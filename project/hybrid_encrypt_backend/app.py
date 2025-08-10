@@ -52,28 +52,44 @@ def encrypt_route():
     else:
         print(f"Failed to save encrypted image: {encrypted_path}")
 
-    return jsonify({
-        'image_url': f'/static/encrypted.png',
-        'permutation': permutation,
-        'key_stream': key_stream,
-    })
+    # return jsonify({
+    #     'image_url': f'/static/encrypted.png',
+    #     'permutation': permutation,
+    #     'key_stream': key_stream,
+    # })
+
+    return jsonify({'image_url': f'/static/encrypted.png'})
+
+
+
+# @app.route('/decrypt', methods=['POST'])
+# def decrypt_route():
+#     file = request.files['image']
+#     key = request.form['key']
+#     permutation = list(map(int, request.form.getlist('permutation[]')))
+#     key_stream = list(map(int, request.form.getlist('key_stream[]')))
+
+#     img_bytes = file.read()
+#     nparr = np.frombuffer(img_bytes, np.uint8)
+#     cipher_img = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
+
+#     decrypted = decrypt_image(cipher_img, key, permutation, key_stream)
+#     decrypted_path = os.path.join(UPLOAD_FOLDER, 'decrypted.png')
+#     cv2.imwrite(decrypted_path, decrypted)
+
+#     return jsonify({'image_url': f'/static/decrypted.png'})
 
 @app.route('/decrypt', methods=['POST'])
 def decrypt_route():
     file = request.files['image']
     key = request.form['key']
-    permutation = list(map(int, request.form.getlist('permutation[]')))
-    key_stream = list(map(int, request.form.getlist('key_stream[]')))
 
-    img_bytes = file.read()
-    nparr = np.frombuffer(img_bytes, np.uint8)
-    cipher_img = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
-
-    decrypted = decrypt_image(cipher_img, key, permutation, key_stream)
-    decrypted_path = os.path.join(UPLOAD_FOLDER, 'decrypted.png')
-    cv2.imwrite(decrypted_path, decrypted)
-
+    cipher_img = cv2.imdecode(np.frombuffer(file.read(), np.uint8), cv2.IMREAD_GRAYSCALE)
+    decrypted = decrypt_image(cipher_img, key)
+    # (Optional) if you standardized to 256×256 at encrypt time, just return that.
+    cv2.imwrite(os.path.join(UPLOAD_FOLDER, 'decrypted.png'), decrypted)
     return jsonify({'image_url': f'/static/decrypted.png'})
+
 
 @app.route('/analyze', methods=['POST'])
 def analyze_route():

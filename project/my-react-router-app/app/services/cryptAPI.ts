@@ -29,6 +29,19 @@ export const decryptImage = async (file: File, key: string, permutation: number[
     };
 };
 
+export const decryptImageWithoutMetadata = async (file: File, key: string) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("key", key);
+
+    const res = await axios.post(`${API_BASE}/decrypt`, formData);
+    // Prepend API_BASE to the image_url
+    return {
+        ...res.data,
+        image_url: `${API_BASE}${res.data.image_url}`
+    };
+};
+
 export const analyzeEncryption = async (original: File, encrypted: File) => {
     const formData = new FormData();
     formData.append("original", original);

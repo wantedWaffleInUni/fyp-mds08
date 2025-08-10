@@ -21,7 +21,7 @@ const Home = () => {
         color: "#333",
         fontSize: "2.5rem"
       }}>
-        Image Encryption System
+        PEEKAPIC
       </h1>
       
       <p style={{ 
@@ -30,14 +30,14 @@ const Home = () => {
         marginBottom: "3rem",
         lineHeight: "1.6"
       }}>
-        Secure your images with advanced hybrid encryption using chaotic maps and neural networks.
+        Secure your images with advanced encryption using chaotic maps and neural networks.
         Choose an operation below to get started.
       </p>
 
       <div style={{ 
         display: "flex", 
         gap: "2rem", 
-        justifyContent: "center",
+        justifyContent: "space-between",
         flexWrap: "wrap"
       }}>
         <button

@@ -45,11 +45,23 @@ def encrypt_image(img, key):
 
     return cipher_img, permutation.tolist(), key_stream.tolist()
 
-def decrypt_image(cipher_img, key, permutation, key_stream):
-    shape = cipher_img.shape
+def decrypt_image(cipher_img, key):
+    h, w = cipher_img.shape
     cipher_flat = cipher_img.flatten()
-    diffused = np.bitwise_xor(cipher_flat, np.array(key_stream, dtype=np.uint8))
-    inverse_perm = np.argsort(np.array(permutation))
-    decrypted_flat = diffused[inverse_perm]
-    return decrypted_flat.reshape(shape)
+
+    # Recompute params from key
+    (x0, y0), fseed = key_to_params(key)
+    chaos_map = logistic_sine_map_2d(x0, y0, size=h)   # assume square; generalize if needed
+    perm = np.argsort(chaos_map.flatten())
+
+    inv_perm = np.empty_like(perm)
+    inv_perm[perm] = np.arange(perm.size)
+
+    fodnn_stream = fractional_nn(fseed, steps=h*w)
+    key_stream = np.floor(fodnn_stream * 256).astype(np.uint8)
+
+    undiffused = np.bitwise_xor(cipher_flat, key_stream)
+    original_flat = undiffused[inv_perm]
+    return original_flat.reshape((h, w))
+
 
