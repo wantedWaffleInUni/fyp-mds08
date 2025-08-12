@@ -5,21 +5,34 @@ import os
 from encryption import encrypt_image, decrypt_image
 from utils import npcr, uaci
 from flask_cors import CORS
+from flask import after_this_request
 
 
-app = Flask(__name__)
+# Get the absolute path to the current directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
+
+app = Flask(__name__, static_folder=STATIC_DIR, static_url_path='/static')
 CORS(app)
-UPLOAD_FOLDER = 'static'
+UPLOAD_FOLDER = STATIC_DIR
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-@app.route('/static/<filename>')
-def serve_static(filename):
-    response = send_from_directory(UPLOAD_FOLDER, filename)
-    # Add CORS headers for static files
+print(f"Base directory: {BASE_DIR}")
+print(f"Static directory: {STATIC_DIR}")
+print(f"Static directory exists: {os.path.exists(STATIC_DIR)}")
+
+@app.after_request
+def add_cors_headers(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-    response.headers.add('Access-Control-Allow-Methods', 'GET')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
     return response
+
+
+
+@app.route('/test-html')
+def test_html():
+    return send_file('test.html')
 
 @app.route('/test-static')
 def test_static():
@@ -27,10 +40,21 @@ def test_static():
     test_img = np.ones((100, 100), dtype=np.uint8) * 128
     test_path = os.path.join(UPLOAD_FOLDER, 'test.png')
     cv2.imwrite(test_path, test_img)
+    print(f"Test image created at: {test_path}")
+    print(f"File exists: {os.path.exists(test_path)}")
+    
+    # List all files in static directory
+    static_files = os.listdir(UPLOAD_FOLDER) if os.path.exists(UPLOAD_FOLDER) else []
+    
     return jsonify({
         'message': 'Test image created',
         'test_url': '/static/test.png',
-        'full_url': f'http://localhost:5000/static/test.png'
+        'full_url': f'http://localhost:5000/static/test.png',
+        'file_path': test_path,
+        'file_exists': os.path.exists(test_path),
+        'static_directory': UPLOAD_FOLDER,
+        'static_files': static_files,
+        'current_working_dir': os.getcwd()
     })
 
 @app.route('/encrypt', methods=['POST'])
@@ -44,11 +68,13 @@ def encrypt_route():
     encrypted, permutation, key_stream = encrypt_image(img, key)
 
     encrypted_path = os.path.join(UPLOAD_FOLDER, 'encrypted.png')
+    print(f"Saving encrypted image to: {encrypted_path}")
     cv2.imwrite(encrypted_path, encrypted)
     
     # Debug: Check if file was created
     if os.path.exists(encrypted_path):
         print(f"Encrypted image saved successfully: {encrypted_path}")
+        print(f"File size: {os.path.getsize(encrypted_path)} bytes")
     else:
         print(f"Failed to save encrypted image: {encrypted_path}")
 
