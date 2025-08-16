@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Static File Test</title>
+</head>
+<body>
+    <h1>Static File Test</h1>
+    <p>Testing static file serving...</p>
+    
+    <div>
+        <h2>Test Image:</h2>
+        <img id="testImage" src="/static/test.png" alt="Test Image" style="border: 1px solid black;">
+        <p id="status">Loading...</p>
+    </div>
+    
+    <script>
+        const img = document.getElementById('testImage');
+        const status = document.getElementById('status');
+        
+        img.onload = function() {
+            status.textContent = '✅ Image loaded successfully!';
+            status.style.color = 'green';
+        };
+        
+        img.onerror = function() {
+            status.textContent = '❌ Failed to load image!';
+            status.style.color = 'red';
+        };
+    </script>
+</body>
+</html>

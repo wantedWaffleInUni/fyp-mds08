@@ -15,18 +15,8 @@ export const encryptImage = async (file: File, key: string) => {
 };
 
 export const decryptImage = async (file: File, key: string, permutation: number[], keyStream: number[]) => {
-    const formData = new FormData();
-    formData.append("image", file);
-    formData.append("key", key);
-    permutation.forEach(p => formData.append("permutation[]", p.toString()));
-    keyStream.forEach(k => formData.append("key_stream[]", k.toString()));
-
-    const res = await axios.post(`${API_BASE}/decrypt`, formData);
-    // Prepend API_BASE to the image_url
-    return {
-        ...res.data,
-        image_url: `${API_BASE}${res.data.image_url}`
-    };
+    // This function is kept for backward compatibility but now uses the simplified decrypt
+    return decryptImageWithoutMetadata(file, key);
 };
 
 export const decryptImageWithoutMetadata = async (file: File, key: string) => {
