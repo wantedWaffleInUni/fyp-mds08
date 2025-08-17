@@ -1,0 +1,8 @@
+Flask
+Flask-CORS
+opencv-python
+numpy
+Pillow
+scipy
+Werkzeug
+gunicorn
