@@ -9,6 +9,7 @@ import io
 import base64
 from werkzeug.utils import secure_filename
 from encryption.chaos_encryptor import ChaosEncryptor
+from encryption.fodhnn_encryptor import FODHNNEncryptor
 from utils import calculate_entropy, calculate_npcr, calculate_uaci
 
 app = Flask(__name__)
@@ -69,6 +70,8 @@ def encrypt_image():
         # Extract image data and key
         image_data = data['image']
         key = data.get('key', 'default_key_123')
+        algorithm = str(data.get('algorithm', 'chaos')).lower()
+        nonce = data.get('nonce')
         
         # Generate unique filename
         original_filename = f"original_{uuid.uuid4()}.png"
@@ -85,8 +88,15 @@ def encrypt_image():
             return jsonify({'error': 'Failed to read image'}), 500
         
         # Initialize encryptor and encrypt
-        encryptor = ChaosEncryptor()
-        encrypted_img = encryptor.encrypt_image(original_img, key)
+        if algorithm == 'fodhnn':
+            # Generate a nonce if not provided
+            if not nonce:
+                nonce = uuid.uuid4().hex
+            encryptor = FODHNNEncryptor()
+            encrypted_img = encryptor.encrypt_image(original_img, key, nonce)
+        else:
+            encryptor = ChaosEncryptor()
+            encrypted_img = encryptor.encrypt_image(original_img, key)
         
         # Save encrypted image
         encrypted_path = os.path.join(app.config['UPLOAD_FOLDER'], encrypted_filename)
@@ -110,6 +120,8 @@ def encrypt_image():
             'original_image': original_b64,
             'encrypted_image': encrypted_b64,
             'encrypted_filename': encrypted_filename,
+            'algorithm': algorithm,
+            'nonce': nonce if algorithm == 'fodhnn' else None,
             'metrics': {
                 'entropy_original': entropy_original,
                 'entropy_encrypted': entropy_encrypted,
@@ -133,6 +145,8 @@ def decrypt_image():
         # Extract image data and key
         image_data = data['image']
         key = data.get('key', 'default_key_123')
+        algorithm = str(data.get('algorithm', 'chaos')).lower()
+        nonce = data.get('nonce')
         
         # Generate unique filename
         encrypted_filename = f"encrypted_{uuid.uuid4()}.png"
@@ -149,8 +163,14 @@ def decrypt_image():
             return jsonify({'error': 'Failed to read image'}), 500
         
         # Initialize encryptor and decrypt
-        encryptor = ChaosEncryptor()
-        decrypted_img = encryptor.decrypt_image(encrypted_img, key)
+        if algorithm == 'fodhnn':
+            if not nonce:
+                return jsonify({'error': 'Nonce is required for FODHNN decryption'}), 400
+            encryptor = FODHNNEncryptor()
+            decrypted_img = encryptor.decrypt_image(encrypted_img, key, nonce)
+        else:
+            encryptor = ChaosEncryptor()
+            decrypted_img = encryptor.decrypt_image(encrypted_img, key)
         
         # Save decrypted image
         decrypted_path = os.path.join(app.config['UPLOAD_FOLDER'], decrypted_filename)
@@ -165,7 +185,8 @@ def decrypt_image():
         return jsonify({
             'success': True,
             'decrypted_image': decrypted_b64,
-            'decrypted_filename': decrypted_filename
+            'decrypted_filename': decrypted_filename,
+            'algorithm': algorithm
         })
         
     except Exception as e:

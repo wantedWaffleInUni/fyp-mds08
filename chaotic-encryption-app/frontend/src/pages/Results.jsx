@@ -24,7 +24,7 @@ const Results = () => {
       // Convert base64 to blob
       const response = await fetch(`data:image/png;base64,${imageData}`);
       const blob = await response.blob();
-      
+
       // Download the file
       saveAs(blob, filename);
     } catch (err) {
@@ -49,11 +49,14 @@ const Results = () => {
             {operationType === 'encrypt' ? '🔒 Encryption Results' : '🔓 Decryption Results'}
           </h2>
           <p>
-            {operationType === 'encrypt' 
+            {operationType === 'encrypt'
               ? 'Your image has been successfully encrypted using chaotic encryption'
               : 'Your encrypted image has been successfully decrypted'
             }
           </p>
+          {operationType === 'encrypt' && resultData?.algorithm && (
+            <p><strong>Algorithm:</strong> {resultData.algorithm.toUpperCase()} {resultData.algorithm === 'fodhnn' && resultData.nonce ? `(nonce: ${resultData.nonce})` : ''}</p>
+          )}
         </div>
       </div>
 
@@ -67,9 +70,9 @@ const Results = () => {
           {operationType === 'encrypt' ? (
             <>
               <div className="image-container">
-                <img 
-                  src={`data:image/png;base64,${resultData.original_image}`} 
-                  alt="Original" 
+                <img
+                  src={`data:image/png;base64,${resultData.original_image}`}
+                  alt="Original"
                 />
                 <div className="image-title">Original Image</div>
                 <button
@@ -80,9 +83,9 @@ const Results = () => {
                 </button>
               </div>
               <div className="image-container">
-                <img 
-                  src={`data:image/png;base64,${resultData.encrypted_image}`} 
-                  alt="Encrypted" 
+                <img
+                  src={`data:image/png;base64,${resultData.encrypted_image}`}
+                  alt="Encrypted"
                 />
                 <div className="image-title">Encrypted Image</div>
                 <button
@@ -95,9 +98,9 @@ const Results = () => {
             </>
           ) : (
             <div className="image-container">
-              <img 
-                src={`data:image/png;base64,${resultData.decrypted_image}`} 
-                alt="Decrypted" 
+              <img
+                src={`data:image/png;base64,${resultData.decrypted_image}`}
+                alt="Decrypted"
               />
               <div className="image-title">Decrypted Image</div>
               <button
@@ -135,7 +138,7 @@ const Results = () => {
           <div>
             <h4>Decryption Success:</h4>
             <p style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
-              The image has been successfully decrypted using the provided key. 
+              The image has been successfully decrypted using the provided key.
               The decrypted image should be identical to the original image if the correct key was used.
             </p>
           </div>

@@ -19,17 +19,17 @@ def create_test_image(width=256, height=256):
 
 def test_encryption():
     """Test the encryption and decryption process"""
-    print("🔐 Testing Chaotic Image Encryption")
+    print("Testing Chaotic Image Encryption")
     print("=" * 50)
     
     # Create test image
-    print("📸 Creating test image...")
+    print("Creating test image...")
     test_image = create_test_image(128, 128)
     print(f"   Image shape: {test_image.shape}")
     print(f"   Image dtype: {test_image.dtype}")
     
     # Initialize encryptor
-    print("\n🔧 Initializing encryptor...")
+    print("\nInitializing encryptor...")
     encryptor = ChaosEncryptor()
     
     # Test key
@@ -43,17 +43,17 @@ def test_encryption():
     print(f"   Key hash: {info['key_hash']}")
     
     # Encrypt image
-    print("\n🔒 Encrypting image...")
+    print("\nEncrypting image...")
     encrypted_image = encryptor.encrypt_image(test_image, test_key)
-    print("   ✅ Encryption completed")
+    print("   Encryption completed")
     
     # Decrypt image
-    print("\n🔓 Decrypting image...")
+    print("\nDecrypting image...")
     decrypted_image = encryptor.decrypt_image(encrypted_image, test_key)
-    print("   ✅ Decryption completed")
+    print("   Decryption completed")
     
     # Calculate metrics
-    print("\n📊 Calculating metrics...")
+    print("\nCalculating metrics...")
     entropy_original = calculate_entropy(test_image)
     entropy_encrypted = calculate_entropy(encrypted_image)
     entropy_decrypted = calculate_entropy(decrypted_image)
@@ -67,38 +67,38 @@ def test_encryption():
     print(f"   UACI: {uaci_value:.2f}%")
     
     # Verify decryption
-    print("\n✅ Verification...")
+    print("\nVerification...")
     if np.array_equal(test_image, decrypted_image):
-        print("   ✅ Perfect decryption - images are identical")
+        print("   Perfect decryption - images are identical")
     else:
-        print("   ❌ Decryption failed - images are different")
+        print("   Decryption failed - images are different")
         diff = np.mean(np.abs(test_image.astype(float) - decrypted_image.astype(float)))
         print(f"   Average difference: {diff:.2f}")
     
     # Quality assessment
-    print("\n🎯 Quality Assessment:")
+    print("\nQuality Assessment:")
     if entropy_encrypted > 7.5:
-        print("   🟢 Excellent entropy (>7.5)")
+        print("   Excellent entropy (>7.5)")
     elif entropy_encrypted > 7.0:
-        print("   🟡 Good entropy (>7.0)")
+        print("   Good entropy (>7.0)")
     else:
-        print("   🔴 Poor entropy (<7.0)")
+        print("   Poor entropy (<7.0)")
     
     if npcr_value > 99.5:
-        print("   🟢 Excellent NPCR (>99.5%)")
+        print("   Excellent NPCR (>99.5%)")
     elif npcr_value > 99.0:
-        print("   🟡 Good NPCR (>99.0%)")
+        print("   Good NPCR (>99.0%)")
     else:
-        print("   🔴 Poor NPCR (<99.0%)")
+        print("   Poor NPCR (<99.0%)")
     
     if 33.0 <= uaci_value <= 34.0:
-        print("   🟢 Excellent UACI (33.0-34.0%)")
+        print("   Excellent UACI (33.0-34.0%)")
     elif 32.0 <= uaci_value <= 35.0:
-        print("   🟡 Good UACI (32.0-35.0%)")
+        print("   Good UACI (32.0-35.0%)")
     else:
-        print("   🔴 Poor UACI (outside 32.0-35.0%)")
+        print("   Poor UACI (outside 32.0-35.0%)")
     
-    print("\n🎉 Test completed successfully!")
+    print("\nTest completed successfully!")
 
 if __name__ == "__main__":
     test_encryption()

@@ -10,6 +10,8 @@ const Decrypt = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
+  const [algorithm, setAlgorithm] = useState('chaos');
+  const [nonce, setNonce] = useState('');
   const navigate = useNavigate();
 
   const handleImageUpload = (file) => {
@@ -29,19 +31,24 @@ const Decrypt = () => {
       return;
     }
 
+    if (algorithm === 'fodhnn' && !nonce.trim()) {
+      setError('Nonce is required for FODHNN decryption');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
 
     try {
-      const response = await decryptImage(selectedFile, decryptionKey);
+      const response = await decryptImage(selectedFile, decryptionKey, algorithm, algorithm === 'fodhnn' ? nonce : undefined);
       setResult(response);
-      
+
       // Navigate to results page with the data
-      navigate('/results', { 
-        state: { 
+      navigate('/results', {
+        state: {
           type: 'decrypt',
-          data: response 
-        } 
+          data: response
+        }
       });
     } catch (err) {
       setError(err.message);
@@ -55,7 +62,7 @@ const Decrypt = () => {
       // Convert base64 to blob
       const response = await fetch(`data:image/png;base64,${imageData}`);
       const blob = await response.blob();
-      
+
       // Download the file
       saveAs(blob, filename || 'decrypted_image.png');
     } catch (err) {
@@ -102,6 +109,48 @@ const Decrypt = () => {
           </small>
         </div>
 
+        <div className="form-group">
+          <label className="form-label">Algorithm</label>
+          <div className="d-flex gap-2">
+            <label className="radio">
+              <input
+                type="radio"
+                name="algorithm"
+                value="chaos"
+                checked={algorithm === 'chaos'}
+                onChange={() => setAlgorithm('chaos')}
+              />
+              <span>Chaotic Logistic (default)</span>
+            </label>
+            <label className="radio">
+              <input
+                type="radio"
+                name="algorithm"
+                value="fodhnn"
+                checked={algorithm === 'fodhnn'}
+                onChange={() => setAlgorithm('fodhnn')}
+              />
+              <span>FODHNN</span>
+            </label>
+          </div>
+        </div>
+
+        {algorithm === 'fodhnn' && (
+          <div className="form-group">
+            <label className="form-label">Nonce</label>
+            <input
+              type="text"
+              className="form-control"
+              value={nonce}
+              onChange={(e) => setNonce(e.target.value)}
+              placeholder="Enter the nonce returned during encryption"
+            />
+            <small style={{ color: '#666', marginTop: '0.5rem', display: 'block' }}>
+              You must provide the exact nonce that was used/generated during FODHNN encryption.
+            </small>
+          </div>
+        )}
+
         <div className="d-flex justify-center">
           <button
             className="btn btn-primary"
@@ -129,9 +178,9 @@ const Decrypt = () => {
 
           <div className="image-preview">
             <div className="image-container">
-              <img 
-                src={`data:image/png;base64,${result.decrypted_image}`} 
-                alt="Decrypted" 
+              <img
+                src={`data:image/png;base64,${result.decrypted_image}`}
+                alt="Decrypted"
               />
               <div className="image-title">Decrypted Image</div>
             </div>
@@ -152,7 +201,7 @@ const Decrypt = () => {
         <div className="card-header">
           <h3 className="card-title">Important Notes</h3>
         </div>
-        
+
         <div className="alert alert-info">
           <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
             <li><strong>Key Requirement:</strong> You must use the exact same key that was used for encryption</li>
