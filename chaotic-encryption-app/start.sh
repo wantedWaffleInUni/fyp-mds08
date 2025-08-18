@@ -40,7 +40,7 @@ start_backend() {
     pip install -r requirements.txt
     
     # Start Flask server
-    echo "🌐 Starting Flask server on http://localhost:5000"
+    echo "🌐 Starting Flask server on http://localhost:5001"
     python app.py &
     BACKEND_PID=$!
     echo "Backend PID: $BACKEND_PID"
@@ -91,7 +91,7 @@ start_frontend
 echo ""
 echo "🎉 Both servers are starting up!"
 echo "📱 Frontend: http://localhost:3000"
-echo "🔧 Backend:  http://localhost:5000"
+echo "🔧 Backend:  http://localhost:5001"
 echo ""
 echo "Press Ctrl+C to stop both servers"
 
