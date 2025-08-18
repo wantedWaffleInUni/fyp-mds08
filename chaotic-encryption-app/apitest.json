@@ -1,0 +1,183 @@
+{
+    "info": {
+      "name": "Chaotic Image Encryption API (FODHNN + Chaos)",
+      "_postman_id": "8b1f3c14-2a7e-4e8f-9a03-collection-chaos-fodhhn",
+      "description": "Postman collection for testing the Flask backend with both FODHNN and Chaos algorithms.",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+      { "key": "base_url", "value": "http://localhost:5001", "type": "string" },
+      { "key": "key", "value": "myStrongKey123!", "type": "string" },
+      { "key": "image_b64", "value": "", "type": "string" },
+      { "key": "nonce", "value": "", "type": "string" },
+      { "key": "enc_image_b64", "value": "", "type": "string" },
+      { "key": "enc_filename", "value": "", "type": "string" }
+    ],
+    "item": [
+      {
+        "name": "Health",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": "{{base_url}}/api/health"
+        }
+      },
+      {
+        "name": "Encrypt (FODHNN)",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.headers.get('Content-Type')?.includes('application/json')) {",
+                "  const data = pm.response.json();",
+                "  if (data.encrypted_image) { pm.collectionVariables.set('enc_image_b64', data.encrypted_image); }",
+                "  if (data.nonce) { pm.collectionVariables.set('nonce', data.nonce); }",
+                "  if (data.encrypted_filename) { pm.collectionVariables.set('enc_filename', data.encrypted_filename); }",
+                "  try {",
+                "    const req = JSON.parse(pm.request.body.raw);",
+                "    if (req.key) pm.collectionVariables.set('key', req.key);",
+                "  } catch (e) {}",
+                "  const html = `",
+                "    <h3>Encrypted (FODHNN) Preview</h3>",
+                "    <div>Nonce: ${data.nonce || '(none)'}<br/>Entropy(cipher): ${data?.metrics?.entropy_encrypted ?? ''}</div>",
+                "    <img style=\"max-width:100%\" src=\"data:image/png;base64,${data.encrypted_image}\" />",
+                "  `;",
+                "  pm.visualizer.set(html, {});",
+                "}"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            { "key": "Content-Type", "value": "application/json" }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"image\": \"{{image_b64}}\",\n  \"key\": \"{{key}}\",\n  \"algorithm\": \"fodhnn\"\n}"
+          },
+          "url": "{{base_url}}/api/encrypt",
+          "description": "Encrypts using FODHNN. Server returns a nonce; this request stores it automatically."
+        }
+      },
+      {
+        "name": "Decrypt (FODHNN)",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.headers.get('Content-Type')?.includes('application/json')) {",
+                "  const data = pm.response.json();",
+                "  const html = `",
+                "    <h3>Decrypted (FODHNN) Preview</h3>",
+                "    <img style=\\\"max-width:100%\\\" src=\\\"data:image/png;base64,${data.decrypted_image}\\\" />",
+                "  `;",
+                "  pm.visualizer.set(html, {});",
+                "}"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            { "key": "Content-Type", "value": "application/json" }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"image\": \"{{enc_image_b64}}\",\n  \"key\": \"{{key}}\",\n  \"algorithm\": \"fodhnn\",\n  \"nonce\": \"{{nonce}}\"\n}"
+          },
+          "url": "{{base_url}}/api/decrypt",
+          "description": "Decrypts a FODHNN-encrypted image using the saved nonce."
+        }
+      },
+      {
+        "name": "Download Encrypted File",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": "{{base_url}}/api/download/{{enc_filename}}",
+          "description": "Downloads the encrypted file produced by the last encryption."
+        }
+      },
+      {
+        "name": "Encrypt (Chaos)",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.headers.get('Content-Type')?.includes('application/json')) {",
+                "  const data = pm.response.json();",
+                "  if (data.encrypted_image) { pm.collectionVariables.set('enc_image_b64', data.encrypted_image); }",
+                "  if (data.encrypted_filename) { pm.collectionVariables.set('enc_filename', data.encrypted_filename); }",
+                "  try {",
+                "    const req = JSON.parse(pm.request.body.raw);",
+                "    if (req.key) pm.collectionVariables.set('key', req.key);",
+                "  } catch (e) {}",
+                "  const html = `",
+                "    <h3>Encrypted (Chaos) Preview</h3>",
+                "    <div>Entropy(cipher): ${data?.metrics?.entropy_encrypted ?? ''}</div>",
+                "    <img style=\\\"max-width:100%\\\" src=\\\"data:image/png;base64,${data.encrypted_image}\\\" />",
+                "  `;",
+                "  pm.visualizer.set(html, {});",
+                "}"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            { "key": "Content-Type", "value": "application/json" }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"image\": \"{{image_b64}}\",\n  \"key\": \"{{key}}\",\n  \"algorithm\": \"chaos\"\n}"
+          },
+          "url": "{{base_url}}/api/encrypt",
+          "description": "Encrypts using the Logistic-map chaos implementation (no nonce)."
+        }
+      },
+      {
+        "name": "Decrypt (Chaos)",
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.headers.get('Content-Type')?.includes('application/json')) {",
+                "  const data = pm.response.json();",
+                "  const html = `",
+                "    <h3>Decrypted (Chaos) Preview</h3>",
+                "    <img style=\\\"max-width:100%\\\" src=\\\"data:image/png;base64,${data.decrypted_image}\\\" />",
+                "  `;",
+                "  pm.visualizer.set(html, {});",
+                "}"
+              ],
+              "type": "text/javascript"
+            }
+          }
+        ],
+        "request": {
+          "method": "POST",
+          "header": [
+            { "key": "Content-Type", "value": "application/json" }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"image\": \"{{enc_image_b64}}\",\n  \"key\": \"{{key}}\",\n  \"algorithm\": \"chaos\"\n}"
+          },
+          "url": "{{base_url}}/api/decrypt",
+          "description": "Decrypts an image encrypted with the chaos algorithm."
+        }
+      }
+    ]
+  }
+  

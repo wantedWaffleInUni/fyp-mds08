@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { encryptImage } from "../services/cryptAPI";
-import type { EncryptResponse } from "../types/encryptionTypes";
 import ImageUploader from "../../components/ImageUploader";
 import EncryptedViewer from "../../components/EncryptedViewer";
 // import { IonIcon } from "@ionic/react";
@@ -10,7 +9,7 @@ const EncryptPage = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [key, setKey] = useState("");
   const [encryptedImgUrl, setEncryptedImgUrl] = useState<string | null>(null);
-  const [metadata, setMetadata] = useState<EncryptResponse | null>(null);
+  const [metadata, setMetadata] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleEncrypt = async () => {
@@ -21,7 +20,8 @@ const EncryptPage = () => {
         console.log("Encryption result:", result);
         console.log("Image URL:", result.image_url);
         setEncryptedImgUrl(result.image_url);
-        setMetadata(result);
+        // Note: Backend no longer returns permutation and key_stream
+        setMetadata({ image_url: result.image_url });
       } catch (error) {
         console.error("Encryption failed:", error);
         alert("Encryption failed. Please try again.");
@@ -31,18 +31,7 @@ const EncryptPage = () => {
     }
   };
 
-  const handleDownloadMetadata = () => {
-    if (metadata) {
-      const dataStr = JSON.stringify(metadata, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(dataBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'encryption_metadata.json';
-      link.click();
-      URL.revokeObjectURL(url);
-    }
-  };
+
 
   const goBack = () => {
     window.location.href = '/';
@@ -135,7 +124,7 @@ const EncryptPage = () => {
               <EncryptedViewer imageUrl={encryptedImgUrl} />
               <a
                 href={encryptedImgUrl}
-                download="encrypted_image.png"
+                download="encrypted.png"
                 style={{
                   display: "inline-block",
                   padding: "0.5rem 1rem",
@@ -150,23 +139,20 @@ const EncryptPage = () => {
               </a>
             </div>
             <div>
-              <h4>Encryption Metadata</h4>
+              <h4>Encryption Info</h4>
               <p style={{ color: "#666", marginBottom: "1rem" }}>
-                Save this metadata for decryption later
+                The encryption key is used for both encryption and decryption.
+                Make sure to save your key securely!
               </p>
-              <button
-                onClick={handleDownloadMetadata}
-                style={{
-                  padding: "0.5rem 1rem",
-                  background: "#17a2b8",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: 4,
-                  cursor: "pointer"
-                }}
-              >
-                Download Metadata
-              </button>
+              <div style={{ 
+                padding: "1rem", 
+                background: "#f8f9fa", 
+                borderRadius: "4px",
+                border: "1px solid #dee2e6"
+              }}>
+                <strong>Important:</strong> Keep your encryption key safe. 
+                You'll need the same key to decrypt this image later.
+              </div>
             </div>
           </div>
         </div>

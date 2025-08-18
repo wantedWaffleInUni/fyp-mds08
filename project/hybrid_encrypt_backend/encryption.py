@@ -51,8 +51,10 @@ def decrypt_image(cipher_img, key):
 
     # Recompute params from key
     (x0, y0), fseed = key_to_params(key)
-    chaos_map = logistic_sine_map_2d(x0, y0, size=h)   # assume square; generalize if needed
-    perm = np.argsort(chaos_map.flatten())
+    # Use max dimension to ensure chaos map is large enough
+    max_dim = max(h, w)
+    chaos_map = logistic_sine_map_2d(x0, y0, size=max_dim)
+    perm = np.argsort(chaos_map.flatten())[:h*w]  # Take only what we need
 
     inv_perm = np.empty_like(perm)
     inv_perm[perm] = np.arange(perm.size)
