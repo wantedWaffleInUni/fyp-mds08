@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
+from flask.json.provider import DefaultJSONProvider
 import os
 import uuid
 import cv2
@@ -25,6 +26,19 @@ app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
 # Ensure upload folder exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+from flask.json.provider import DefaultJSONProvider
+import numpy as np
+
+class NumpyJSONProvider(DefaultJSONProvider):
+    def default(self, o):
+        if isinstance(o, (np.floating,)):
+            return float(o)
+        if isinstance(o, (np.integer,)):
+            return int(o)
+        if isinstance(o, np.ndarray):
+            return o.tolist()
+        return super().default(o)
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -220,4 +234,5 @@ def index():
     })
 
 if __name__ == '__main__':
+    app.json = NumpyJSONProvider(app)
     app.run(debug=True, host='0.0.0.0', port=5001)

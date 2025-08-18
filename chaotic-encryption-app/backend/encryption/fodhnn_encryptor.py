@@ -60,15 +60,19 @@ class FODHNNKey:
 class FODHNN:
     """
     3-D fractional-order discrete Hopfield NN numerical solution (Caputo-like delta).
-    We use a windowed memory kernel to keep runtime practical.
+    Uses an overflow-free kernel and robust indexing for the fractional sum.
     """
     def __init__(self, key: FODHNNKey, memory_window: int = 256):
         assert 0.0 < key.nu <= 1.0
         self.key = key
         self.W = int(memory_window)
-        # Precompute kernel weights: w[m] = Γ(m+ν)/(Γ(m+1) * Γ(ν))
-        gnu = gamma(key.nu)
-        self.w = np.array([gamma(m + key.nu) / (gamma(m + 1) * gnu) for m in range(self.W)], dtype=np.float64)
+
+        # Overflow-free kernel: w[0]=1; w[m] = w[m-1] * (nu + m - 1) / m
+        w = np.empty(self.W, dtype=np.float64)
+        w[0] = 1.0
+        for m in range(1, self.W):
+            w[m] = w[m - 1] * (key.nu + m - 1.0) / m
+        self.w = w
 
     def iterate(self, n_steps: int, burn_in: int = 1024) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         steps = burn_in + n_steps
@@ -87,19 +91,22 @@ class FODHNN:
         for n in range(1, steps):
             L = min(self.W, n)
             w = self.w[:L]
-            Fx_slice = Fx[n-1:n-1-L:-1] if L > 1 else Fx[n-1:n]
-            Fy_slice = Fy[n-1:n-1-L:-1] if L > 1 else Fy[n-1:n]
-            Fz_slice = Fz[n-1:n-1-L:-1] if L > 1 else Fz[n-1:n]
 
-            x[n] = self.key.x0 + float(np.dot(w, Fx_slice))
-            y[n] = self.key.y0 + float(np.dot(w, Fy_slice))
-            z[n] = self.key.z0 + float(np.dot(w, Fz_slice))
+            # Robust index vector for reverse history: [n-1, n-2, ..., n-L]
+            idx = np.arange(n - 1, n - 1 - L, -1)
+
+            x[n] = self.key.x0 + float(np.dot(w, Fx[idx]))
+            y[n] = self.key.y0 + float(np.dot(w, Fy[idx]))
+            z[n] = self.key.z0 + float(np.dot(w, Fz[idx]))
 
             Fx[n] = -x[n] + 2.0 * _tanh(x[n]) - 1.2 * _tanh(y[n])
             Fy[n] = -y[n] + (self.key.p + 1.9) * _tanh(x[n]) + 1.71 * _tanh(y[n]) + 1.15 * _tanh(z[n])
             Fz[n] = -z[n] - 4.75 * _tanh(x[n]) + 1.1 * _tanh(z[n])
 
-        # Drop burn-in
+            # Optional safety: bail if diverging
+            if not (np.isfinite(x[n]) and np.isfinite(y[n]) and np.isfinite(z[n])):
+                raise ValueError("FODHNN state diverged; try a different key/nonce or reduce memory_window")
+
         return x[burn_in:], y[burn_in:], z[burn_in:]
 
 
@@ -229,6 +236,28 @@ class FODHNNEncryptor:
         Cimg = _unflatten_per_channel(flat_c, H, W, C)
         return Cimg
 
+    @staticmethod
+    def _undiffuse_backward(d: np.ndarray, z: np.ndarray) -> np.ndarray:
+        C, L = d.shape
+        out = np.empty_like(d, dtype=np.uint8)
+        ks = z.astype(np.uint8)
+        for c in range(C):
+            out[c, L-1] = (int(d[c, L-1]) + int(ks[L-1])) & 0xFF
+            for i in range(L-2, -1, -1):
+                out[c, i] = (int(d[c, i]) + int(d[c, i+1]) + int(ks[i])) & 0xFF
+        return out
+
+    @staticmethod
+    def _undiffuse_forward(c: np.ndarray, z: np.ndarray) -> np.ndarray:
+        C, L = c.shape
+        out = np.empty_like(c, dtype=np.uint8)
+        ks = z.astype(np.uint8)
+        for cidx in range(C):
+            out[cidx, 0] = (int(c[cidx, 0]) - int(ks[0])) & 0xFF
+            for i in range(1, L):
+                out[cidx, i] = (int(c[cidx, i]) - int(c[cidx, i-1]) - int(ks[i])) & 0xFF
+        return out
+
     def decrypt_image(self, cipher_bgr_or_gray: np.ndarray, key: str, nonce: str) -> np.ndarray:
         """
         Decrypt BGR or grayscale image with (key, nonce).
@@ -246,11 +275,20 @@ class FODHNNEncryptor:
 
         # invert diffusion (inverse order)
         flat_c, H, W, C = _flatten_per_channel(Cimg)
-        flat = self._diffuse_forward(flat_c, Z[::-1])     # inverse of backward pass
-        flat = self._diffuse_backward(flat, Z)            # inverse of forward pass
-        P = _unflatten_per_channel(flat, H, W, C)
-
-        # invert permutation
+        c = self._undiffuse_backward(flat_c, Z[::-1])
+        p = self._undiffuse_forward(c, Z)
+        P = _unflatten_per_channel(p, H, W, C)
         row_perm, col_perm = self._row_col_permutation(H, W, X, Y)
         P0 = self._invert_permutation(P, row_perm, col_perm)
         return P0
+
+        # flat_c, H, W, C = _flatten_per_channel(Cimg)
+        # flat = self._diffuse_forward(flat_c, Z[::-1])     # inverse of backward pass
+        # flat = self._diffuse_backward(flat, Z)            # inverse of forward pass
+        # P = _unflatten_per_channel(flat, H, W, C)
+
+        # # invert permutation
+        # row_perm, col_perm = self._row_col_permutation(H, W, X, Y)
+        # P0 = self._invert_permutation(P, row_perm, col_perm)
+        # return P0
+
