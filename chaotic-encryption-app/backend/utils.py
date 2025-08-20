@@ -166,6 +166,45 @@ def calculate_psnr(original: np.ndarray, decrypted: np.ndarray) -> float:
     
     return psnr
 
+def calculate_adjacent_correlation(image: np.ndarray, sample: int | None = None) -> dict:
+    """
+    Pearson correlation between adjacent pixel pairs in gray image.
+    Returns dict with H (horizontal), V (vertical), D (main diagonal).
+    If the image is constant (std=0), returns 0.0 for that direction.
+    """
+    if image is None:
+        return {"H": 0.0, "V": 0.0, "D": 0.0}
+
+    if len(image.shape) == 3:
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    else:
+        gray = image
+    g = gray.astype(np.float64)
+
+    pairs = {
+        "H": (g[:, :-1].ravel(), g[:, 1:].ravel()),
+        "V": (g[:-1, :].ravel(), g[1:, :].ravel()),
+        "D": (g[:-1, :-1].ravel(), g[1:, 1:].ravel()),
+    }
+
+    def corr(a, b):
+        n = a.size
+        if n == 0:
+            return 0.0
+        if sample is not None and sample > 0 and sample < n:
+            idx = np.random.choice(n, sample, replace=False)
+            a, b = a[idx], b[idx]
+        a = a - a.mean()
+        b = b - b.mean()
+        sa = a.std()
+        sb = b.std()
+        if sa == 0 or sb == 0:
+            return 0.0
+        return float((a * b).mean() / (sa * sb))
+
+    return {k: corr(*v) for k, v in pairs.items()}
+
+
 def analyze_encryption_quality(original: np.ndarray, encrypted: np.ndarray, decrypted: np.ndarray = None) -> dict:
     """
     Comprehensive analysis of encryption quality
@@ -185,11 +224,17 @@ def analyze_encryption_quality(original: np.ndarray, encrypted: np.ndarray, decr
         'uaci': calculate_uaci(original, encrypted),
         'histogram_similarity': calculate_histogram_similarity(original, encrypted)
     }
-    
+
+    # NEW: adjacent-pixel correlations
+    results['adj_corr_original']  = calculate_adjacent_correlation(original)
+    results['adj_corr_encrypted'] = calculate_adjacent_correlation(encrypted)
+
     if decrypted is not None:
         results['psnr'] = calculate_psnr(original, decrypted)
         results['entropy_decrypted'] = calculate_entropy(decrypted)
-    
+        # NEW:
+        results['adj_corr_decrypted'] = calculate_adjacent_correlation(decrypted)
+
     return results
 
 def generate_histogram_data(image: np.ndarray) -> dict:

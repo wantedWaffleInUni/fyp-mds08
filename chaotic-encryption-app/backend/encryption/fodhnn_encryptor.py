@@ -122,8 +122,9 @@ class FODHNNEncryptor:
     Fully invertible without transmitting any swap logs.
     """
 
-    def __init__(self, memory_window: int = 256):
+    def __init__(self, memory_window: int = 256, burn_in: int = 1024):
         self.memory_window = int(memory_window)
+        self.burn_in = int(burn_in)
 
     # --- parameter derivation ---
 
@@ -160,15 +161,20 @@ class FODHNNEncryptor:
 
     # --- permutation ---
 
-    def _row_col_permutation(self, H: int, W: int, X: np.ndarray, Y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        # reshape X,Y to HxW and derive row/col scores; break ties with tiny jitter from opposite stream
+    def _row_col_permutation(self, H, W, X, Y):
         Xr = X.reshape(H, W)
         Yr = Y.reshape(H, W)
-        row_scores = Xr.sum(axis=1).astype(np.float64) + (Yr[:, 0].astype(np.float64) * 1e-9)
-        col_scores = Yr.sum(axis=0).astype(np.float64) + (Xr[0, :].astype(np.float64) * 1e-9)
-        row_perm = np.argsort(row_scores)          # 0..H-1
-        col_perm = np.argsort(col_scores)          # 0..W-1
+
+        row_primary = Xr.sum(axis=1).astype(np.int64)
+        row_tiebreak = Yr[:, 0].astype(np.int64)
+        row_perm = np.lexsort((row_tiebreak, row_primary))  # stable tie-break
+
+        col_primary = Yr.sum(axis=0).astype(np.int64)
+        col_tiebreak = Xr[0, :].astype(np.int64)
+        col_perm = np.lexsort((col_tiebreak, col_primary))
+
         return row_perm, col_perm
+
 
     def _apply_permutation(self, img: np.ndarray, row_perm: np.ndarray, col_perm: np.ndarray) -> np.ndarray:
         if img.ndim == 2:
@@ -186,23 +192,19 @@ class FODHNNEncryptor:
 
     @staticmethod
     def _diffuse_forward(flat: np.ndarray, z: np.ndarray) -> np.ndarray:
-        # flat: shape (C, L), z: length L uint8
+        # out[i] = sum_{j<=i} (flat[j] + ks[j]) mod 256
         C, L = flat.shape
-        out = np.empty_like(flat, dtype=np.uint8)
-        for c in range(C):
-            ks = z.astype(np.uint8)
-            prev = ks[0]
-            out[c, 0] = (int(flat[c, 0]) + int(prev)) & 0xFF
-            for i in range(1, L):
-                out[c, i] = (int(flat[c, i]) + int(out[c, i-1]) + int(ks[i])) & 0xFF
-        return out
+        ks = z.astype(np.uint16, copy=False)
+        arr = flat.astype(np.uint16) + ks[None, :]
+        out = np.add.accumulate(arr, axis=1) & 0xFF
+        return out.astype(np.uint8)
 
     @staticmethod
     def _diffuse_backward(flat_c: np.ndarray, z: np.ndarray) -> np.ndarray:
         C, L = flat_c.shape
         out = np.empty_like(flat_c, dtype=np.uint8)
+        ks = z.astype(np.uint8, copy=False)
         for c in range(C):
-            ks = z.astype(np.uint8)
             out[c, L-1] = (int(flat_c[c, L-1]) - int(ks[L-1])) & 0xFF
             for i in range(L-2, -1, -1):
                 out[c, i] = (int(flat_c[c, i]) - int(flat_c[c, i+1]) - int(ks[i])) & 0xFF
@@ -210,20 +212,27 @@ class FODHNNEncryptor:
 
     # --- public API ---
 
+    def _validate_image(self, img: np.ndarray):
+        if img is None:
+            raise ValueError("image is None")
+        if img.ndim not in (2, 3):
+            raise ValueError(f"image ndim must be 2 or 3, got {img.ndim}")
+        if img.ndim == 3 and img.shape[2] not in (1, 3):
+            raise ValueError(f"image channel count must be 1 or 3, got {img.shape[2]}")
+        if img.size == 0:
+            raise ValueError("image is empty")
+
     def encrypt_image(self, image_bgr_or_gray: np.ndarray, key: str, nonce: str) -> np.ndarray:
         """
         Encrypt BGR or grayscale image with (key, nonce).
         """
-        if image_bgr_or_gray is None:
-            raise ValueError("image is None")
+        self._validate_image(image_bgr_or_gray)
         if not key:
             raise ValueError("key is required")
-        if not nonce:
-            raise ValueError("nonce is required")
 
         img = _as_uint8(image_bgr_or_gray)
         H, W = img.shape[:2]
-        X, Y, Z = self._keystreams_xyz(H, W, key, nonce)
+        X, Y, Z = self._keystreams_xyz(H, W, key, nonce, burn_in=self.burn_in)
 
         # 1) permutation
         row_perm, col_perm = self._row_col_permutation(H, W, X, Y)
@@ -240,38 +249,37 @@ class FODHNNEncryptor:
     def _undiffuse_backward(d: np.ndarray, z: np.ndarray) -> np.ndarray:
         C, L = d.shape
         out = np.empty_like(d, dtype=np.uint8)
-        ks = z.astype(np.uint8)
+        ks = z.astype(np.uint8, copy=False)
         for c in range(C):
+            # Recover the last element first
             out[c, L-1] = (int(d[c, L-1]) + int(ks[L-1])) & 0xFF
+            # Then walk backward, using the ALREADY recovered out[c, i+1]
             for i in range(L-2, -1, -1):
-                out[c, i] = (int(d[c, i]) + int(d[c, i+1]) + int(ks[i])) & 0xFF
+                out[c, i] = (int(d[c, i]) + int(out[c, i+1]) + int(ks[i])) & 0xFF
         return out
+
 
     @staticmethod
     def _undiffuse_forward(c: np.ndarray, z: np.ndarray) -> np.ndarray:
-        C, L = c.shape
-        out = np.empty_like(c, dtype=np.uint8)
-        ks = z.astype(np.uint8)
-        for cidx in range(C):
-            out[cidx, 0] = (int(c[cidx, 0]) - int(ks[0])) & 0xFF
-            for i in range(1, L):
-                out[cidx, i] = (int(c[cidx, i]) - int(c[cidx, i-1]) - int(ks[i])) & 0xFF
-        return out
+        # a[0] = c[0]-ks[0]; a[i] = c[i]-c[i-1]-ks[i]
+        ks = z.astype(np.int16, copy=False)
+        c16 = c.astype(np.int16)
+        out = np.empty_like(c16)
+        out[:, 0] = c16[:, 0] - ks[0]
+        out[:, 1:] = c16[:, 1:] - c16[:, :-1] - ks[1:]
+        return (out & 0xFF).astype(np.uint8)
 
     def decrypt_image(self, cipher_bgr_or_gray: np.ndarray, key: str, nonce: str) -> np.ndarray:
         """
         Decrypt BGR or grayscale image with (key, nonce).
         """
-        if cipher_bgr_or_gray is None:
-            raise ValueError("cipher image is None")
+        self._validate_image(cipher_bgr_or_gray)
         if not key:
             raise ValueError("key is required")
-        if not nonce:
-            raise ValueError("nonce is required")
 
         Cimg = _as_uint8(cipher_bgr_or_gray)
         H, W = Cimg.shape[:2]
-        X, Y, Z = self._keystreams_xyz(H, W, key, nonce)
+        X, Y, Z = self._keystreams_xyz(H, W, key, nonce, burn_in=self.burn_in)
 
         # invert diffusion (inverse order)
         flat_c, H, W, C = _flatten_per_channel(Cimg)
@@ -281,14 +289,4 @@ class FODHNNEncryptor:
         row_perm, col_perm = self._row_col_permutation(H, W, X, Y)
         P0 = self._invert_permutation(P, row_perm, col_perm)
         return P0
-
-        # flat_c, H, W, C = _flatten_per_channel(Cimg)
-        # flat = self._diffuse_forward(flat_c, Z[::-1])     # inverse of backward pass
-        # flat = self._diffuse_backward(flat, Z)            # inverse of forward pass
-        # P = _unflatten_per_channel(flat, H, W, C)
-
-        # # invert permutation
-        # row_perm, col_perm = self._row_col_permutation(H, W, X, Y)
-        # P0 = self._invert_permutation(P, row_perm, col_perm)
-        # return P0
 
