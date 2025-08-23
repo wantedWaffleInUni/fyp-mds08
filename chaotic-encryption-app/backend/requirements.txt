@@ -6,3 +6,5 @@ Pillow
 scipy
 Werkzeug
 gunicorn
+pytest
+hypothesis
