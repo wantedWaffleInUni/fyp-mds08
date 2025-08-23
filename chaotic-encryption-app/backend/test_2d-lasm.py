@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 # Import project modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from encryption.fodhnn_encryptor import FODHNNEncryptor
+from encryption.twoD_LASM_encryptor import LASMEncryptor
 from utils import analyze_encryption_quality, generate_histogram_data
 
 DEFAULT_OUT_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_results")
@@ -102,7 +102,7 @@ def save_image_set(run_dir_img: str, bgr_q, gray_q, C_bgr, P_bgr, C_g, P_g):
     cv2.imwrite(os.path.join(run_dir_img, "cipher_gray.png"), C_g)
     cv2.imwrite(os.path.join(run_dir_img, "plain_recovered_gray.png"), P_g)
 
-def process_one(enc: FODHNNEncryptor, image_path: str, run_dir: str, key: str, nonce: str, max_pixels: int):
+def process_one(enc: LASMEncryptor, image_path: str, run_dir: str, key: str, nonce: str, max_pixels: int):
     stem = os.path.splitext(os.path.basename(image_path))[0]
     out_dir = os.path.join(run_dir, stem)
     os.makedirs(out_dir, exist_ok=True)
@@ -225,12 +225,12 @@ def process_one(enc: FODHNNEncryptor, image_path: str, run_dir: str, key: str, n
     return row, timings
 
 def parse_args():
-    p = argparse.ArgumentParser(description="Batch test FODHNN over all images in a folder; save results per image.")
+    p = argparse.ArgumentParser(description="Batch test LASM over all images in a folder; save results per image.")
     p.add_argument("--images-dir", default="test_images", help="Directory containing test images.")
     p.add_argument("--recursive", action="store_true", help="Recurse into subfolders.")
     p.add_argument("--key", default="super-secret-key")
     p.add_argument("--nonce", default="img-001")
-    p.add_argument("--mem-window", type=int, default=128, help="FODHNN memory window.")
+    p.add_argument("--mem-window", type=int, default=128, help="LASM memory window.")
     p.add_argument("--max-pixels", type=int, default=256*256, help="Auto-downscale target pixels.")
     p.add_argument("--out-root", default=DEFAULT_OUT_ROOT, help="Root folder for test_results.")
     p.add_argument("--label", default=None, help="Optional label for the run folder.")
@@ -242,7 +242,7 @@ def main():
     run_dir = make_run_dir(args.out_root, args.label, args.mem_window, args.max_pixels, args.images_dir)
     print(f"[demo] Run folder: {run_dir}")
 
-    enc = FODHNNEncryptor(memory_window=args.mem_window)
+    enc = LASMEncryptor(memory_window=args.mem_window)
 
     all_rows, all_timings, errors = [], {}, {}
     count = 0
