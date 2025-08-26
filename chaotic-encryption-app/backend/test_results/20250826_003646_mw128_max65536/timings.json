@@ -1,0 +1,50 @@
+{
+  "4.2.07.tiff": {
+    "bgr_encrypt_s": 0.15625941699545365,
+    "bgr_decrypt_s": 0.1473550829978194,
+    "gray_encrypt_s": 0.14612179200048558,
+    "gray_decrypt_s": 0.14614162499492522
+  },
+  "black.jpg": {
+    "bgr_encrypt_s": 0.1433059580012923,
+    "bgr_decrypt_s": 0.14315579200047068,
+    "gray_encrypt_s": 0.14395058300578967,
+    "gray_decrypt_s": 0.1408351669961121
+  },
+  "blue.png": {
+    "bgr_encrypt_s": 0.1421243329969002,
+    "bgr_decrypt_s": 0.14154945900372695,
+    "gray_encrypt_s": 0.14036141699762084,
+    "gray_decrypt_s": 0.14270804199622944
+  },
+  "kodim04.png": {
+    "bgr_encrypt_s": 0.19564474999788217,
+    "bgr_decrypt_s": 0.14801616700424347,
+    "gray_encrypt_s": 0.1508331250079209,
+    "gray_decrypt_s": 0.2834589169942774
+  },
+  "monashlogo.png": {
+    "bgr_encrypt_s": 0.15535649999219459,
+    "bgr_decrypt_s": 0.14869408300728537,
+    "gray_encrypt_s": 0.14682912499119993,
+    "gray_decrypt_s": 0.14391475000593346
+  },
+  "white.jpg": {
+    "bgr_encrypt_s": 0.14524125000752974,
+    "bgr_decrypt_s": 0.14265741599956527,
+    "gray_encrypt_s": 0.14347416699456517,
+    "gray_decrypt_s": 0.14227570799994282
+  },
+  "xray.jpeg.jpg": {
+    "bgr_encrypt_s": 0.1505891669949051,
+    "bgr_decrypt_s": 0.16994087499915622,
+    "gray_encrypt_s": 0.1562547909998102,
+    "gray_decrypt_s": 0.18168695899657905
+  },
+  "xray2.jpg": {
+    "bgr_encrypt_s": 0.15156933300022501,
+    "bgr_decrypt_s": 0.1467073329986306,
+    "gray_encrypt_s": 0.14622137500555255,
+    "gray_decrypt_s": 0.14292916700651404
+  }
+}

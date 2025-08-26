@@ -1,0 +1,19 @@
+Image: /Users/hueyyan/Documents/FIT3164/fyp-mds08/chaotic-encryption-app/backend/test_images/kodim04.png
+Quick BGR shape: [313, 209, 3]; Quick GRAY shape: [313, 209]
+BGR enc 0.145s, dec 0.144s | GRAY enc 0.142s, dec 0.141s
+
+[BGR]
+ Entropy orig/cipher/decr: 7.144/7.639/7.144
+ NPCR: 99.462%  UACI: 21.953%
+ HistSim: 0.641  PSNR: inf dB
+
+[GRAY]
+ Entropy orig/cipher/decr: 7.144/7.997/7.144
+ NPCR: 99.599%  UACI: 28.553%
+ HistSim: -0.018  PSNR: inf dB
+  Adj corr BGR (orig H/V/D): 0.951/0.955/0.934
+  Adj corr BGR (ciph H/V/D): -0.003/0.002/0.000
+  Adj corr BGR (decr H/V/D): 0.951/0.955/0.934
+  Adj corr GRAY (orig H/V/D): 0.951/0.955/0.934
+  Adj corr GRAY (ciph H/V/D): 0.007/-0.000/-0.001
+  Adj corr GRAY (decr H/V/D): 0.951/0.955/0.934

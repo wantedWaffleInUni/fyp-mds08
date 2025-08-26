@@ -208,7 +208,7 @@ class LASMEncryptor:
         H, W = img.shape[:2]
 
         params = self._derive_params(key, nonce)
-        (S1x, S1y), (S2,) = self._lasm_maps(H, W, params)
+        (S1x, S1y), S2 = self._lasm_maps(H, W, params)
 
         # 1) permutation (same row/col for all channels)
         row_perm, col_perm = self._row_col_permutation_from_maps(H, W, S1x, S1y)
@@ -233,7 +233,7 @@ class LASMEncryptor:
         H, W = Cimg.shape[:2]
 
         params = self._derive_params(key, nonce)
-        (S1x, S1y), (S2,) = self._lasm_maps(H, W, params)
+        (S1x, S1y), S2 = self._lasm_maps(H, W, params)
 
         # invert diffusion
         if Cimg.ndim == 2:
@@ -247,38 +247,3 @@ class LASMEncryptor:
         row_perm, col_perm = self._row_col_permutation_from_maps(H, W, S1x, S1y)
         P0 = self._invert_permutation(P, row_perm, col_perm)
         return P0
-
-# 
-# # =========================
-# # Example usage
-# # =========================
-# if __name__ == "__main__":
-#     key   = "muig-hybrid-key-v1"
-#     nonce = "demo-0001"
-# 
-#     img = cv2.imread("black.jpg", cv2.IMREAD_COLOR)  # or grayscale
-#     if img is None:
-#         raise FileNotFoundError("black.jpg not found")
-# 
-#     enc = LASMEncryptor()
-#     C = enc.encrypt_image(img, key, nonce)
-#     R = enc.decrypt_image(C, key, nonce)
-# 
-#     # quick integrity checks (YCrCb tolerant)
-#     y0 = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
-#     y1 = cv2.cvtColor(R,   cv2.COLOR_BGR2YCrCb)
-#     exact_y   = (y0[:, :, 0] == y1[:, :, 0]).mean() * 100.0
-#     exact_ycc = (y0 == y1).mean() * 100.0
-#     diff = np.abs(R.astype(np.int16) - img.astype(np.int16))
-#     tol1 = (diff.max(axis=2) <= 1).mean() * 100.0 if img.ndim == 3 else (diff <= 1).mean() * 100.0
-# 
-#     print(f"Accuracy Y (exact): {exact_y:.4f}%")
-#     print(f"Accuracy YCrCb (exact): {exact_ycc:.4f}%")
-#     print(f"Accuracy RGB (|Δ|≤1): {tol1:.4f}%")
-# 
-#     # visualize
-#     cv2.imshow("orig", img)
-#     cv2.imshow("cipher", C if C.ndim == 2 else cv2.cvtColor(C, cv2.COLOR_BGR2RGB))
-#     cv2.imshow("recovered", R)
-#     cv2.waitKey(0)
-#     cv2.destroyAllWindows()

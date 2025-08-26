@@ -3,6 +3,8 @@ import os, sys, time, math, json, argparse, csv
 from datetime import datetime
 import numpy as np
 import cv2
+import traceback
+
 
 # --- matplotlib headless for Windows without Tk ---
 import matplotlib
@@ -234,6 +236,7 @@ def parse_args():
     p.add_argument("--max-pixels", type=int, default=256*256, help="Auto-downscale target pixels.")
     p.add_argument("--out-root", default=DEFAULT_OUT_ROOT, help="Root folder for test_results.")
     p.add_argument("--label", default=None, help="Optional label for the run folder.")
+    p.add_argument("--debug", action="store_true", help="Print full tracebacks on errors.")
     return p.parse_args()
 
 def main():
@@ -254,6 +257,8 @@ def main():
             all_rows.append(row)
             all_timings[os.path.basename(img_path)] = timings
         except Exception as e:
+            if args.debug:
+                traceback.print_exc()
             print(f"  !! ERROR on {img_path}: {e}")
             errors[os.path.basename(img_path)] = str(e)
 
