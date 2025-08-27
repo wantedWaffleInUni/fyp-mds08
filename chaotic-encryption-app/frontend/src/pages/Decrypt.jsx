@@ -14,6 +14,8 @@ const Decrypt = () => {
   const [nonce, setNonce] = useState('');
   const navigate = useNavigate();
 
+  const needsNonce = ['fodhnn', '2dlasm'].includes(algorithm);
+
   const handleImageUpload = (file) => {
     setSelectedFile(file);
     setError('');
@@ -32,7 +34,7 @@ const Decrypt = () => {
     }
 
     if (algorithm === 'fodhnn' && !nonce.trim()) {
-      setError('Nonce is required for FODHNN decryption');
+      setError('Nonce is required for this algorithm');
       return;
     }
 
@@ -132,10 +134,21 @@ const Decrypt = () => {
               />
               <span>FODHNN</span>
             </label>
+
+            <label className="radio">
+              <input
+                type="radio"
+                name="algorithm"
+                value="2dlasm"
+                checked={algorithm === '2dlasm'}
+                onChange={() => setAlgorithm('2dlasm')}
+              />
+              <span>2DLASM</span>
+            </label>
           </div>
         </div>
 
-        {algorithm === 'fodhnn' && (
+        {needsNonce        source /Users/hueyyan/Documents/FIT3164/fyp-mds08/chaotic-encryption-app/backend/venv/bin/activate        source /Users/hueyyan/Documents/FIT3164/fyp-mds08/chaotic-encryption-app/backend/venv/bin/activate && (
           <div className="form-group">
             <label className="form-label">Nonce</label>
             <input
