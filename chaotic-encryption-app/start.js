@@ -6,12 +6,12 @@
  * - Cross-platform npm (npm.cmd on Windows)
  */
 
-const { spawn } = require('child_process');
+const { spawn, exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
 const isWin = process.platform === 'win32';
-const npmCmd = isWin ? 'npm.cmd' : 'npm';
+const npmCmd = isWin ? 'npm' : 'npm';
 
 function run(cmd, args, opts = {}) {
   return new Promise((resolve, reject) => {
@@ -71,9 +71,10 @@ async function startFrontend() {
   console.log('🚀 Starting Frontend…');
   const frontendDir = path.join(__dirname, 'frontend');
   console.log('📥 Installing Node.js dependencies…');
-  await run(npmCmd, ['install'], { cwd: frontendDir });
+  // On Windows, spawn npm via shell to avoid EINVAL in some environments
+  await run(npmCmd, ['install'], { cwd: frontendDir, shell: isWin });
   console.log('🌐 Starting React dev server on http://localhost:3000');
-  return spawn(npmCmd, ['start'], { cwd: frontendDir, stdio: 'inherit' });
+  return spawn(npmCmd, ['start'], { cwd: frontendDir, stdio: 'inherit', shell: isWin });
 }
 
 function killTree(proc) {
@@ -90,6 +91,26 @@ function killTree(proc) {
   try {
     console.log('🔐 Chaotic Image Encryption - Universal Startup');
     console.log('================================================');
+
+    // Quick prerequisite check for Node/npm
+    await new Promise((resolve) => {
+      exec('node --version', (err) => {
+        if (err) {
+          console.error('❌ Node.js is not available on PATH. Please install Node.js 18+');
+          process.exit(1);
+        }
+        resolve();
+      });
+    });
+    await new Promise((resolve) => {
+      exec(isWin ? 'npm -v' : 'npm -v', (err) => {
+        if (err) {
+          console.error('❌ npm is not available on PATH. Ensure Node.js installation added npm to PATH.');
+          process.exit(1);
+        }
+        resolve();
+      });
+    });
 
     // Resolve Python
     const ctx = resolvePython();

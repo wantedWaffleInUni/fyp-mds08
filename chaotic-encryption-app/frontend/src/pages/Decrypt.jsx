@@ -148,7 +148,7 @@ const Decrypt = () => {
           </div>
         </div>
 
-        {needsNonce        source /Users/hueyyan/Documents/FIT3164/fyp-mds08/chaotic-encryption-app/backend/venv/bin/activate        source /Users/hueyyan/Documents/FIT3164/fyp-mds08/chaotic-encryption-app/backend/venv/bin/activate && (
+        {needsNonce && (
           <div className="form-group">
             <label className="form-label">Nonce</label>
             <input
