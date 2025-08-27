@@ -9,16 +9,16 @@ const Home = () => {
           <h1 className="card-title" style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>
             🔐 Chaotic Image Encryption
           </h1>
-          <p style={{ fontSize: '1.2rem', color: '#666' }}>
+          <p style={{ fontSize: '1rem', color: '#666' }}>
             Advanced image encryption using chaotic maps for enhanced security
           </p>
         </div>
         
         <div className="mb-3">
           <p style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
-            This application demonstrates the power of chaotic encryption algorithms for securing digital images. 
-            Unlike traditional encryption methods, chaotic encryption provides enhanced security through 
-            unpredictable, non-linear transformations based on chaotic mathematical systems.
+            Secure your images with advanced encryption. <br></br>
+            Protect sensitive visuals and ensure privacy with our reliable, user-friendly image encryption solution.
+            
           </p>
         </div>
         
