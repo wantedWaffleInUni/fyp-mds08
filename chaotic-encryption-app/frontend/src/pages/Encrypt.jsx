@@ -116,6 +116,26 @@ const Encrypt = () => {
 
   const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
 
+//   const algoOptions = [
+//   { value: 'chaos',  label: 'Chaotic Logistic (default)' },
+//   { value: 'fodhnn', label: 'FODHNN (fractional-order Hopfield)' },
+//   { value: '2dlasm', label: '2DLASM (2D Logistic Adjusted Sine Map)' },
+// ];
+  const algoOptions = [
+    { value: 'chaos',  label: 'Chaotic Logistic (default)',
+      desc: 'Fast baseline using logistic-map confusion+diffusion. Good general choice.' },
+    { value: 'fodhnn', label: 'FODHNN (fractional-order Hopfield)',
+      desc: 'Stronger confusion/diffusion via fractional-order dynamics. Slower; may need nonce.' },
+    { value: '2dlasm', label: '2DLASM (2D Logistic Adjusted Sine Map)',
+      desc: '2D chaotic map with high key sensitivity. Requires nonce; usually fast.' },
+  ];
+
+  const [flipped, setFlipped] = useState({});
+  const setFlip = (val, on) => setFlipped(f => ({ ...f, [val]: on ?? !f[val] }));
+
+
+
+
   return (
     <div>
       <div className="card">
@@ -142,7 +162,7 @@ const Encrypt = () => {
         </div>
 
         <div className="form-group">
-          <label className="form-label"><strong>Encryption Key</strong></label>
+          <label className="form-label"><strong>Enter Encryption Key</strong></label>
           <input
             type="text"
             className="form-control"
@@ -150,8 +170,22 @@ const Encrypt = () => {
             onChange={(e) => setEncryptionKey(e.target.value)}
             placeholder="Enter encryption key or generate a random one"
           />
+  
+          {/* radio for enabling auto generation of strong key */}
+          {/* <div className="form-check mt-2">
+            <input
+              type="checkbox"
+              className="form-check-input"
+              id="autoGenerateKey"
+              checked={autoGenerateKey}
+              onChange={(e) => setAutoGenerateKey(e.target.checked)}
+            />
+            <label className="form-check-label" htmlFor="autoGenerateKey">
+              Auto-generate a strong key
+            </label>
+          </div> */}
           <small style={{ color: '#666', marginTop: '0.5rem', display: 'block' }}>
-            The key is used to generate chaotic sequences. Keep it secure for decryption.
+            Tip: Use a strong, memorable key. The key is used to generate chaotic sequences, essential for decryption.
           </small>
         </div>
 
@@ -226,43 +260,83 @@ const Encrypt = () => {
         <div className="modal-backdrop">
           <div className="modal">
             <div className="modal-header">
-              <h3 className="modal-title">Choose Encryption Algorithm</h3>
+              <h3 className="modal-title">🔒 Before Encrypting</h3>
             </div>
             <div className="modal-body">
               <div className="form-group">
-                <label className="form-label">Algorithm</label>
-                <div className="d-flex gap-2">
-                  <label className="radio">
-                    <input
-                      type="radio"
-                      name="algorithm"
-                      value="chaos"
-                      checked={selectedAlgorithm === 'chaos'}
-                      onChange={() => setSelectedAlgorithm('chaos')}
-                    />
-                    <span>Chaotic Logistic (default)</span>
-                  </label>
-                  <label className="radio">
-                    <input
-                      type="radio"
-                      name="algorithm"
-                      value="fodhnn"
-                      checked={selectedAlgorithm === 'fodhnn'}
-                      onChange={() => setSelectedAlgorithm('fodhnn')}
-                    />
-                    <span>FODHNN (fractional-order Hopfield)</span>
-                  </label>
+                <label className="form-label" style={{alignContent: 'center'}}>Select a method you prefer. </label>
+                <p style={{fontStyle:'italic', fontSize: '0.8rem'}}> Hover over each algorithm to see which one fits you best! </p>
+                <br></br>
+                
+                {/* <div className="btn-choice-group">
+                  {algoOptions.map(opt => {
+                    const active = selectedAlgorithm === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        className={`btn btn-choice ${active ? 'active' : ''}`}
+                        style={{ flex: 1, height: '100px', fontSize: '0.9rem' }}
+                        onClick={() => setSelectedAlgorithm(opt.value)}
+                        aria-pressed={active}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div> */}
 
-                  <label className="radio">
-                    <input
-                      type="radio"
-                      name="algorithm"
-                      value="2dlasm"
-                      checked={selectedAlgorithm === '2dlasm'}
-                      onChange={() => setSelectedAlgorithm('2dlasm')}
-                    /> 
-                    <span>2DLASM (2D Logistic Adjusted Sine Map)</span> 
-                  </label>
+                <div className="algo-grid">
+                  {algoOptions.map(opt => {
+                    const active = selectedAlgorithm === opt.value;
+                    const isFlipped = !!flipped[opt.value];
+                    return (
+                      <div
+                        key={opt.value}
+                        className={`algo-card ${active ? 'active' : ''} ${isFlipped ? 'flipped' : ''}`}
+                        onClick={() => setSelectedAlgorithm(opt.value)}                 // click selects
+                        onMouseEnter={() => setFlip(opt.value, true)}                   // hover flips
+                        onMouseLeave={() => setFlip(opt.value, false)}
+                        tabIndex={0}
+                        onFocus={() => setFlip(opt.value, true)}                        // keyboard focus flips
+                        onBlur={() => setFlip(opt.value, false)}
+                        role="button"
+                        aria-pressed={active}
+                        aria-label={`Choose ${opt.label}`}
+                      >
+                        <div className="algo-card-inner">
+                          <div className="algo-face front">
+                            <div className="algo-title">{opt.label}</div>
+                            {/* <div className="algo-hint">Click to select • Tap ⓘ for info</div> */}
+                          </div>
+
+                          <div className="algo-face back">
+                            <div className="algo-back-title" style={{fontWeight:"bold"}}>{opt.label}</div>
+                            <p className="algo-desc">{opt.desc}</p>
+                            <div className="algo-actions">
+                              {/* <button
+                                type="button"
+                                className="btn btn-primary btn-sm"
+                                onClick={(e) => { e.stopPropagation(); setSelectedAlgorithm(opt.value); }}
+                              >
+                                Choose
+                              </button> */}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Works on touch: tap ⓘ to flip without selecting */}
+                        <button
+                          type="button"
+                          className="info-badge"
+                          aria-label={`About ${opt.label}`}
+                          onClick={(e) => { e.stopPropagation(); setFlip(opt.value); }}
+                        >
+                          ⓘ
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
               {/* {selectedAlgorithm === 'fodhnn' && ( */}
