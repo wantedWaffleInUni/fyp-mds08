@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { encryptImage } from "../services/cryptAPI";
 import ImageUploader from "../../components/ImageUploader";
 import EncryptedViewer from "../../components/EncryptedViewer";
+// import { IonIcon } from "@ionic/react";
+// import { copyOutline, refreshOutline } from "ionicons/icons";
 
 const EncryptPage = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -56,19 +58,24 @@ const EncryptPage = () => {
         ← Back to Home
       </button>
       
-      <h1 style={{ textAlign: "center", marginBottom: "2rem", color: "#333" }}>
+      <h1 style={{ textAlign: "center", marginBottom: "2rem", color: "#333", fontWeight: "bold" ,
+        fontSize: "2rem", textTransform: "uppercase", letterSpacing: "1px"
+       }}>
         Image Encryption
       </h1>
       
       <div style={{ marginBottom: "2rem" }}>
-        <h3>Step 1: Upload Image</h3>
-        <div style={{ maxWidth: 400, marginBottom: "1.5rem" }}>
+        <h3 style={{fontWeight: "bold" }}>
+          Step 1: Upload Image
+          </h3>
+        <div style={{ maxWidth: 400, marginBottom: "1.5rem"}}>
           <ImageUploader onFileSelect={setSelectedFile} />
         </div>
       </div>
 
       <div style={{ marginBottom: "2rem" }}>
-        <h3>Step 2: Enter Encryption Key</h3>
+        <h3 style={{fontWeight: "bold" }}>
+          Step 2: Enter Encryption Key</h3>
         <input
           type="text"
           placeholder="Enter encryption key"
@@ -87,7 +94,8 @@ const EncryptPage = () => {
       </div>
 
       <div style={{ marginBottom: "2rem" }}>
-        <h3>Step 3: Encrypt Image</h3>
+        <h3 style={{fontWeight: "bold" }}>
+          Step 3: Encrypt Image</h3>
         <button
           onClick={handleEncrypt}
           disabled={!selectedFile || !key || isLoading}
@@ -108,7 +116,8 @@ const EncryptPage = () => {
 
       {encryptedImgUrl && (
         <div style={{ marginBottom: "2rem" }}>
-          <h3>Step 4: Download Results</h3>
+          <h3 style={{fontWeight: "bold" }}
+          >Step 4: Download Results</h3>
           <div style={{ display: "flex", gap: "2rem", alignItems: "flex-start" }}>
             <div>
               <h4>Encrypted Image</h4>

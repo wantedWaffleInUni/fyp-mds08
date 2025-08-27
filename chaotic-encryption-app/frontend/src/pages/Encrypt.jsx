@@ -40,11 +40,13 @@ const Encrypt = () => {
     setError('');
 
     try {
+      const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
       const response = await encryptImage(
         selectedFile,
         encryptionKey,
         selectedAlgorithm,
-        selectedAlgorithm === 'fodhnn' ? (nonce || undefined) : undefined
+        // selectedAlgorithm === 'fodhnn' ? (nonce || undefined) : undefined
+        needsNonce ? (nonce || undefined) : undefined
       );
       setResult(response);
       setShowAlgoModal(false);
@@ -74,6 +76,8 @@ const Encrypt = () => {
       setError('Download failed: ' + err.message);
     }
   };
+
+  const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
 
   return (
     <div>
@@ -197,9 +201,21 @@ const Encrypt = () => {
                     />
                     <span>FODHNN (fractional-order Hopfield)</span>
                   </label>
+
+                  <label className="radio">
+                    <input
+                      type="radio"
+                      name="algorithm"
+                      value="2dlasm"
+                      checked={selectedAlgorithm === '2dlasm'}
+                      onChange={() => setSelectedAlgorithm('2dlasm')}
+                    /> 
+                    <span>2DLASM (2D Logistic Adjusted Sine Map)</span> 
+                  </label>
                 </div>
               </div>
-              {selectedAlgorithm === 'fodhnn' && (
+              {/* {selectedAlgorithm === 'fodhnn' && ( */}
+              {needsNonce && (
                 <div className="form-group">
                   <label className="form-label">Nonce (optional)</label>
                   <input

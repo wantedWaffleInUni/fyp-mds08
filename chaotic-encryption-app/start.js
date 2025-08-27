@@ -1,180 +1,137 @@
 #!/usr/bin/env node
-
 /**
- * Universal Startup Script for Chaotic Image Encryption
- * Works on both macOS/Linux and Windows
+ * Robust startup for Chaotic Image Encryption
+ * - Prefers activated venv → ./.venv → ./backend/venv
+ * - Uses `python -m pip` (no PATH issues)
+ * - Cross-platform npm (npm.cmd on Windows)
  */
 
-const { spawn, exec } = require('child_process');
+const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-console.log('🔐 Chaotic Image Encryption - Universal Startup Script');
-console.log('======================================================');
+const isWin = process.platform === 'win32';
+const npmCmd = isWin ? 'npm.cmd' : 'npm';
 
-// Check operating system
-const isWindows = process.platform === 'win32';
-const pythonCmd = isWindows ? 'python' : 'python3';
-const npmCmd = 'npm';
-
-// Function to check if command exists
-function checkCommand(command) {
-    return new Promise((resolve) => {
-        exec(`${command} --version`, (error) => {
-            resolve(!error);
-        });
-    });
+function run(cmd, args, opts = {}) {
+  return new Promise((resolve, reject) => {
+    const p = spawn(cmd, args, { stdio: 'inherit', shell: false, ...opts });
+    p.on('close', code => code === 0 ? resolve() : reject(new Error(`${cmd} exited with ${code}`)));
+  });
 }
 
-// Function to start backend
-function startBackend() {
-    return new Promise((resolve, reject) => {
-        console.log('🚀 Starting Backend...');
-        
-        const backendDir = path.join(__dirname, 'backend');
-        const venvDir = path.join(backendDir, 'venv');
-        const activateScript = isWindows ? 'Scripts\\activate.bat' : 'bin/activate';
-        
-        // Check if virtual environment exists
-        if (!fs.existsSync(venvDir)) {
-            console.log('📦 Creating virtual environment...');
-            const venvProcess = spawn(pythonCmd, ['-m', 'venv', 'venv'], { cwd: backendDir });
-            venvProcess.on('close', (code) => {
-                if (code === 0) {
-                    console.log('✅ Virtual environment created');
-                    installBackendDependencies();
-                } else {
-                    reject(new Error('Failed to create virtual environment'));
-                }
-            });
-        } else {
-            installBackendDependencies();
-        }
-        
-        function installBackendDependencies() {
-            console.log('📥 Installing Python dependencies...');
-            const pipCmd = isWindows ? 'venv\\Scripts\\pip' : 'venv/bin/pip';
-            const pipProcess = spawn(pipCmd, ['install', '-r', 'requirements.txt'], { cwd: backendDir });
-            
-            pipProcess.on('close', (code) => {
-                if (code === 0) {
-                    console.log('✅ Dependencies installed');
-                    startFlaskServer();
-                } else {
-                    reject(new Error('Failed to install dependencies'));
-                }
-            });
-        }
-        
-        function startFlaskServer() {
-            console.log('🌐 Starting Flask server on http://localhost:5001');
-            const pythonPath = isWindows ? 'venv\\Scripts\\python' : 'venv/bin/python';
-            const flaskProcess = spawn(pythonPath, ['app.py'], { cwd: backendDir });
-            
-            flaskProcess.stdout.on('data', (data) => {
-                console.log(`[Backend] ${data.toString().trim()}`);
-            });
-            
-            flaskProcess.stderr.on('data', (data) => {
-                console.error(`[Backend Error] ${data.toString().trim()}`);
-            });
-            
-            flaskProcess.on('close', (code) => {
-                console.log(`Backend process exited with code ${code}`);
-            });
-            
-            resolve(flaskProcess);
-        }
-    });
+function pythonFromVenvDir(venvDir) {
+  if (!venvDir) return null;
+  const exe = path.join(venvDir, isWin ? 'Scripts' : 'bin', isWin ? 'python.exe' : 'python');
+  return fs.existsSync(exe) ? exe : null;
 }
 
-// Function to start frontend
-function startFrontend() {
-    return new Promise((resolve, reject) => {
-        console.log('🚀 Starting Frontend...');
-        
-        const frontendDir = path.join(__dirname, 'frontend');
-        
-        console.log('📥 Installing Node.js dependencies...');
-        const npmInstallProcess = spawn(npmCmd, ['install'], { cwd: frontendDir });
-        
-        npmInstallProcess.on('close', (code) => {
-            if (code === 0) {
-                console.log('✅ Dependencies installed');
-                startReactServer();
-            } else {
-                reject(new Error('Failed to install frontend dependencies'));
-            }
-        });
-        
-        function startReactServer() {
-            console.log('🌐 Starting React server on http://localhost:3000');
-            const reactProcess = spawn(npmCmd, ['start'], { cwd: frontendDir });
-            
-            reactProcess.stdout.on('data', (data) => {
-                console.log(`[Frontend] ${data.toString().trim()}`);
-            });
-            
-            reactProcess.stderr.on('data', (data) => {
-                console.error(`[Frontend Error] ${data.toString().trim()}`);
-            });
-            
-            reactProcess.on('close', (code) => {
-                console.log(`Frontend process exited with code ${code}`);
-            });
-            
-            resolve(reactProcess);
-        }
-    });
+function resolvePython() {
+  // 1) activated venv
+  if (process.env.VIRTUAL_ENV) {
+    const p = pythonFromVenvDir(process.env.VIRTUAL_ENV);
+    if (p) return { py: p, venvDir: process.env.VIRTUAL_ENV };
+  }
+  // 2) repo .venv
+  const repoVenv = path.join(__dirname, '.venv');
+  const pyRepo = pythonFromVenvDir(repoVenv);
+  if (pyRepo) return { py: pyRepo, venvDir: repoVenv };
+
+  // 3) backend venv (create if needed)
+  const backendDir = path.join(__dirname, 'backend');
+  const backendVenv = path.join(backendDir, 'venv');
+  const pyBackend = pythonFromVenvDir(backendVenv);
+  return { py: pyBackend, venvDir: backendVenv, needsCreate: !pyBackend, backendDir };
 }
 
-// Main execution
-async function main() {
-    try {
-        // Check prerequisites
-        console.log('🔍 Checking prerequisites...');
-        
-        const pythonExists = await checkCommand(pythonCmd);
-        if (!pythonExists) {
-            console.error(`❌ ${pythonCmd} is not installed. Please install Python 3.8 or higher.`);
-            process.exit(1);
-        }
-        
-        const npmExists = await checkCommand(npmCmd);
-        if (!npmExists) {
-            console.error(`❌ ${npmCmd} is not installed. Please install Node.js 16 or higher.`);
-            process.exit(1);
-        }
-        
-        console.log('✅ Prerequisites check passed');
-        
-        // Start services
-        const backendProcess = await startBackend();
-        
-        // Wait a bit for backend to start
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        
-        const frontendProcess = await startFrontend();
-        
-        console.log('');
-        console.log('🎉 Both servers are starting up!');
-        console.log('📱 Frontend: http://localhost:3000');
-        console.log('🔧 Backend:  http://localhost:5001');
-        console.log('');
-        console.log('Press Ctrl+C to stop both servers');
-        
-        // Handle graceful shutdown
-        process.on('SIGINT', () => {
-            console.log('\n🛑 Shutting down servers...');
-            backendProcess.kill();
-            frontendProcess.kill();
-            process.exit(0);
-        });
-        
-    } catch (error) {
-        console.error('❌ Error:', error.message);
-        process.exit(1);
+async function ensureBackendVenv(ctx) {
+  if (!ctx.needsCreate) return;
+  console.log('📦 Creating backend virtual environment at', ctx.venvDir);
+  const pyBootstrap = isWin ? 'python' : 'python3';
+  await run(pyBootstrap, ['-m', 'venv', 'venv'], { cwd: ctx.backendDir });
+}
+
+async function pipInstall(py, reqPath, cwd) {
+  console.log('📥 Installing Python dependencies…');
+  await run(py, ['-m', 'pip', 'install', '--disable-pip-version-check', '-U', 'pip', 'setuptools', 'wheel'], { cwd });
+  await run(py, ['-m', 'pip', 'install', '-r', reqPath], { cwd });
+}
+
+async function startBackend(py) {
+  console.log('🌐 Starting backend on http://localhost:5001');
+  // Choose one: app.py (dev) or gunicorn (prod-ish). Default to app.py.
+  const backendDir = path.join(__dirname, 'backend');
+  const appPath = path.join(backendDir, 'app.py');
+  return spawn(py, [appPath], { cwd: backendDir, stdio: 'inherit' });
+  // For gunicorn:
+  // return spawn(py, ['-m', 'gunicorn', 'app:app', '--bind', '127.0.0.1:5001', '--chdir', 'backend'], { stdio: 'inherit' });
+}
+
+async function startFrontend() {
+  console.log('🚀 Starting Frontend…');
+  const frontendDir = path.join(__dirname, 'frontend');
+  console.log('📥 Installing Node.js dependencies…');
+  await run(npmCmd, ['install'], { cwd: frontendDir });
+  console.log('🌐 Starting React dev server on http://localhost:3000');
+  return spawn(npmCmd, ['start'], { cwd: frontendDir, stdio: 'inherit' });
+}
+
+function killTree(proc) {
+  if (!proc) return;
+  if (isWin) {
+    spawn('taskkill', ['/pid', String(proc.pid), '/T', '/F']);
+  } else {
+    try { process.kill(-proc.pid, 'SIGTERM'); } catch {}
+    try { proc.kill('SIGTERM'); } catch {}
+  }
+}
+
+(async () => {
+  try {
+    console.log('🔐 Chaotic Image Encryption - Universal Startup');
+    console.log('================================================');
+
+    // Resolve Python
+    const ctx = resolvePython();
+    if (ctx.needsCreate && !ctx.backendDir) {
+      throw new Error('No usable Python venv found and no backend dir to create one.');
     }
-}
+    if (ctx.needsCreate) await ensureBackendVenv(ctx);
 
-main();
+    const py = pythonFromVenvDir(ctx.venvDir);
+    if (!py) throw new Error('Failed to resolve Python executable from venv.');
+
+    console.log('🐍 Using Python:', py);
+
+    // Pip install (idempotent)
+    await pipInstall(py, 'requirements.txt', path.join(__dirname, 'backend'));
+
+    // Start backend
+    const backendProc = await startBackend(py);
+
+    // Give backend a moment (or poll health endpoint if you add one)
+    await new Promise(r => setTimeout(r, 2000));
+
+    // Start frontend
+    const frontendProc = await startFrontend();
+
+    console.log('\n🎉 Both servers launching!');
+    console.log('📱 Frontend: http://localhost:3000');
+    console.log('🔧 Backend:  http://localhost:5001\n');
+    console.log('Press Ctrl+C to stop both.\n');
+
+    // Graceful shutdown
+    const shutdown = () => {
+      console.log('\n🛑 Shutting down…');
+      killTree(frontendProc);
+      killTree(backendProc);
+      process.exit(0);
+    };
+    process.on('SIGINT', shutdown);
+    process.on('SIGTERM', shutdown);
+
+  } catch (e) {
+    console.error('❌ Error:', e.message);
+    process.exit(1);
+  }
+})();
