@@ -1,3 +1,12 @@
 
 # Ignore this file
 path/from/repo/root/to/your_file.ext
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+npm-debug.log*
+*.log
+test_results/
+backend/test_results/
+.DS_Store
