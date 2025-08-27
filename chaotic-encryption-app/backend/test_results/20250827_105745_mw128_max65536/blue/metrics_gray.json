@@ -1,0 +1,24 @@
+{
+  "entropy_original": -0.0,
+  "entropy_encrypted": 7.993396759033203,
+  "npcr": 99.65786901270772,
+  "uaci": 39.79067237843329,
+  "histogram_similarity": -0.08140451877824313,
+  "adj_corr_original": {
+    "H": 0.0,
+    "V": 0.0,
+    "D": 0.0
+  },
+  "adj_corr_encrypted": {
+    "H": 0.0025294378280731815,
+    "V": -0.0032087043897321113,
+    "D": 0.004662310216368223
+  },
+  "psnr": null,
+  "entropy_decrypted": -0.0,
+  "adj_corr_decrypted": {
+    "H": 0.0,
+    "V": 0.0,
+    "D": 0.0
+  }
+}

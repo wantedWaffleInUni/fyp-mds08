@@ -1,0 +1,19 @@
+Image: /Users/hueyyan/Documents/FIT3164/fyp-mds08/chaotic-encryption-app/backend/test_images/black.jpg
+Quick BGR shape: [188, 348, 3]; Quick GRAY shape: [188, 348]
+BGR enc 0.155s, dec 0.152s | GRAY enc 0.111s, dec 0.110s
+
+[BGR]
+ Entropy orig/cipher/decr: 3.360/7.996/3.360
+ NPCR: 99.586%  UACI: 47.946%
+ HistSim: -0.018  PSNR: inf dB
+
+[GRAY]
+ Entropy orig/cipher/decr: 3.355/7.997/3.355
+ NPCR: 99.578%  UACI: 47.955%
+ HistSim: 0.074  PSNR: inf dB
+  Adj corr BGR (orig H/V/D): 0.704/0.670/0.406
+  Adj corr BGR (ciph H/V/D): -0.004/0.006/0.010
+  Adj corr BGR (decr H/V/D): 0.704/0.670/0.406
+  Adj corr GRAY (orig H/V/D): 0.704/0.672/0.406
+  Adj corr GRAY (ciph H/V/D): -0.004/0.005/0.010
+  Adj corr GRAY (decr H/V/D): 0.704/0.672/0.406
