@@ -510,3 +510,26 @@ body {
   cursor: pointer;
 }
 .info-badge:focus { outline: 2px solid #7c3aed55; outline-offset: 2px; }
+
+/* copy paste button */
+.input-with-actions { position: relative; }
+.input-with-actions .input-actions {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 6px;
+}
+
+.icon-btn {
+  font-size: 12px;
+  line-height: 1;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
+  color: #111827;
+}
+.icon-btn:disabled { opacity: .6; cursor: not-allowed; }
+.icon-btn:hover:not(:disabled) { background: #e5e7eb; }

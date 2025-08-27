@@ -72,6 +72,31 @@ const Encrypt = () => {
     setShowAlgoModal(true);
   };
 
+  // copy and paste key handlers
+  const keyInputRef = useRef(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyKey = async () => {
+    try {
+      await navigator.clipboard.writeText(encryptionKey || '');
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    } catch (e) {
+      setError('Copy failed (clipboard blocked by browser).');
+    }
+  };
+
+  const handlePasteKey = async () => {
+    try {
+      const txt = await navigator.clipboard.readText();
+      setEncryptionKey(txt || '');
+      if (error) setError('');
+    } catch (e) {
+      setError('Paste blocked by browser. Click the field and use Cmd/Ctrl+V.');
+    }
+  };
+
+
   const confirmEncrypt = async () => {
     setIsLoading(true);
     setError('');
@@ -163,7 +188,7 @@ const Encrypt = () => {
 
         <div className="form-group">
           <label className="form-label"><strong>Enter Encryption Key</strong></label>
-          <input
+          {/* <input
             type="text"
             className="form-control"
             value={encryptionKey}
@@ -183,7 +208,40 @@ const Encrypt = () => {
             <label className="form-check-label" htmlFor="autoGenerateKey">
               Auto-generate a strong key
             </label>
-          </div> */}
+          </div> */} 
+          <div className="input-with-actions">
+            <input
+              ref={keyInputRef}
+              type="text"
+              className="form-control"
+              value={encryptionKey}
+              onChange={(e) => setEncryptionKey(e.target.value)}
+              placeholder="Enter encryption key or generate a random one"
+              style={{ paddingRight: '116px' }}  // room for the two buttons
+            />
+
+            <div className="input-actions">
+              <button
+                type="button"
+                className="icon-btn"
+                onClick={handlePasteKey}
+                title="Paste from clipboard"
+                aria-label="Paste from clipboard"
+              >
+                Paste
+              </button>
+              <button
+                type="button"
+                className="icon-btn"
+                onClick={handleCopyKey}
+                disabled={!encryptionKey}
+                title="Copy key"
+                aria-label="Copy key"
+              >
+                {copied ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
+          </div>
           <small style={{ color: '#666', marginTop: '0.5rem', display: 'block' }}>
             Tip: Use a strong, memorable key. The key is used to generate chaotic sequences, essential for decryption.
           </small>
@@ -256,6 +314,7 @@ const Encrypt = () => {
         </div>
       )}
 
+      {/* modal */}
       {showAlgoModal && (
         <div className="modal-backdrop">
           <div className="modal">
