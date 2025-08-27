@@ -3,5 +3,6 @@
 
 from .chaos_encryptor import ChaosEncryptor
 from .fodhnn_encryptor import FODHNNEncryptor
+from .another_2d import LASMEncryptorFB
 
-__all__ = ['ChaosEncryptor', 'FODHNNEncryptor']
+__all__ = ['ChaosEncryptor', 'FODHNNEncryptor', 'LASMEncryptorFB']
