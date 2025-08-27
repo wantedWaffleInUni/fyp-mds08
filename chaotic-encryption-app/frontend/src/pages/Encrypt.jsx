@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ImageUploader from '../components/ImageUploader';
 import { encryptImage } from '../services/api';
@@ -6,6 +6,8 @@ import { saveAs } from 'file-saver';
 
 const Encrypt = () => {
   const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');           // NEW
+  const previewUrlRef = useRef('');
   const [encryptionKey, setEncryptionKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showAlgoModal, setShowAlgoModal] = useState(false);
@@ -15,22 +17,57 @@ const Encrypt = () => {
   const [result, setResult] = useState(null);
   const navigate = useNavigate();
 
+  // Revoke object URLs to avoid memory leaks
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    };
+  }, []);
+
   const handleImageUpload = (file) => {
     setSelectedFile(file);
     setError('');
     setResult(null);
+
+    // manage preview url
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    const url = URL.createObjectURL(file);
+    previewUrlRef.current = url;
+    setPreviewUrl(url);
   };
 
+  // ------- validation flags/messages -------
+  const keyFilled = encryptionKey.trim().length > 0;
+  const canEncrypt = !!selectedFile && keyFilled;
+
+  const validationMsg =
+    !selectedFile && !keyFilled
+      ? 'Please select an image and enter an encryption key'
+      : !selectedFile
+      ? 'Please select an image to encrypt'
+      : !keyFilled
+      ? 'Please enter an encryption key'
+      : '';
+
   const handleEncrypt = async () => {
-    if (!selectedFile) {
-      setError('Please select an image to encrypt');
+    if (!canEncrypt) {
+      setError(validationMsg);
       return;
     }
 
-    if (!encryptionKey.trim()) {
-      setError('Please enter an encryption key');
-      return;
-    }
+    //     if (!selectedFile && !encryptionKey.trim()) {
+    //       setError('Please select an image and enter an encryption key');
+    //       return;
+    //     }
+    //     if (!selectedFile) {
+    //       setError('Please select an image to encrypt');
+    //       return;
+    //     }
+    // 
+    //     if (!encryptionKey.trim()) {
+    //       setError('Please enter an encryption key');
+    //       return;
+    //     }
     // Open algorithm selection modal
     setShowAlgoModal(true);
   };
@@ -84,7 +121,7 @@ const Encrypt = () => {
       <div className="card">
         <div className="card-header">
           <h2 className="card-title">🔒 Encrypt Image</h2>
-          <p>Upload an image and encrypt it using chaotic encryption</p>
+          <p>Upload an image to encrypt it using chaotic encryption</p>
         </div>
 
         {error && (
@@ -94,24 +131,24 @@ const Encrypt = () => {
         )}
 
         <div className="form-group">
-          <label className="form-label">Select Image</label>
+          <label className="form-label"><strong>Upload An Image</strong></label>
           <ImageUploader onImageUpload={handleImageUpload} />
           {selectedFile && (
             <div className="mt-2">
-              <p><strong>Selected:</strong> {selectedFile.name}</p>
-              <p><strong>Size:</strong> {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+              <p>Uploaded: {selectedFile.name}</p>
+              <p>Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
             </div>
           )}
         </div>
 
         <div className="form-group">
-          <label className="form-label">Encryption Key</label>
+          <label className="form-label"><strong>Encryption Key</strong></label>
           <input
             type="text"
             className="form-control"
             value={encryptionKey}
             onChange={(e) => setEncryptionKey(e.target.value)}
-            placeholder="Enter encryption key (optional, default will be used if empty)"
+            placeholder="Enter encryption key or generate a random one"
           />
           <small style={{ color: '#666', marginTop: '0.5rem', display: 'block' }}>
             The key is used to generate chaotic sequences. Keep it secure for decryption.
@@ -120,10 +157,16 @@ const Encrypt = () => {
 
         <div className="d-flex justify-center">
           <button
-            className="btn btn-primary"
+
+            className={`btn ${canEncrypt ? 'btn-primary' : 'btn-disabled'}`}
             onClick={handleEncrypt}
-            disabled={isLoading || !selectedFile}
+            disabled={!canEncrypt || isLoading}
             style={{ minWidth: '200px' }}
+            aria-disabled={!canEncrypt || isLoading}
+            // className="btn btn-primary"
+            // onClick={handleEncrypt}
+            // disabled={isLoading || !selectedFile}
+            // style={{ minWidth: '200px' }}
           >
             {isLoading ? (
               <>
@@ -134,7 +177,15 @@ const Encrypt = () => {
               '🔒 Encrypt Image'
             )}
           </button>
+
+
         </div>
+        {/* live validation hint when disabled */}
+          {!canEncrypt && !isLoading && (
+            <div className="mt-2" style={{ color: '#6b7280', fontSize: 13, alignContent: 'center', textAlign: 'center' }}>
+              {validationMsg}
+            </div>
+          )}
       </div>
 
       {result && (

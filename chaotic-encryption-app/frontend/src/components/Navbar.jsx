@@ -6,7 +6,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="navbar-container">
         <NavLink to="/" className="navbar-brand">
-          🔐 Chaotic Encryption
+          PEEKAP🔑C
         </NavLink>
         <ul className="navbar-nav">
           <li>
