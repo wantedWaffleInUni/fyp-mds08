@@ -533,3 +533,18 @@ body {
 }
 .icon-btn:disabled { opacity: .6; cursor: not-allowed; }
 .icon-btn:hover:not(:disabled) { background: #e5e7eb; }
+
+/* progress bar */
+.progressbar {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin: 0 auto;
+  width: min(420px, 90%);
+}
+.progressbar-fill {
+  height: 100%;
+  background: #3b82f6; /* or your primary */
+  transition: width .25s ease;
+}

@@ -4,6 +4,12 @@ import ImageUploader from '../components/ImageUploader';
 import { encryptImage } from '../services/api';
 import { saveAs } from 'file-saver';
 
+// NEW imports
+import SelectAlgorithmModal from '../components/modals/SelectAlgorithmModal';
+import ProgressModal from '../components/modals/ProgressModal';
+import usePhasedProgress from '../components/modals/usePhasedProgress';
+
+
 const Encrypt = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');           // NEW
@@ -16,6 +22,23 @@ const Encrypt = () => {
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
   const navigate = useNavigate();
+
+  // progress modal state
+  // const [showProgress, setShowProgress] = useState(false);
+  // const [progress, setProgress] = useState(0);
+  // const [phase, setPhase] = useState('analysing image …');
+  // const abortRef = useRef(null);
+
+  // labels & soft caps for each phase (won’t exceed 95% until done)
+  const PHASES = [
+    { label: 'Analysing image …',            from: 2,  to: 25 },
+    { label: 'Confusion & diffusion stage …',from: 26, to: 55 },
+    { label: 'Encrypting …',                 from: 56, to: 85 },
+    { label: 'Evaluating results …',         from: 86, to: 95 },
+  ];
+
+  const { show, setShow, progress, phase, start, stop } = usePhasedProgress(PHASES);
+  const abortRef = useRef(null);
 
   // Revoke object URLs to avoid memory leaks
   useEffect(() => {
@@ -97,34 +120,165 @@ const Encrypt = () => {
   };
 
 
+//   const confirmEncrypt = async () => {
+//     setIsLoading(true);
+//     setError('');
+// 
+//     try {
+//       const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
+//       const response = await encryptImage(
+//         selectedFile,
+//         encryptionKey,
+//         selectedAlgorithm,
+//         // selectedAlgorithm === 'fodhnn' ? (nonce || undefined) : undefined
+//         needsNonce ? (nonce || undefined) : undefined
+//       );
+//       setResult(response);
+//       setShowAlgoModal(false);
+//       // Navigate to results page with the data
+//       navigate('/results', {
+//         state: {
+//           type: 'encrypt',
+//           data: response
+//         }
+//       });
+//     } catch (err) {
+//       setError(err.message);
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+// const confirmEncrypt = async () => {
+//   setShowAlgoModal(false);
+//   setShowProgress(true);
+//   setPhase('analysing image…');
+//   setProgress(5);
+// 
+//   const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
+// 
+//   // optional: smooth fake progress while waiting (caps at 95%)
+//   const tick = setInterval(() => {
+//     setProgress(p => (p < 95 ? p + (p < 80 ? 1 : 0.5) : p));
+//   }, 200);
+// 
+//   const ac = new AbortController();
+//   abortRef.current = ac;
+// 
+//   try {
+//     const res = await encryptImage(
+//       selectedFile,
+//       encryptionKey,
+//       selectedAlgorithm,
+//       needsNonce ? (nonce || undefined) : undefined,
+//       { signal: ac.signal } // ok to omit if your API helper doesn’t use it
+//     );
+// 
+//     clearInterval(tick);
+//     setPhase('finalising…');
+//     setProgress(100);
+// 
+//     // small pause for UX polish
+//     setTimeout(() => {
+//       setShowProgress(false);
+//       navigate('/results', { state: { type: 'encrypt', data: res } });
+//     }, 250);
+//   } catch (e) {
+//     clearInterval(tick);
+//     setShowProgress(false);
+//     if (e.name !== 'AbortError') setError(e.message || 'Encryption failed.');
+//   }
+// };
+
+//   const confirmEncrypt = async () => {
+//     setShowAlgoModal(false);
+//     setShowProgress(true);
+//     setError('');
+// 
+//     const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
+// 
+//     // kick off fake phased progress while backend works
+//     const ac = new AbortController();
+//     abortRef.current = ac;
+//     const stop = startPhasedProgress(ac.signal);
+// 
+//     try {
+//       const res = await encryptImage(
+//         selectedFile,
+//         encryptionKey,
+//         selectedAlgorithm,
+//         needsNonce ? (nonce || undefined) : undefined,
+//         { signal: ac.signal } // safe to omit if your helper doesn’t support it
+//       );
+// 
+//       // finish bar nicely, then navigate
+//       stop();
+//       setPhase('Finalising …');
+//       setProgress(100);
+// 
+//       setTimeout(() => {
+//         setShowProgress(false);
+//         navigate('/results', { state: { type: 'encrypt', data: res } });
+//       }, 250);
+//     } catch (e) {
+//       stop();
+//       setShowProgress(false);
+//       if (e.name !== 'AbortError') setError(e.message || 'Encryption failed.');
+//     }
+//   };
   const confirmEncrypt = async () => {
     setIsLoading(true);
+    setShowAlgoModal(false);
     setError('');
 
+    const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
+
+    const ac = new AbortController();
+    abortRef.current = ac;
+
+    start(ac.signal); // start phased progress
+
     try {
-      const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
-      const response = await encryptImage(
-        selectedFile,
-        encryptionKey,
-        selectedAlgorithm,
-        // selectedAlgorithm === 'fodhnn' ? (nonce || undefined) : undefined
-        needsNonce ? (nonce || undefined) : undefined
+      const res = await encryptImage(
+        selectedFile, encryptionKey, selectedAlgorithm,
+        needsNonce ? (nonce || undefined) : undefined,
+        { signal: ac.signal } // if supported
       );
-      setResult(response);
-      setShowAlgoModal(false);
-      // Navigate to results page with the data
-      navigate('/results', {
-        state: {
-          type: 'encrypt',
-          data: response
-        }
-      });
-    } catch (err) {
-      setError(err.message);
+
+      stop();
+      setShow(false);
+      navigate('/results', { state: { type: 'encrypt', data: res } });
+    } catch (e) {
+      stop();
+      setShow(false);
+      if (e.name !== 'AbortError') setError(e.message || 'Encryption failed.');
     } finally {
       setIsLoading(false);
     }
   };
+
+
+
+
+//   const confirmEncrypt = async () => {
+//   // close modal and go to /results immediately
+//   const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
+// 
+//   setShowAlgoModal(false);
+// 
+//   navigate('/results', {
+//     state: {
+//       type: 'encrypt',
+//       params: {
+//         file: selectedFile,
+//         key: encryptionKey,
+//         algorithm: selectedAlgorithm,
+//         nonce: needsNonce ? (nonce || undefined) : undefined,
+//       },
+//     },
+//   });
+// };
+
 
   const handleDownload = async (imageData, filename) => {
     try {
@@ -158,6 +312,31 @@ const Encrypt = () => {
   const [flipped, setFlipped] = useState({});
   const setFlip = (val, on) => setFlipped(f => ({ ...f, [val]: on ?? !f[val] }));
 
+
+//   function startPhasedProgress(signal) {
+//     let i = 0;
+//     let p = PHASES[0].from;
+//     setPhase(PHASES[0].label);
+//     setProgress(p);
+// 
+//     const id = setInterval(() => {
+//       if (signal?.aborted) return clearInterval(id);
+// 
+//       const step = PHASES[i];
+//       // speed tapers slightly as we advance
+//       const bump = i < 2 ? 1.2 : 0.6;
+//       p = Math.min(step.to, p + bump + Math.random() * 0.8);
+//       setProgress(p);
+// 
+//       if (p >= step.to && i < PHASES.length - 1) {
+//         i += 1;
+//         setPhase(PHASES[i].label);
+//         p = Math.max(p, PHASES[i].from);
+//       }
+//     }, 180);
+// 
+//     return () => clearInterval(id); // stop function
+//   }
 
 
 
@@ -314,116 +493,48 @@ const Encrypt = () => {
         </div>
       )}
 
-      {/* modal */}
-      {showAlgoModal && (
-        <div className="modal-backdrop">
-          <div className="modal">
-            <div className="modal-header">
-              <h3 className="modal-title">🔒 Before Encrypting</h3>
-            </div>
-            <div className="modal-body">
-              <div className="form-group">
-                <label className="form-label" style={{alignContent: 'center'}}>Select a method you prefer. </label>
-                <p style={{fontStyle:'italic', fontSize: '0.8rem'}}> Hover over each algorithm to see which one fits you best! </p>
-                <br></br>
-                
-                {/* <div className="btn-choice-group">
-                  {algoOptions.map(opt => {
-                    const active = selectedAlgorithm === opt.value;
-                    return (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        className={`btn btn-choice ${active ? 'active' : ''}`}
-                        style={{ flex: 1, height: '100px', fontSize: '0.9rem' }}
-                        onClick={() => setSelectedAlgorithm(opt.value)}
-                        aria-pressed={active}
-                      >
-                        {opt.label}
-                      </button>
-                    );
-                  })}
-                </div> */}
+      {/* <SelectAlgorithmModal
+        open={showAlgoModal}
+        onClose={() => setShowAlgoModal(false)}
+        onConfirm={confirmEncrypt}
+        options={algoOptions}
+        selected={selectedAlgorithm}
+        onSelect={(val) => { setSelectedAlgorithm(val); setNonce(''); }}
+        showNonce={needsNonce}
+        nonce={nonce}
+        onChangeNonce={setNonce}
+        confirming={isLoading}
+        flipped={flipped}
+        setFlip={setFlip}
+      /> */}
 
-                <div className="algo-grid">
-                  {algoOptions.map(opt => {
-                    const active = selectedAlgorithm === opt.value;
-                    const isFlipped = !!flipped[opt.value];
-                    return (
-                      <div
-                        key={opt.value}
-                        className={`algo-card ${active ? 'active' : ''} ${isFlipped ? 'flipped' : ''}`}
-                        onClick={() => setSelectedAlgorithm(opt.value)}                 // click selects
-                        onMouseEnter={() => setFlip(opt.value, true)}                   // hover flips
-                        onMouseLeave={() => setFlip(opt.value, false)}
-                        tabIndex={0}
-                        onFocus={() => setFlip(opt.value, true)}                        // keyboard focus flips
-                        onBlur={() => setFlip(opt.value, false)}
-                        role="button"
-                        aria-pressed={active}
-                        aria-label={`Choose ${opt.label}`}
-                      >
-                        <div className="algo-card-inner">
-                          <div className="algo-face front">
-                            <div className="algo-title">{opt.label}</div>
-                            {/* <div className="algo-hint">Click to select • Tap ⓘ for info</div> */}
-                          </div>
+      <SelectAlgorithmModal
+        open={showAlgoModal}
+        onClose={() => setShowAlgoModal(false)}
+        onConfirm={confirmEncrypt}
+        options={algoOptions}                 // ✅ array
+        selected={selectedAlgorithm}          // ✅ string
+        onSelect={(val) => { setSelectedAlgorithm(val); setNonce(''); }}
+        showNonce={needsNonce}                // ✅ boolean
+        nonce={nonce}                         // ✅ string
+        onChangeNonce={setNonce}              // ✅ function
+        confirming={isLoading}                // ✅ (optional, see below)
+        flipped={flipped}
+        setFlip={setFlip}
+      />
 
-                          <div className="algo-face back">
-                            <div className="algo-back-title" style={{fontWeight:"bold"}}>{opt.label}</div>
-                            <p className="algo-desc">{opt.desc}</p>
-                            <div className="algo-actions">
-                              {/* <button
-                                type="button"
-                                className="btn btn-primary btn-sm"
-                                onClick={(e) => { e.stopPropagation(); setSelectedAlgorithm(opt.value); }}
-                              >
-                                Choose
-                              </button> */}
-                            </div>
-                          </div>
-                        </div>
 
-                        {/* Works on touch: tap ⓘ to flip without selecting */}
-                        <button
-                          type="button"
-                          className="info-badge"
-                          aria-label={`About ${opt.label}`}
-                          onClick={(e) => { e.stopPropagation(); setFlip(opt.value); }}
-                        >
-                          ⓘ
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-              {/* {selectedAlgorithm === 'fodhnn' && ( */}
-              {needsNonce && (
-                <div className="form-group">
-                  <label className="form-label">Nonce (optional)</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={nonce}
-                    onChange={(e) => setNonce(e.target.value)}
-                    placeholder="If empty, a nonce will be generated by the server"
-                  />
-                  <small style={{ color: '#666', marginTop: '0.5rem', display: 'block' }}>
-                    Save the nonce with your key to decrypt later.
-                  </small>
-                </div>
-              )}
-            </div>
-            <div className="modal-footer d-flex gap-2 justify-end">
-              <button className="btn btn-secondary" onClick={() => setShowAlgoModal(false)}>Cancel</button>
-              <button className="btn btn-primary" onClick={confirmEncrypt} disabled={isLoading}>
-                {isLoading ? 'Encrypting...' : 'Confirm'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ProgressModal
+        open={show}
+        progress={progress}
+        phase={phase}
+        onCancel={() => {
+          abortRef.current?.abort();
+          stop();
+          setShow(false);
+        }}
+      /> 
+
     </div>
   );
 };
