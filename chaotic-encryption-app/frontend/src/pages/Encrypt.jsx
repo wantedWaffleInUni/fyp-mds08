@@ -77,7 +77,7 @@ const Encrypt = () => {
     setError('');
 
     try {
-      const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
+      const needsNonce = ['fodhnn', '2dlasm','acm_2dscl'].includes(selectedAlgorithm);
       const response = await encryptImage(
         selectedFile,
         encryptionKey,
@@ -114,7 +114,7 @@ const Encrypt = () => {
     }
   };
 
-  const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
+  const needsNonce = ['fodhnn', '2dlasm','acm_2dscl'].includes(selectedAlgorithm);
 
   return (
     <div>
@@ -263,6 +263,18 @@ const Encrypt = () => {
                     /> 
                     <span>2DLASM (2D Logistic Adjusted Sine Map)</span> 
                   </label>
+
+                  <label className="radio">
+                    <input
+                      type="radio"
+                      name="algorithm"
+                      value="acm_2dscl"
+                      checked={selectedAlgorithm === 'acm_2dscl'}
+                      onChange={() => setSelectedAlgorithm('acm_2dscl')}
+                    />
+                    <span>ACM_2DSCL (Adaptive Chaotic Map 2D Sine Cosine Layer)</span>
+                  </label>
+
                 </div>
               </div>
               {/* {selectedAlgorithm === 'fodhnn' && ( */}
