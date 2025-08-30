@@ -357,3 +357,12 @@ settings.local.json
 
 # Startup scripts
 start.js
+
+# Venvs
+.venv/
+venv/
+chaotic-encryption-app/.venv/
+
+# Python caches
+**/__pycache__/
+*.pyc

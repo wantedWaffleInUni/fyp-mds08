@@ -30,7 +30,7 @@ export const encryptImage = async (imageFile, key = 'default_key_123', algorithm
       key: key,
       algorithm: (algorithm || 'chaos').toLowerCase(),
     };
-    if (payload.algorithm === 'fodhnn' || '2dlasm' && nonce) {
+    if (payload.algorithm === 'fodhnn' || '2dlasm' || 'acm_2dscl' && nonce) { 
       payload.nonce = nonce;
     }
     const response = await api.post('/encrypt', payload);
@@ -51,7 +51,7 @@ export const decryptImage = async (imageFile, key = 'default_key_123', algorithm
       key: key,
       algorithm: (algorithm || 'chaos').toLowerCase(),
     };
-    if (payload.algorithm === 'fodhnn' || '2dlasm') {
+    if (payload.algorithm === 'fodhnn' || '2dlasm' || 'acm_2dscl') {
       if (!nonce) {
         throw new Error('Nonce is required for FODHNN decryption');
       }

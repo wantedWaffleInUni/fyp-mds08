@@ -12,6 +12,7 @@ from werkzeug.utils import secure_filename
 from encryption.chaos_encryptor import ChaosEncryptor
 from encryption.fodhnn_encryptor import FODHNNEncryptor
 from encryption.another_2d import LASMEncryptorFB
+from encryption.acm_2dscl import HybridEncryptorFB
 from utils import calculate_entropy, calculate_npcr, calculate_uaci
 
 app = Flask(__name__)
@@ -115,6 +116,12 @@ def encrypt_image():
                 nonce = uuid.uuid4().hex
             encryptor = LASMEncryptorFB()
             encrypted_img = encryptor.encrypt_image(original_img, key, nonce)
+        
+        elif algorithm == 'acm_2dscl':
+            if not nonce:
+                nonce = uuid.uuid4().hex
+            encryptor = HybridEncryptorFB()
+            encrypted_img = encryptor.encrypt_image(original_img, key, nonce)
 
 
         else:
@@ -144,7 +151,7 @@ def encrypt_image():
             'encrypted_image': encrypted_b64,
             'encrypted_filename': encrypted_filename,
             'algorithm': algorithm,
-            'nonce': nonce if algorithm == 'fodhnn' or algorithm == '2dlasm' else None,
+            'nonce': nonce if algorithm == 'fodhnn' or algorithm == '2dlasm' or algorithm == 'acm_2dscl' else None, 
             'metrics': {
                 'entropy_original': entropy_original,
                 'entropy_encrypted': entropy_encrypted,
@@ -196,6 +203,12 @@ def decrypt_image():
             if not nonce:
                 return jsonify({'error': 'Nonce is required for 2DLASM decryption'}), 400
             encryptor = LASMEncryptorFB()
+            decrypted_img = encryptor.decrypt_image(encrypted_img, key, nonce)
+
+        elif algorithm == 'acm_2dscl':
+            if not nonce:
+                return jsonify({'error': 'Nonce is required for ACM_2DSCL decryption'}), 400
+            encryptor = HybridEncryptorFB()
             decrypted_img = encryptor.decrypt_image(encrypted_img, key, nonce)
 
         else:
