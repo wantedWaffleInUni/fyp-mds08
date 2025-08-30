@@ -20,7 +20,7 @@ const StatsDisplay = ({ metrics }) => {
         return value > 99.5 ? '🟢 Excellent' : value > 99.0 ? '🟡 Good' : '🔴 Poor';
       case 'uaci':
         return value > 33.0 && value < 34.0 ? '🟢 Excellent' : 
-               value > 32.0 && value < 35.0 ? '🟡 Good' : '🔴 Poor';
+               value > 32.0 && value < 36.0 ? '🟡 Good' : '🔴 Poor';
       default:
         return '';
     }

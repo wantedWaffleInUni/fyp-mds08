@@ -119,7 +119,7 @@ const ImageUploader = ({
               <span>
                 📤 Drag & drop an image here, or click to select
                 <br />
-                <small>Supports: PNG, JPG, JPEG, GIF, BMP (Max 16MB)</small>
+                <small>Supports: PNG, JPG, JPEG, GIF, BMP, etc. (Max 16MB)</small>
               </span>
             )}
           </div>
