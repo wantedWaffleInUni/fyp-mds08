@@ -1,8 +1,0 @@
-{
-  "images_dir": "C:\\Users\\Yanly\\Monash\\FYP\\fyp-mds08\\chaotic-encryption-app\\backend\\test_images",
-  "recursive": false,
-  "memory_window": 128,
-  "max_pixels": 262144,
-  "key_len": 16,
-  "nonce": "img-001"
-}
