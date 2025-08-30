@@ -3,5 +3,6 @@
 
 from .chaos_encryptor import ChaosEncryptor
 from .fodhnn_encryptor import FODHNNEncryptor
+from .acm_2dscl import HybridEncryptorFB
 
-__all__ = ['ChaosEncryptor', 'FODHNNEncryptor']
+__all__ = ['ChaosEncryptor', 'FODHNNEncryptor', 'HybridEncryptorFB']
