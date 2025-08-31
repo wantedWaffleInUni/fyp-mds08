@@ -548,3 +548,33 @@ body {
   background: #3b82f6; /* or your primary */
   transition: width .25s ease;
 }
+
+.form-check-input:checked {
+  border-color: #7c3aed;
+  background-color: #7c3aed;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.form-check-input:focus {
+  outline: 2px solid #7c3aed55;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px #7c3aed33;
+}
+
+.form-check-input {
+  width: 16px;
+  height: 16px;
+  margin: 10px 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: white;
+  transition: all .2s;
+  cursor: pointer;
+  padding-top: 12%;
+}
+
+.form-check-label {
+  padding-inline-start: 1%;
+  font-size: 14px;
+}

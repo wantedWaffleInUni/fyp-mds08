@@ -48,6 +48,7 @@ export default function SelectAlgorithmModal(props) {
           <p style={{ fontStyle:'italic', fontSize:'0.8rem' }}>
             Hover over each algorithm to see which one fits you best!
           </p>
+          <br></br>
 
           <div className="algo-grid">
             {list.map(opt => {

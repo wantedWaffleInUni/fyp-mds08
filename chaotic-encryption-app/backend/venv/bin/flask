@@ -1,4 +1,4 @@
-#!/Users/yanly/Monash/FYP/fyp-mds08/chaotic-encryption-app/backend/venv/bin/python
+#!/Users/hueyyan/Documents/FIT3164/fyp-mds08/chaotic-encryption-app/backend/venv/bin/python
 import sys
 from flask.cli import main
 if __name__ == '__main__':
