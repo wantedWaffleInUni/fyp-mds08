@@ -14,7 +14,7 @@ const Decrypt = () => {
   const [nonce, setNonce] = useState('');
   const navigate = useNavigate();
 
-  const needsNonce = ['fodhnn', '2dlasm', 'acm_2dscl'].includes(algorithm);
+  const needsNonce = ['fodhnn', '2dlasm', 'acm_2dscl','bulban'].includes(algorithm);
 
   const handleImageUpload = (file) => {
     setSelectedFile(file);
@@ -156,7 +156,17 @@ const Decrypt = () => {
               />
               <span>ACM_2DSCL</span>
             </label>
-            
+
+            <label className="radio">
+              <input
+                type="radio"
+                name="algorithm"
+                value="bulban"
+                checked={algorithm === 'bulban'}
+                onChange={() => setAlgorithm('bulban')}
+              />
+              <span>Bulban</span>
+            </label>
           </div>
         </div>
 
