@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from flask.json.provider import DefaultJSONProvider
+# from flask.json.provider import DefaultJSONProvider
 import os
 import uuid
 import cv2
@@ -32,18 +32,18 @@ app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 # Ensure upload folder exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-from flask.json.provider import DefaultJSONProvider
-import numpy as np
+# from flask.json.provider import DefaultJSONProvider
+# import numpy as np
 
-class NumpyJSONProvider(DefaultJSONProvider):
-    def default(self, o):
-        if isinstance(o, (np.floating,)):
-            return float(o)
-        if isinstance(o, (np.integer,)):
-            return int(o)
-        if isinstance(o, np.ndarray):
-            return o.tolist()
-        return super().default(o)
+# class NumpyJSONProvider(DefaultJSONProvider):
+#     def default(self, o):
+#         if isinstance(o, (np.floating,)):
+#             return float(o)
+#         if isinstance(o, (np.integer,)):
+#             return int(o)
+#         if isinstance(o, np.ndarray):
+#             return o.tolist()
+#         return super().default(o)
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -90,7 +90,6 @@ def encrypt_image():
         image_data = data['image']
         key = data.get('key', 'default_key_123')
         algorithm = str(data.get('algorithm', 'chaos')).lower()
-        nonce = data.get('nonce')
         
         # Generate unique filename
         original_filename = f"original_{uuid.uuid4()}.png"
@@ -108,32 +107,23 @@ def encrypt_image():
         
         # Initialize encryptor and encrypt
         if algorithm == 'fodhnn':
-            # Generate a nonce if not provided
-            if not nonce:
-                nonce = uuid.uuid4().hex
             encryptor = FODHNNEncryptor()
-            encrypted_img = encryptor.encrypt_image(original_img, key, nonce)
+            encrypted_img = encryptor.encrypt_image(original_img, key)
 
         elif algorithm == '2dlasm':
-            if not nonce:
-                nonce = uuid.uuid4().hex
             encryptor = LASMEncryptorFB()
-            encrypted_img = encryptor.encrypt_image(original_img, key, nonce)
+            encrypted_img = encryptor.encrypt_image(original_img, key)
         
         elif algorithm == 'acm_2dscl':
-            if not nonce:
-                nonce = uuid.uuid4().hex
             encryptor = HybridEncryptorFB()
-            encrypted_img = encryptor.encrypt_image(original_img, key, nonce)
+            encrypted_img = encryptor.encrypt_image(original_img, key)
         
         elif algorithm == 'bulban':
-            if not nonce:
-                nonce = uuid.uuid4().hex
             # Convert to grayscale if image is colored
             if original_img.ndim == 3:
                 original_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
             encryptor = BulbanEncryptor()
-            encrypted_img = encryptor.encrypt_image(original_img, key, nonce)
+            encrypted_img = encryptor.encrypt_image(original_img, key)
 
 
         else:
@@ -163,12 +153,11 @@ def encrypt_image():
             'encrypted_image': encrypted_b64,
             'encrypted_filename': encrypted_filename,
             'algorithm': algorithm,
-            'nonce': nonce if algorithm == 'fodhnn' or algorithm == '2dlasm' or algorithm == 'acm_2dscl' else None, 
             'metrics': {
-                'entropy_original': entropy_original,
-                'entropy_encrypted': entropy_encrypted,
-                'npcr': npcr_value,
-                'uaci': uaci_value
+                'entropy_original': float(entropy_original),
+                'entropy_encrypted': float(entropy_encrypted),
+                'npcr': float(npcr_value),
+                'uaci': float(uaci_value)
             }
         })
         
@@ -188,7 +177,6 @@ def decrypt_image():
         image_data = data['image']
         key = data.get('key', 'default_key_123')
         algorithm = str(data.get('algorithm', 'chaos')).lower()
-        nonce = data.get('nonce')
         
         # Generate unique filename
         encrypted_filename = f"encrypted_{uuid.uuid4()}.png"
@@ -206,30 +194,22 @@ def decrypt_image():
         
         # Initialize encryptor and decrypt
         if algorithm == 'fodhnn':
-            if not nonce:
-                return jsonify({'error': 'Nonce is required for FODHNN decryption'}), 400
             encryptor = FODHNNEncryptor()
-            decrypted_img = encryptor.decrypt_image(encrypted_img, key, nonce)
+            decrypted_img = encryptor.decrypt_image(encrypted_img, key)
 
         elif algorithm == '2dlasm':
-            if not nonce:
-                return jsonify({'error': 'Nonce is required for 2DLASM decryption'}), 400
             encryptor = LASMEncryptorFB()
-            decrypted_img = encryptor.decrypt_image(encrypted_img, key, nonce)
+            decrypted_img = encryptor.decrypt_image(encrypted_img, key)
 
         elif algorithm == 'acm_2dscl':
-            if not nonce:
-                return jsonify({'error': 'Nonce is required for ACM_2DSCL decryption'}), 400
             encryptor = HybridEncryptorFB()
-            decrypted_img = encryptor.decrypt_image(encrypted_img, key, nonce)
+            decrypted_img = encryptor.decrypt_image(encrypted_img, key)
 
         elif algorithm == 'bulban':
-            if not nonce:
-                return jsonify({'error': 'Nonce is required for Bulban decryption'}), 400
             if encrypted_img.ndim == 3:
                 encrypted_img = cv2.cvtColor(encrypted_img, cv2.COLOR_BGR2GRAY)
             encryptor = BulbanEncryptor()
-            decrypted_img = encryptor.decrypt_image(encrypted_img, key, nonce)
+            decrypted_img = encryptor.decrypt_image(encrypted_img, key)
 
         else:
             encryptor = ChaosEncryptor()
@@ -283,5 +263,4 @@ def index():
     })
 
 if __name__ == '__main__':
-    app.json = NumpyJSONProvider(app)
     app.run(debug=True, host='0.0.0.0', port=5001)

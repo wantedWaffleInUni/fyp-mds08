@@ -55,7 +55,7 @@ const Results = () => {
             }
           </p>
           {operationType === 'encrypt' && resultData?.algorithm && (
-            <p><strong>Algorithm:</strong> {resultData.algorithm.toUpperCase()} {resultData.algorithm === 'fodhnn' && resultData.nonce ? `(nonce: ${resultData.nonce})` : ''}</p>
+            <p><strong>Algorithm:</strong> {resultData.algorithm.toUpperCase()}</p>
           )}
         </div>
       </div>
