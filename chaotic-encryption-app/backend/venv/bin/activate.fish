@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV /Users/yanly/Monash/FYP/fyp-mds08/chaotic-encryption-app/backend/venv
+set -gx VIRTUAL_ENV /Users/hueyyan/Documents/FIT3164/fyp-mds08/chaotic-encryption-app/backend/venv
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/"bin $PATH

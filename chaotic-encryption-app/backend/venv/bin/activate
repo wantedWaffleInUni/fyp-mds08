@@ -41,12 +41,12 @@ case "$(uname)" in
     CYGWIN*|MSYS*|MINGW*)
         # transform D:\path\to\venv to /d/path/to/venv on MSYS and MINGW
         # and to /cygdrive/d/path/to/venv on Cygwin
-        VIRTUAL_ENV=$(cygpath /Users/yanly/Monash/FYP/fyp-mds08/chaotic-encryption-app/backend/venv)
+        VIRTUAL_ENV=$(cygpath /Users/hueyyan/Documents/FIT3164/fyp-mds08/chaotic-encryption-app/backend/venv)
         export VIRTUAL_ENV
         ;;
     *)
         # use the path as-is
-        export VIRTUAL_ENV=/Users/yanly/Monash/FYP/fyp-mds08/chaotic-encryption-app/backend/venv
+        export VIRTUAL_ENV=/Users/hueyyan/Documents/FIT3164/fyp-mds08/chaotic-encryption-app/backend/venv
         ;;
 esac
 

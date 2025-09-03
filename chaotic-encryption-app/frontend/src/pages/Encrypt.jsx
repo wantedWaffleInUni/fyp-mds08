@@ -22,6 +22,7 @@ const Encrypt = () => {
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
   const navigate = useNavigate();
+  const [autoGenerateKey, setAutoGenerateKey] = useState(false);
 
   // progress modal state
   // const [showProgress, setShowProgress] = useState(false);
@@ -120,112 +121,6 @@ const Encrypt = () => {
   };
 
 
-  //   const confirmEncrypt = async () => {
-  //     setIsLoading(true);
-  //     setError('');
-  // 
-  //     try {
-  //       const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
-  //       const response = await encryptImage(
-  //         selectedFile,
-  //         encryptionKey,
-  //         selectedAlgorithm,
-  //         // selectedAlgorithm === 'fodhnn' ? (nonce || undefined) : undefined
-  //         needsNonce ? (nonce || undefined) : undefined
-  //       );
-  //       setResult(response);
-  //       setShowAlgoModal(false);
-  //       // Navigate to results page with the data
-  //       navigate('/results', {
-  //         state: {
-  //           type: 'encrypt',
-  //           data: response
-  //         }
-  //       });
-  //     } catch (err) {
-  //       setError(err.message);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-
-  // const confirmEncrypt = async () => {
-  //   setShowAlgoModal(false);
-  //   setShowProgress(true);
-  //   setPhase('analysing image…');
-  //   setProgress(5);
-  // 
-  //   const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
-  // 
-  //   // optional: smooth fake progress while waiting (caps at 95%)
-  //   const tick = setInterval(() => {
-  //     setProgress(p => (p < 95 ? p + (p < 80 ? 1 : 0.5) : p));
-  //   }, 200);
-  // 
-  //   const ac = new AbortController();
-  //   abortRef.current = ac;
-  // 
-  //   try {
-  //     const res = await encryptImage(
-  //       selectedFile,
-  //       encryptionKey,
-  //       selectedAlgorithm,
-  //       needsNonce ? (nonce || undefined) : undefined,
-  //       { signal: ac.signal } // ok to omit if your API helper doesn’t use it
-  //     );
-  // 
-  //     clearInterval(tick);
-  //     setPhase('finalising…');
-  //     setProgress(100);
-  // 
-  //     // small pause for UX polish
-  //     setTimeout(() => {
-  //       setShowProgress(false);
-  //       navigate('/results', { state: { type: 'encrypt', data: res } });
-  //     }, 250);
-  //   } catch (e) {
-  //     clearInterval(tick);
-  //     setShowProgress(false);
-  //     if (e.name !== 'AbortError') setError(e.message || 'Encryption failed.');
-  //   }
-  // };
-
-  //   const confirmEncrypt = async () => {
-  //     setShowAlgoModal(false);
-  //     setShowProgress(true);
-  //     setError('');
-  // 
-  //     const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
-  // 
-  //     // kick off fake phased progress while backend works
-  //     const ac = new AbortController();
-  //     abortRef.current = ac;
-  //     const stop = startPhasedProgress(ac.signal);
-  // 
-  //     try {
-  //       const res = await encryptImage(
-  //         selectedFile,
-  //         encryptionKey,
-  //         selectedAlgorithm,
-  //         needsNonce ? (nonce || undefined) : undefined,
-  //         { signal: ac.signal } // safe to omit if your helper doesn’t support it
-  //       );
-  // 
-  //       // finish bar nicely, then navigate
-  //       stop();
-  //       setPhase('Finalising …');
-  //       setProgress(100);
-  // 
-  //       setTimeout(() => {
-  //         setShowProgress(false);
-  //         navigate('/results', { state: { type: 'encrypt', data: res } });
-  //       }, 250);
-  //     } catch (e) {
-  //       stop();
-  //       setShowProgress(false);
-  //       if (e.name !== 'AbortError') setError(e.message || 'Encryption failed.');
-  //     }
-  //   };
   const confirmEncrypt = async () => {
     setIsLoading(true);
     setShowAlgoModal(false);
@@ -316,31 +211,24 @@ const Encrypt = () => {
   const [flipped, setFlipped] = useState({});
   const setFlip = (val, on) => setFlipped(f => ({ ...f, [val]: on ?? !f[val] }));
 
+  // tiny helper (uses native crypto.randomUUID when available)
+  const genUUID = () => {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+    // RFC4122 v4 fallback
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  };
 
-  //   function startPhasedProgress(signal) {
-  //     let i = 0;
-  //     let p = PHASES[0].from;
-  //     setPhase(PHASES[0].label);
-  //     setProgress(p);
-  // 
-  //     const id = setInterval(() => {
-  //       if (signal?.aborted) return clearInterval(id);
-  // 
-  //       const step = PHASES[i];
-  //       // speed tapers slightly as we advance
-  //       const bump = i < 2 ? 1.2 : 0.6;
-  //       p = Math.min(step.to, p + bump + Math.random() * 0.8);
-  //       setProgress(p);
-  // 
-  //       if (p >= step.to && i < PHASES.length - 1) {
-  //         i += 1;
-  //         setPhase(PHASES[i].label);
-  //         p = Math.max(p, PHASES[i].from);
-  //       }
-  //     }, 180);
-  // 
-  //     return () => clearInterval(id); // stop function
-  //   }
+  // generate once when toggled on
+  useEffect(() => {
+    if (autoGenerateKey) {
+      setEncryptionKey(genUUID());
+    }
+    // don’t clear when toggled off — keep whatever is in the field
+  }, [autoGenerateKey]);
 
 
 
@@ -371,48 +259,47 @@ const Encrypt = () => {
 
         <div className="form-group">
           <label className="form-label"><strong>Enter Encryption Key</strong></label>
-          {/* <input
-            type="text"
-            className="form-control"
-            value={encryptionKey}
-            onChange={(e) => setEncryptionKey(e.target.value)}
-            placeholder="Enter encryption key or generate a random one"
-          />
-  
-          {/* radio for enabling auto generation of strong key */}
-          {/* <div className="form-check mt-2">
-            <input
-              type="checkbox"
-              className="form-check-input"
-              id="autoGenerateKey"
-              checked={autoGenerateKey}
-              onChange={(e) => setAutoGenerateKey(e.target.checked)}
-            />
-            <label className="form-check-label" htmlFor="autoGenerateKey">
-              Auto-generate a strong key
-            </label>
-          </div> */}
           <div className="input-with-actions">
             <input
               ref={keyInputRef}
               type="text"
               className="form-control"
               value={encryptionKey}
-              onChange={(e) => setEncryptionKey(e.target.value)}
+              onChange={(e) => !autoGenerateKey && setEncryptionKey(e.target.value)}
               placeholder="Enter encryption key or generate a random one"
               style={{ paddingRight: '116px' }}  // room for the two buttons
+              readOnly={autoGenerateKey}
+              aria-readonly={autoGenerateKey}
             />
 
             <div className="input-actions">
-              <button
-                type="button"
-                className="icon-btn"
-                onClick={handlePasteKey}
-                title="Paste from clipboard"
-                aria-label="Paste from clipboard"
-              >
-                Paste
-              </button>
+              {/* Show Paste only when manual mode */}
+              {!autoGenerateKey && (
+                <button
+                  type="button"
+                  className="icon-btn"
+                  onClick={handlePasteKey}
+                  title="Paste from clipboard"
+                  aria-label="Paste from clipboard"
+                >
+                  Paste
+                </button>
+              )}
+
+              {/* In auto mode, allow regenerate */}
+              {autoGenerateKey &&(
+                <button
+                  type="button"
+                  className="icon-btn"
+                  onClick={() => setEncryptionKey(genUUID())}
+                  title="Regenerate key"
+                  aria-label="Regenerate key"
+                >
+                  Regenerate
+                </button>
+              )}
+
+              {/* Copy always available */}
               <button
                 type="button"
                 className="icon-btn"
@@ -425,6 +312,22 @@ const Encrypt = () => {
               </button>
             </div>
           </div>
+
+          {/* generate checkbox */}
+          {/* <div className="form-check mt-2"> */}
+          <input
+            type="checkbox"
+            id="auto-generate-key"
+            className="form-check-input"
+            checked={autoGenerateKey}
+            onChange={(e) => setAutoGenerateKey(e.target.checked)}
+            
+          />
+          <label htmlFor="auto-generate-key" className="form-check-label">
+            Generate a random key
+          </label>
+          {/* </div> */}
+
           <small style={{ color: '#666', marginTop: '0.5rem', display: 'block' }}>
             Tip: Use a strong, memorable key. The key is used to generate chaotic sequences, essential for decryption.
           </small>
