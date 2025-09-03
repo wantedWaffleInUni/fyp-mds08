@@ -84,7 +84,9 @@ class LASMKeyParams:
     x02: float; y02: float   # seeds for round 2 (diff)
 
 
-class LASMEncryptor:
+from .encryptor_interface import EncryptorInterface
+
+class LASMEncryptor(EncryptorInterface):
     """
     Deterministic (key + nonce) LASM-based image cipher:
       1) Row/col permutation from LASM S1 (key+nonce+shape).
@@ -100,6 +102,14 @@ class LASMEncryptor:
     def __init__(self, memory_window: int = 256, burn_in: int = 1024):
         self.memory_window = int(memory_window)
         self.burn_in = int(burn_in)
+        
+    def requires_nonce(self) -> bool:
+        """LASM encryptor requires a nonce."""
+        return True
+    
+    def get_algorithm_name(self) -> str:
+        """Get the name of the encryption algorithm."""
+        return '2dlasm'
 
     # ---------- key derivation ----------
     def _derive_params(self, key: str, nonce: str) -> LASMKeyParams:
@@ -197,13 +207,13 @@ class LASMEncryptor:
         return img
 
     # ---------- public API ----------
-    def encrypt_image(self, image_bgr_or_gray: np.ndarray, key: str, nonce: str) -> np.ndarray:
+    def encrypt_image(self, image_bgr_or_gray: np.ndarray, key: str, nonce: str = None) -> np.ndarray:
         """
         Encrypt a grayscale or BGR image with (key, nonce).
         Output has the same shape/dtype.
         """
-        if not key:
-            raise ValueError("key is required")
+        self.validate_image(image_bgr_or_gray)
+        self.validate_encryption_params(key, nonce)
         img = _as_uint8(image_bgr_or_gray)
         H, W = img.shape[:2]
 
@@ -223,12 +233,12 @@ class LASMEncryptor:
                 Cimg[:, :, c] = self._diffuse_2d_uint8(P[:, :, c], S2)
         return Cimg
 
-    def decrypt_image(self, cipher_bgr_or_gray: np.ndarray, key: str, nonce: str) -> np.ndarray:
+    def decrypt_image(self, cipher_bgr_or_gray: np.ndarray, key: str, nonce: str = None) -> np.ndarray:
         """
         Decrypt image encrypted with encrypt_image using the same (key, nonce).
         """
-        if not key:
-            raise ValueError("key is required")
+        self.validate_image(cipher_bgr_or_gray)
+        self.validate_encryption_params(key, nonce)
         Cimg = _as_uint8(cipher_bgr_or_gray)
         H, W = Cimg.shape[:2]
 

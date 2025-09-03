@@ -114,7 +114,9 @@ class FODHNN:
 # Keystream + image cipher (per-image nonce, invertible)
 # ---------------------------
 
-class FODHNNEncryptor:
+from .encryptor_interface import EncryptorInterface
+
+class FODHNNEncryptor(EncryptorInterface):
     """
     Deterministic (key + nonce) FODHNN-based image cipher:
       1) Row/col permutation from X,Y keystreams (key+nonce+shape).
@@ -125,6 +127,14 @@ class FODHNNEncryptor:
     def __init__(self, memory_window: int = 256, burn_in: int = 1024):
         self.memory_window = int(memory_window)
         self.burn_in = int(burn_in)
+        
+    def requires_nonce(self) -> bool:
+        """FODHNN encryptor requires a nonce."""
+        return True
+    
+    def get_algorithm_name(self) -> str:
+        """Get the name of the encryption algorithm."""
+        return 'fodhnn'
 
     # --- parameter derivation ---
 
@@ -222,13 +232,12 @@ class FODHNNEncryptor:
         if img.size == 0:
             raise ValueError("image is empty")
 
-    def encrypt_image(self, image_bgr_or_gray: np.ndarray, key: str, nonce: str) -> np.ndarray:
+    def encrypt_image(self, image_bgr_or_gray: np.ndarray, key: str, nonce: str = None) -> np.ndarray:
         """
         Encrypt BGR or grayscale image with (key, nonce).
         """
-        self._validate_image(image_bgr_or_gray)
-        if not key:
-            raise ValueError("key is required")
+        self.validate_image(image_bgr_or_gray)
+        self.validate_encryption_params(key, nonce)
 
         img = _as_uint8(image_bgr_or_gray)
         H, W = img.shape[:2]
@@ -269,13 +278,12 @@ class FODHNNEncryptor:
         out[:, 1:] = c16[:, 1:] - c16[:, :-1] - ks[1:]
         return (out & 0xFF).astype(np.uint8)
 
-    def decrypt_image(self, cipher_bgr_or_gray: np.ndarray, key: str, nonce: str) -> np.ndarray:
+    def decrypt_image(self, cipher_bgr_or_gray: np.ndarray, key: str, nonce: str = None) -> np.ndarray:
         """
         Decrypt BGR or grayscale image with (key, nonce).
         """
-        self._validate_image(cipher_bgr_or_gray)
-        if not key:
-            raise ValueError("key is required")
+        self.validate_image(cipher_bgr_or_gray)
+        self.validate_encryption_params(key, nonce)
 
         Cimg = _as_uint8(cipher_bgr_or_gray)
         H, W = Cimg.shape[:2]

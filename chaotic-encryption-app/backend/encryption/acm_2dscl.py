@@ -73,7 +73,9 @@ class HybridKey:
     z0: float
 
 
-class HybridEncryptorFB:
+from .encryptor_interface import EncryptorInterface
+
+class HybridEncryptorFB(EncryptorInterface):
     """
     Deterministic (key + nonce) hybrid chaotic image cipher with:
     1) Arnold Cat Map scrambling (for squares) or keyed row/col permutation (for rectangles)
@@ -85,6 +87,14 @@ class HybridEncryptorFB:
         self.security_threshold = security_threshold  # kept for parity; not used now
         self.burn_in = int(burn_in)
         self.precision = 1e-16
+        
+    def requires_nonce(self) -> bool:
+        """HybridEncryptorFB requires a nonce."""
+        return True
+    
+    def get_algorithm_name(self) -> str:
+        """Get the name of the encryption algorithm."""
+        return 'hybrid'
 
     # --- parameter derivation ---
 
@@ -275,10 +285,9 @@ class HybridEncryptorFB:
 
     # --- public API (parity with your tests) ---
 
-    def encrypt_image(self, image_bgr_or_gray: np.ndarray, key: str, nonce: str) -> np.ndarray:
-        self._validate_image(image_bgr_or_gray)
-        if not key:
-            raise ValueError("key is required")
+    def encrypt_image(self, image_bgr_or_gray: np.ndarray, key: str, nonce: str = None) -> np.ndarray:
+        self.validate_image(image_bgr_or_gray)
+        self.validate_encryption_params(key, nonce)
 
         img = _as_uint8(image_bgr_or_gray)
         H, W = img.shape[:2]
@@ -293,10 +302,9 @@ class HybridEncryptorFB:
                 chans.append(self._encrypt_channel(channel, channel, hybrid_key, ch=c))
             return np.stack(chans, axis=2)
 
-    def decrypt_image(self, cipher_bgr_or_gray: np.ndarray, key: str, nonce: str) -> np.ndarray:
-        self._validate_image(cipher_bgr_or_gray)
-        if not key:
-            raise ValueError("key is required")
+    def decrypt_image(self, cipher_bgr_or_gray: np.ndarray, key: str, nonce: str = None) -> np.ndarray:
+        self.validate_image(cipher_bgr_or_gray)
+        self.validate_encryption_params(key, nonce)
 
         cipher = _as_uint8(cipher_bgr_or_gray)
         H, W = cipher.shape[:2]

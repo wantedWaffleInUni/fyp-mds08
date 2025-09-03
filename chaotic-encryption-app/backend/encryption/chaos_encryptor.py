@@ -3,7 +3,9 @@ import cv2
 import hashlib
 from typing import Tuple
 
-class ChaosEncryptor:
+from .encryptor_interface import EncryptorInterface
+
+class ChaosEncryptor(EncryptorInterface):
     """
     Chaotic Image Encryption Module
     
@@ -16,6 +18,14 @@ class ChaosEncryptor:
         """Initialize the chaotic encryptor"""
         self.logistic_r = 3.9  # Logistic map parameter
         self.initial_x = 0.5   # Initial condition for logistic map
+        
+    def requires_nonce(self) -> bool:
+        """Chaos encryptor does not require a nonce."""
+        return False
+    
+    def get_algorithm_name(self) -> str:
+        """Get the name of the encryption algorithm."""
+        return 'chaos'
         
     def _generate_key_from_string(self, key_string: str) -> Tuple[float, float]:
         """
@@ -114,15 +124,13 @@ class ChaosEncryptor:
         Returns:
             Inverse permuted image
         """
-        # Create inverse permutations
+        # Create inverse permutation arrays
         row_inv = np.argsort(row_perm)
         col_inv = np.argsort(col_perm)
         
-        # Apply inverse column permutation
-        result = image[:, col_inv]
-        
-        # Apply inverse row permutation
-        result = result[row_inv, :]
+        # Apply inverse permutation
+        result = image[row_inv, :]
+        result = result[:, col_inv]
         
         return result
     
@@ -154,22 +162,21 @@ class ChaosEncryptor:
         
         return result
     
-    def encrypt_image(self, image: np.ndarray, key: str) -> np.ndarray:
+    def encrypt_image(self, image: np.ndarray, key: str, nonce: str = None) -> np.ndarray:
         """
         Encrypt an image using chaotic encryption
         
         Args:
             image: Input image as numpy array (BGR format)
             key: Encryption key string
+            nonce: Not used by chaos encryptor (kept for interface compatibility)
             
         Returns:
             Encrypted image as numpy array
         """
-        if image is None:
-            raise ValueError("Input image cannot be None")
-        
-        if not key:
-            raise ValueError("Encryption key cannot be empty")
+        # Validate inputs using interface methods
+        self.validate_image(image)
+        self.validate_encryption_params(key, nonce)
         
         # Get image dimensions
         height, width = image.shape[:2]
@@ -185,22 +192,21 @@ class ChaosEncryptor:
         
         return encrypted_image
     
-    def decrypt_image(self, image: np.ndarray, key: str) -> np.ndarray:
+    def decrypt_image(self, image: np.ndarray, key: str, nonce: str = None) -> np.ndarray:
         """
         Decrypt an image using chaotic decryption
         
         Args:
             image: Encrypted image as numpy array (BGR format)
             key: Decryption key string (must be same as encryption key)
+            nonce: Not used by chaos encryptor (kept for interface compatibility)
             
         Returns:
             Decrypted image as numpy array
         """
-        if image is None:
-            raise ValueError("Input image cannot be None")
-        
-        if not key:
-            raise ValueError("Decryption key cannot be empty")
+        # Validate inputs using interface methods
+        self.validate_image(image)
+        self.validate_encryption_params(key, nonce)
         
         # Get image dimensions
         height, width = image.shape[:2]
@@ -216,20 +222,24 @@ class ChaosEncryptor:
         
         return decrypted_image
     
-    def get_encryption_info(self, key: str) -> dict:
+    def get_encryption_info(self, key: str, nonce: str = None) -> dict:
         """
         Get information about the encryption parameters
         
         Args:
             key: Encryption key
+            nonce: Not used by chaos encryptor
             
         Returns:
             Dictionary with encryption parameters
         """
-        r, x0 = self._generate_key_from_string(key)
+        # Use the interface method and add chaos-specific info
+        info = super().get_encryption_info(key, nonce)
         
-        return {
+        r, x0 = self._generate_key_from_string(key)
+        info.update({
             'logistic_r': r,
-            'initial_x': x0,
-            'key_hash': hashlib.sha256(key.encode()).hexdigest()[:16]
-        }
+            'initial_x': x0
+        })
+        
+        return info

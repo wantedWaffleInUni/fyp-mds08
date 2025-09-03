@@ -104,7 +104,9 @@ def _mask_bytes_from_S(S: np.ndarray, salt: int = 0) -> np.ndarray:
 # Keystreams + permutation
 # ---------------------------
 
-class LASMEncryptorFB:
+from .encryptor_interface import EncryptorInterface
+
+class LASMEncryptorFB(EncryptorInterface):
     """
     Deterministic (key + nonce) LASM-based image cipher with
     header-less decrypt:
@@ -119,6 +121,14 @@ class LASMEncryptorFB:
 
     def __init__(self, burn_in: int = 1024):
         self.burn_in = int(burn_in)
+        
+    def requires_nonce(self) -> bool:
+        """LASMEncryptorFB requires a nonce."""
+        return True
+    
+    def get_algorithm_name(self) -> str:
+        """Get the name of the encryption algorithm."""
+        return 'lasm_fb'
 
     # --- parameter derivation ---
 
@@ -242,10 +252,9 @@ class LASMEncryptorFB:
 
     # --- public API (matches FODHNNEncryptor) ---
 
-    def encrypt_image(self, image_bgr_or_gray: np.ndarray, key: str, nonce: str) -> np.ndarray:
-        self._validate_image(image_bgr_or_gray)
-        if not key:
-            raise ValueError("key is required")
+    def encrypt_image(self, image_bgr_or_gray: np.ndarray, key: str, nonce: str = None) -> np.ndarray:
+        self.validate_image(image_bgr_or_gray)
+        self.validate_encryption_params(key, nonce)
         img = _as_uint8(image_bgr_or_gray)
         H, W = img.shape[:2]
 
@@ -262,10 +271,9 @@ class LASMEncryptorFB:
         Cimg = _unflatten_per_channel(c2, H, W, C)
         return Cimg
 
-    def decrypt_image(self, cipher_bgr_or_gray: np.ndarray, key: str, nonce: str) -> np.ndarray:
-        self._validate_image(cipher_bgr_or_gray)
-        if not key:
-            raise ValueError("key is required")
+    def decrypt_image(self, cipher_bgr_or_gray: np.ndarray, key: str, nonce: str = None) -> np.ndarray:
+        self.validate_image(cipher_bgr_or_gray)
+        self.validate_encryption_params(key, nonce)
         Cimg = _as_uint8(cipher_bgr_or_gray)
         H, W = Cimg.shape[:2]
 
