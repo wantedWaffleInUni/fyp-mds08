@@ -18,7 +18,7 @@ const Encrypt = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showAlgoModal, setShowAlgoModal] = useState(false);
   const [selectedAlgorithm, setSelectedAlgorithm] = useState('chaos');
-  const [nonce, setNonce] = useState('');
+
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
   const navigate = useNavigate();
@@ -32,10 +32,10 @@ const Encrypt = () => {
 
   // labels & soft caps for each phase (won’t exceed 95% until done)
   const PHASES = [
-    { label: 'Analysing image …',            from: 2,  to: 25 },
-    { label: 'Confusion & diffusion stage …',from: 26, to: 55 },
-    { label: 'Encrypting …',                 from: 56, to: 85 },
-    { label: 'Evaluating results …',         from: 86, to: 95 },
+    { label: 'Analysing image …', from: 2, to: 25 },
+    { label: 'Confusion & diffusion stage …', from: 26, to: 55 },
+    { label: 'Encrypting …', from: 56, to: 85 },
+    { label: 'Evaluating results …', from: 86, to: 95 },
   ];
 
   const { show, setShow, progress, phase, start, stop } = usePhasedProgress(PHASES);
@@ -68,10 +68,10 @@ const Encrypt = () => {
     !selectedFile && !keyFilled
       ? 'Please select an image and enter an encryption key'
       : !selectedFile
-      ? 'Please select an image to encrypt'
-      : !keyFilled
-      ? 'Please enter an encryption key'
-      : '';
+        ? 'Please select an image to encrypt'
+        : !keyFilled
+          ? 'Please enter an encryption key'
+          : '';
 
   const handleEncrypt = async () => {
     if (!canEncrypt) {
@@ -120,12 +120,11 @@ const Encrypt = () => {
     }
   };
 
+
   const confirmEncrypt = async () => {
     setIsLoading(true);
     setShowAlgoModal(false);
     setError('');
-
-    const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
 
     const ac = new AbortController();
     abortRef.current = ac;
@@ -135,7 +134,6 @@ const Encrypt = () => {
     try {
       const res = await encryptImage(
         selectedFile, encryptionKey, selectedAlgorithm,
-        needsNonce ? (nonce || undefined) : undefined,
         { signal: ac.signal } // if supported
       );
 
@@ -154,24 +152,24 @@ const Encrypt = () => {
 
 
 
-//   const confirmEncrypt = async () => {
-//   // close modal and go to /results immediately
-//   const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
-// 
-//   setShowAlgoModal(false);
-// 
-//   navigate('/results', {
-//     state: {
-//       type: 'encrypt',
-//       params: {
-//         file: selectedFile,
-//         key: encryptionKey,
-//         algorithm: selectedAlgorithm,
-//         nonce: needsNonce ? (nonce || undefined) : undefined,
-//       },
-//     },
-//   });
-// };
+  //   const confirmEncrypt = async () => {
+  //   // close modal and go to /results immediately
+  //   const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
+  // 
+  //   setShowAlgoModal(false);
+  // 
+  //   navigate('/results', {
+  //     state: {
+  //       type: 'encrypt',
+  //       params: {
+  //         file: selectedFile,
+  //         key: encryptionKey,
+  //         algorithm: selectedAlgorithm,
+  //         nonce: needsNonce ? (nonce || undefined) : undefined,
+  //       },
+  //     },
+  //   });
+  // };
 
 
   const handleDownload = async (imageData, filename) => {
@@ -187,20 +185,27 @@ const Encrypt = () => {
     }
   };
 
-  const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
 
-//   const algoOptions = [
-//   { value: 'chaos',  label: 'Chaotic Logistic (default)' },
-//   { value: 'fodhnn', label: 'FODHNN (fractional-order Hopfield)' },
-//   { value: '2dlasm', label: '2DLASM (2D Logistic Adjusted Sine Map)' },
-// ];
+
+  //   const algoOptions = [
+  //   { value: 'chaos',  label: 'Chaotic Logistic (default)' },
+  //   { value: 'fodhnn', label: 'FODHNN (fractional-order Hopfield)' },
+  //   { value: '2dlasm', label: '2DLASM (2D Logistic Adjusted Sine Map)' },
+  // ];
   const algoOptions = [
-    { value: 'chaos',  label: 'Chaotic Logistic (default)',
-      desc: 'Fast baseline using logistic-map confusion+diffusion. Good general choice.' },
-    { value: 'fodhnn', label: 'FODHNN (fractional-order Hopfield)',
-      desc: 'Stronger confusion/diffusion via fractional-order dynamics. Slower; may need nonce.' },
-    { value: '2dlasm', label: '2DLASM (2D Logistic Adjusted Sine Map)',
-      desc: '2D chaotic map with high key sensitivity. Requires nonce; usually fast.' },
+    {
+      value: 'chaos', label: 'Chaotic Logistic (default)',
+      desc: 'Fast baseline using logistic-map confusion+diffusion. Good general choice.'
+    },
+    {
+      value: 'fodhnn', label: 'FODHNN (fractional-order Hopfield)',
+      desc: 'Stronger confusion/diffusion via fractional-order dynamics. Slower but more secure.'
+    },
+    {
+      value: '2dlasm', label: '2DLASM (2D Logistic Adjusted Sine Map)',
+      desc: '2D chaotic map with high key sensitivity. Fast and secure.'
+    },
+    { value: 'bulban', label: 'Bülban chaotic map', desc: 'Fast, highly secure, accepts any pixel size, but internally converts to grayscale before encryption, and outputs a grayscale cipher image.' }
   ];
 
   const [flipped, setFlipped] = useState({});
@@ -224,7 +229,6 @@ const Encrypt = () => {
     }
     // don’t clear when toggled off — keep whatever is in the field
   }, [autoGenerateKey]);
-
 
 
 
@@ -255,7 +259,6 @@ const Encrypt = () => {
 
         <div className="form-group">
           <label className="form-label"><strong>Enter Encryption Key</strong></label>
-          
           <div className="input-with-actions">
             <input
               ref={keyInputRef}
@@ -338,10 +341,10 @@ const Encrypt = () => {
             disabled={!canEncrypt || isLoading}
             style={{ minWidth: '200px' }}
             aria-disabled={!canEncrypt || isLoading}
-            // className="btn btn-primary"
-            // onClick={handleEncrypt}
-            // disabled={isLoading || !selectedFile}
-            // style={{ minWidth: '200px' }}
+          // className="btn btn-primary"
+          // onClick={handleEncrypt}
+          // disabled={isLoading || !selectedFile}
+          // style={{ minWidth: '200px' }}
           >
             {isLoading ? (
               <>
@@ -356,11 +359,11 @@ const Encrypt = () => {
 
         </div>
         {/* live validation hint when disabled */}
-          {!canEncrypt && !isLoading && (
-            <div className="mt-2" style={{ color: '#6b7280', fontSize: 13, alignContent: 'center', textAlign: 'center' }}>
-              {validationMsg}
-            </div>
-          )}
+        {!canEncrypt && !isLoading && (
+          <div className="mt-2" style={{ color: '#6b7280', fontSize: 13, alignContent: 'center', textAlign: 'center' }}>
+            {validationMsg}
+          </div>
+        )}
       </div>
 
       {result && (
@@ -403,10 +406,7 @@ const Encrypt = () => {
         onConfirm={confirmEncrypt}
         options={algoOptions}
         selected={selectedAlgorithm}
-        onSelect={(val) => { setSelectedAlgorithm(val); setNonce(''); }}
-        showNonce={needsNonce}
-        nonce={nonce}
-        onChangeNonce={setNonce}
+        onSelect={(val) => { setSelectedAlgorithm(val); }}
         confirming={isLoading}
         flipped={flipped}
         setFlip={setFlip}
@@ -418,10 +418,7 @@ const Encrypt = () => {
         onConfirm={confirmEncrypt}
         options={algoOptions}                 // ✅ array
         selected={selectedAlgorithm}          // ✅ string
-        onSelect={(val) => { setSelectedAlgorithm(val); setNonce(''); }}
-        showNonce={needsNonce}                // ✅ boolean
-        nonce={nonce}                         // ✅ string
-        onChangeNonce={setNonce}              // ✅ function
+        onSelect={(val) => { setSelectedAlgorithm(val); }}
         confirming={isLoading}                // ✅ (optional, see below)
         flipped={flipped}
         setFlip={setFlip}
@@ -437,7 +434,7 @@ const Encrypt = () => {
           stop();
           setShow(false);
         }}
-      /> 
+      />
 
     </div>
   );

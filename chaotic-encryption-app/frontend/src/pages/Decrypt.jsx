@@ -11,10 +11,7 @@ const Decrypt = () => {
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
   const [algorithm, setAlgorithm] = useState('chaos');
-  const [nonce, setNonce] = useState('');
   const navigate = useNavigate();
-
-  const needsNonce = ['fodhnn', '2dlasm', 'acm_2dscl'].includes(algorithm);
 
   const handleImageUpload = (file) => {
     setSelectedFile(file);
@@ -33,16 +30,13 @@ const Decrypt = () => {
       return;
     }
 
-    if (algorithm === 'fodhnn' && !nonce.trim()) {
-      setError('Nonce is required for this algorithm');
-      return;
-    }
+
 
     setIsLoading(true);
     setError('');
 
     try {
-      const response = await decryptImage(selectedFile, decryptionKey, algorithm, algorithm === 'fodhnn' ? nonce : undefined);
+      const response = await decryptImage(selectedFile, decryptionKey, algorithm);
       setResult(response);
 
       // Navigate to results page with the data
@@ -146,7 +140,7 @@ const Decrypt = () => {
               <span>2DLASM</span>
             </label>
 
-            <label className="radio"> 
+            <label className="radio">
               <input
                 type="radio"
                 name="algorithm"
@@ -156,25 +150,21 @@ const Decrypt = () => {
               />
               <span>ACM_2DSCL</span>
             </label>
-            
+
+            <label className="radio">
+              <input
+                type="radio"
+                name="algorithm"
+                value="bulban"
+                checked={algorithm === 'bulban'}
+                onChange={() => setAlgorithm('bulban')}
+              />
+              <span>Bulban</span>
+            </label>
           </div>
         </div>
 
-        {needsNonce && (
-          <div className="form-group">
-            <label className="form-label">Nonce</label>
-            <input
-              type="text"
-              className="form-control"
-              value={nonce}
-              onChange={(e) => setNonce(e.target.value)}
-              placeholder="Enter the nonce returned during encryption"
-            />
-            <small style={{ color: '#666', marginTop: '0.5rem', display: 'block' }}>
-              You must provide the exact nonce that was used/generated during FODHNN encryption.
-            </small>
-          </div>
-        )}
+
 
         <div className="d-flex justify-center">
           <button

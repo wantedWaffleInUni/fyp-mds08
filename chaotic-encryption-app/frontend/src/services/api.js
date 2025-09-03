@@ -21,7 +21,7 @@ const fileToBase64 = (file) => {
 };
 
 // API functions
-export const encryptImage = async (imageFile, key = 'default_key_123', algorithm = 'chaos', nonce) => {
+export const encryptImage = async (imageFile, key = 'default_key_123', algorithm = 'chaos') => {
   try {
     const imageData = await fileToBase64(imageFile);
     
@@ -30,9 +30,6 @@ export const encryptImage = async (imageFile, key = 'default_key_123', algorithm
       key: key,
       algorithm: (algorithm || 'chaos').toLowerCase(),
     };
-    if (payload.algorithm === 'fodhnn' || '2dlasm' || 'acm_2dscl' && nonce) { 
-      payload.nonce = nonce;
-    }
     const response = await api.post('/encrypt', payload);
     
     return response.data;
@@ -42,7 +39,7 @@ export const encryptImage = async (imageFile, key = 'default_key_123', algorithm
   }
 };
 
-export const decryptImage = async (imageFile, key = 'default_key_123', algorithm = 'chaos', nonce) => {
+export const decryptImage = async (imageFile, key = 'default_key_123', algorithm = 'chaos') => {
   try {
     const imageData = await fileToBase64(imageFile);
     
@@ -51,12 +48,6 @@ export const decryptImage = async (imageFile, key = 'default_key_123', algorithm
       key: key,
       algorithm: (algorithm || 'chaos').toLowerCase(),
     };
-    if (payload.algorithm === 'fodhnn' || '2dlasm' || 'acm_2dscl') {
-      if (!nonce) {
-        throw new Error('Nonce is required for FODHNN decryption');
-      }
-      payload.nonce = nonce;
-    }
     const response = await api.post('/decrypt', payload);
     
     return response.data;

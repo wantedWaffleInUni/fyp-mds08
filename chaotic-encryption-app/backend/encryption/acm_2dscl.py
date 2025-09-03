@@ -73,9 +73,11 @@ class HybridKey:
     z0: float
 
 
-class HybridEncryptorFB:
+from .encryptor_interface import EncryptorInterface
+
+class HybridEncryptorFB(EncryptorInterface):
     """
-    Deterministic (key + nonce) hybrid chaotic image cipher with:
+    Deterministic (key) hybrid chaotic image cipher with:
     1) Arnold Cat Map scrambling (for squares) or keyed row/col permutation (for rectangles)
     2) 2D Sine-Cosine-Logistic XOR mask (self-invertible)
     3) Chen's chaotic system diffusion (exactly one round; symmetric)
@@ -85,15 +87,21 @@ class HybridEncryptorFB:
         self.security_threshold = security_threshold  # kept for parity; not used now
         self.burn_in = int(burn_in)
         self.precision = 1e-16
+        
+
+    
+    def get_algorithm_name(self) -> str:
+        """Get the name of the encryption algorithm."""
+        return 'hybrid'
 
     # --- parameter derivation ---
 
-    def _derive_key(self, key: str, nonce: str, image_shape: Tuple[int, int]) -> HybridKey:
+    def _derive_key(self, key: str, image_shape: Tuple[int, int]) -> HybridKey:
         """
-        Map SHA-256(key|nonce|shape) to chaotic parameters.
+        Map SHA-256(key|shape) to chaotic parameters.
         """
         shape_str = f"{image_shape[0]}x{image_shape[1]}"
-        h = hashlib.sha256((key + "|" + nonce + "|" + shape_str).encode()).hexdigest()
+        h = hashlib.sha256((key + "|" + shape_str).encode()).hexdigest()
         u = [_u32(int(h[i:i+8], 16)) for i in range(0, min(len(h), 64), 8)]
 
         while len(u) < 8:
@@ -275,14 +283,13 @@ class HybridEncryptorFB:
 
     # --- public API (parity with your tests) ---
 
-    def encrypt_image(self, image_bgr_or_gray: np.ndarray, key: str, nonce: str) -> np.ndarray:
-        self._validate_image(image_bgr_or_gray)
-        if not key:
-            raise ValueError("key is required")
+    def encrypt_image(self, image_bgr_or_gray: np.ndarray, key: str) -> np.ndarray:
+        self.validate_image(image_bgr_or_gray)
+        self.validate_encryption_params(key)
 
         img = _as_uint8(image_bgr_or_gray)
         H, W = img.shape[:2]
-        hybrid_key = self._derive_key(key, nonce, (H, W))
+        hybrid_key = self._derive_key(key, (H, W))
 
         if img.ndim == 2:
             return self._encrypt_channel(img, img, hybrid_key, ch=0)
@@ -293,14 +300,13 @@ class HybridEncryptorFB:
                 chans.append(self._encrypt_channel(channel, channel, hybrid_key, ch=c))
             return np.stack(chans, axis=2)
 
-    def decrypt_image(self, cipher_bgr_or_gray: np.ndarray, key: str, nonce: str) -> np.ndarray:
-        self._validate_image(cipher_bgr_or_gray)
-        if not key:
-            raise ValueError("key is required")
+    def decrypt_image(self, cipher_bgr_or_gray: np.ndarray, key: str) -> np.ndarray:
+        self.validate_image(cipher_bgr_or_gray)
+        self.validate_encryption_params(key)
 
         cipher = _as_uint8(cipher_bgr_or_gray)
         H, W = cipher.shape[:2]
-        hybrid_key = self._derive_key(key, nonce, (H, W))
+        hybrid_key = self._derive_key(key, (H, W))
 
         if cipher.ndim == 2:
             return self._decrypt_channel(cipher, hybrid_key, ch=0)
