@@ -13,6 +13,9 @@ from encryption.chaos_encryptor import ChaosEncryptor
 from encryption.fodhnn_encryptor import FODHNNEncryptor
 from encryption.another_2d import LASMEncryptorFB
 from encryption.acm_2dscl import HybridEncryptorFB
+from encryption.bulban_encryptor import BulbanEncryptor
+
+
 from utils import calculate_entropy, calculate_npcr, calculate_uaci
 
 app = Flask(__name__)
@@ -122,6 +125,15 @@ def encrypt_image():
                 nonce = uuid.uuid4().hex
             encryptor = HybridEncryptorFB()
             encrypted_img = encryptor.encrypt_image(original_img, key, nonce)
+        
+        elif algorithm == 'bulban':
+            if not nonce:
+                nonce = uuid.uuid4().hex
+            # Convert to grayscale if image is colored
+            if original_img.ndim == 3:
+                original_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
+            encryptor = BulbanEncryptor()
+            encrypted_img = encryptor.encrypt_image(original_img, key, nonce)
 
 
         else:
@@ -209,6 +221,14 @@ def decrypt_image():
             if not nonce:
                 return jsonify({'error': 'Nonce is required for ACM_2DSCL decryption'}), 400
             encryptor = HybridEncryptorFB()
+            decrypted_img = encryptor.decrypt_image(encrypted_img, key, nonce)
+
+        elif algorithm == 'bulban':
+            if not nonce:
+                return jsonify({'error': 'Nonce is required for Bulban decryption'}), 400
+            if encrypted_img.ndim == 3:
+                encrypted_img = cv2.cvtColor(encrypted_img, cv2.COLOR_BGR2GRAY)
+            encryptor = BulbanEncryptor()
             decrypted_img = encryptor.decrypt_image(encrypted_img, key, nonce)
 
         else:

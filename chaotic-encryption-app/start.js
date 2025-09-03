@@ -47,7 +47,7 @@ function resolvePython() {
 async function ensureBackendVenv(ctx) {
   if (!ctx.needsCreate) return;
   console.log('📦 Creating backend virtual environment at', ctx.venvDir);
-  const pyBootstrap = isWin ? 'python' : 'python3';
+  const pyBootstrap = isWin ? 'py' : 'python3';
   await run(pyBootstrap, ['-m', 'venv', 'venv'], { cwd: ctx.backendDir });
 }
 

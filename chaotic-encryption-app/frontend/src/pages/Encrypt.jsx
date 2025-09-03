@@ -231,7 +231,7 @@ const Encrypt = () => {
     setShowAlgoModal(false);
     setError('');
 
-    const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
+    const needsNonce = ['fodhnn', '2dlasm','bulban'].includes(selectedAlgorithm);
 
     const ac = new AbortController();
     abortRef.current = ac;
@@ -293,7 +293,7 @@ const Encrypt = () => {
     }
   };
 
-  const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
+  const needsNonce = ['fodhnn', '2dlasm','bulban'].includes(selectedAlgorithm);
 
 //   const algoOptions = [
 //   { value: 'chaos',  label: 'Chaotic Logistic (default)' },
@@ -307,6 +307,7 @@ const Encrypt = () => {
       desc: 'Stronger confusion/diffusion via fractional-order dynamics. Slower; may need nonce.' },
     { value: '2dlasm', label: '2DLASM (2D Logistic Adjusted Sine Map)',
       desc: '2D chaotic map with high key sensitivity. Requires nonce; usually fast.' },
+    { value: 'bulban', label: 'Bülban chaotic map', desc: 'Fast, highly secure,accepts any pixel size, but internally converts to grayscale before encryption, and outputs a grayscale cipher image.' }
   ];
 
   const [flipped, setFlipped] = useState({});
