@@ -128,9 +128,7 @@ class FODHNNEncryptor(EncryptorInterface):
         self.memory_window = int(memory_window)
         self.burn_in = int(burn_in)
         
-    def requires_nonce(self) -> bool:
-        """FODHNN encryptor requires a nonce."""
-        return True
+
     
     def get_algorithm_name(self) -> str:
         """Get the name of the encryption algorithm."""
@@ -138,12 +136,12 @@ class FODHNNEncryptor(EncryptorInterface):
 
     # --- parameter derivation ---
 
-    def _derive_key(self, key: str, nonce: str) -> FODHNNKey:
+    def _derive_key(self, key: str) -> FODHNNKey:
         """
-        Derive (nu, p, x0, y0, z0) from SHA-256(key|nonce).
+        Derive (nu, p, x0, y0, z0) from SHA-256(key).
         Keep x0,y0,z0 strictly inside (0,1) and nu in (0.6, 0.95].
         """
-        h = hashlib.sha256((key + "|" + nonce).encode()).hexdigest()
+        h = hashlib.sha256(key.encode()).hexdigest()
         u = [_u32(int(h[i:i+8], 16)) for i in range(0, 64, 8)]
 
         nu = _map_to_interval(u[0], 0.70, 0.95)  # fractional order
@@ -153,10 +151,10 @@ class FODHNNEncryptor(EncryptorInterface):
         z0 = _clip01(_map_to_interval(u[4], 0.0, 1.0))
         return FODHNNKey(nu=nu, p=p, x0=x0, y0=y0, z0=z0)
 
-    def _keystreams_xyz(self, H: int, W: int, key: str, nonce: str,
+    def _keystreams_xyz(self, H: int, W: int, key: str,
                          burn_in: int = 1024) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         L = H * W
-        k = self._derive_key(key, nonce)
+        k = self._derive_key(key)
         fod = FODHNN(k, memory_window=self.memory_window)
         x, y, z = fod.iterate(L, burn_in=burn_in)
 
@@ -232,16 +230,16 @@ class FODHNNEncryptor(EncryptorInterface):
         if img.size == 0:
             raise ValueError("image is empty")
 
-    def encrypt_image(self, image_bgr_or_gray: np.ndarray, key: str, nonce: str = None) -> np.ndarray:
+    def encrypt_image(self, image_bgr_or_gray: np.ndarray, key: str) -> np.ndarray:
         """
-        Encrypt BGR or grayscale image with (key, nonce).
+        Encrypt BGR or grayscale image with key.
         """
         self.validate_image(image_bgr_or_gray)
-        self.validate_encryption_params(key, nonce)
+        self.validate_encryption_params(key)
 
         img = _as_uint8(image_bgr_or_gray)
         H, W = img.shape[:2]
-        X, Y, Z = self._keystreams_xyz(H, W, key, nonce, burn_in=self.burn_in)
+        X, Y, Z = self._keystreams_xyz(H, W, key, burn_in=self.burn_in)
 
         # 1) permutation
         row_perm, col_perm = self._row_col_permutation(H, W, X, Y)
@@ -278,16 +276,16 @@ class FODHNNEncryptor(EncryptorInterface):
         out[:, 1:] = c16[:, 1:] - c16[:, :-1] - ks[1:]
         return (out & 0xFF).astype(np.uint8)
 
-    def decrypt_image(self, cipher_bgr_or_gray: np.ndarray, key: str, nonce: str = None) -> np.ndarray:
+    def decrypt_image(self, cipher_bgr_or_gray: np.ndarray, key: str) -> np.ndarray:
         """
-        Decrypt BGR or grayscale image with (key, nonce).
+        Decrypt BGR or grayscale image with key.
         """
         self.validate_image(cipher_bgr_or_gray)
-        self.validate_encryption_params(key, nonce)
+        self.validate_encryption_params(key)
 
         Cimg = _as_uint8(cipher_bgr_or_gray)
         H, W = Cimg.shape[:2]
-        X, Y, Z = self._keystreams_xyz(H, W, key, nonce, burn_in=self.burn_in)
+        X, Y, Z = self._keystreams_xyz(H, W, key, burn_in=self.burn_in)
 
         # invert diffusion (inverse order)
         flat_c, H, W, C = _flatten_per_channel(Cimg)

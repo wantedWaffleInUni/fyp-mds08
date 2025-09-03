@@ -108,23 +108,21 @@ from .encryptor_interface import EncryptorInterface
 
 class LASMEncryptorFB(EncryptorInterface):
     """
-    Deterministic (key + nonce) LASM-based image cipher with
+Deterministic (key) LASM-based image cipher with
     header-less decrypt:
 
       1) Row/col permutation from LASM Sx,Sy (chaos-only; no plaintext in perms).
       2) Two-pass diffusion (forward accumulate + backward undo) with LASM byte keystream.
 
     API mirrors FODHNNEncryptor:
-      encrypt_image(img, key, nonce) -> cipher
-      decrypt_image(cipher, key, nonce) -> img
+      encrypt_image(img, key) -> cipher
+decrypt_image(cipher, key) -> img
     """
 
     def __init__(self, burn_in: int = 1024):
         self.burn_in = int(burn_in)
         
-    def requires_nonce(self) -> bool:
-        """LASMEncryptorFB requires a nonce."""
-        return True
+
     
     def get_algorithm_name(self) -> str:
         """Get the name of the encryption algorithm."""
@@ -132,23 +130,23 @@ class LASMEncryptorFB(EncryptorInterface):
 
     # --- parameter derivation ---
 
-    def _derive_key(self, key: str, nonce: str) -> LASMKey:
+    def _derive_key(self, key: str) -> LASMKey:
         """
-        Map SHA-256(key|nonce) to mu in (0.70,0.95) and seeds x0,y0 in (0,1).
+        Map SHA-256(key) to mu in (0.70,0.95) and seeds x0,y0 in (0,1).
         """
-        h = hashlib.sha256((key + "|" + nonce).encode()).hexdigest()
+        h = hashlib.sha256(key.encode()).hexdigest()
         u = [_u32(int(h[i:i+8], 16)) for i in range(0, 64, 8)]
         mu = _map_to_interval(u[0], 0.70, 0.95)
         x0 = _clip01(_map_to_interval(u[1], 0.0, 1.0))
         y0 = _clip01(_map_to_interval(u[2], 0.0, 1.0))
         return LASMKey(mu=mu, x0=x0, y0=y0)
 
-    def _keystreams_xyz(self, H: int, W: int, key: str, nonce: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def _keystreams_xyz(self, H: int, W: int, key: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
-        Produce X, Y (for perms) and Z (byte keystream) all deterministic from key+nonce.
+        Produce X, Y (for perms) and Z (byte keystream) all deterministic from key.
         X,Y are uint32 (flattened); Z is uint8 length L=H*W.
         """
-        k = self._derive_key(key, nonce)
+        k = self._derive_key(key)
         Sx, Sy = _lasm2d_sequence_pair((H, W), k.x0, k.y0, k.mu, burn_in=self.burn_in)
         Ssum = (Sx + Sy) % 1.0
 
@@ -252,13 +250,13 @@ class LASMEncryptorFB(EncryptorInterface):
 
     # --- public API (matches FODHNNEncryptor) ---
 
-    def encrypt_image(self, image_bgr_or_gray: np.ndarray, key: str, nonce: str = None) -> np.ndarray:
+    def encrypt_image(self, image_bgr_or_gray: np.ndarray, key: str) -> np.ndarray:
         self.validate_image(image_bgr_or_gray)
-        self.validate_encryption_params(key, nonce)
+        self.validate_encryption_params(key)
         img = _as_uint8(image_bgr_or_gray)
         H, W = img.shape[:2]
 
-        X, Y, Z = self._keystreams_xyz(H, W, key, nonce)
+        X, Y, Z = self._keystreams_xyz(H, W, key)
 
         # 1) permutation
         row_perm, col_perm = self._row_col_permutation(H, W, X, Y)
@@ -271,13 +269,13 @@ class LASMEncryptorFB(EncryptorInterface):
         Cimg = _unflatten_per_channel(c2, H, W, C)
         return Cimg
 
-    def decrypt_image(self, cipher_bgr_or_gray: np.ndarray, key: str, nonce: str = None) -> np.ndarray:
+    def decrypt_image(self, cipher_bgr_or_gray: np.ndarray, key: str) -> np.ndarray:
         self.validate_image(cipher_bgr_or_gray)
-        self.validate_encryption_params(key, nonce)
+        self.validate_encryption_params(key)
         Cimg = _as_uint8(cipher_bgr_or_gray)
         H, W = Cimg.shape[:2]
 
-        X, Y, Z = self._keystreams_xyz(H, W, key, nonce)
+        X, Y, Z = self._keystreams_xyz(H, W, key)
 
         # invert diffusion (inverse order)
         flat_c, H, W, C = _flatten_per_channel(Cimg)

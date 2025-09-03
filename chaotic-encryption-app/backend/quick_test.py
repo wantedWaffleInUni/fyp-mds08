@@ -80,9 +80,8 @@ def test_imports():
             
             # Check required methods
             algorithm_name = encryptor.get_algorithm_name()
-            requires_nonce = encryptor.requires_nonce()
             
-            print(f"   ✅ {encryptor.__class__.__name__}: {algorithm_name} (nonce: {requires_nonce})")
+            print(f"   ✅ {encryptor.__class__.__name__}: {algorithm_name}")
             
         except Exception as e:
             print(f"   ❌ {encryptor.__class__.__name__}: {e}")

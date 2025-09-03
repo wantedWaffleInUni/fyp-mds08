@@ -38,17 +38,15 @@ from .encryptor_interface import EncryptorInterface
 
 class BulbanEncryptor(EncryptorInterface):
     """
-    Deterministic (key + nonce) Bulban-map image cipher.
+    Deterministic (key) Bulban-map image cipher.
 
     Methods
     -------
-    encrypt_image(image, key, nonce) -> np.ndarray
-    decrypt_image(image, key, nonce) -> np.ndarray
+    encrypt_image(image, key) -> np.ndarray
+    decrypt_image(image, key) -> np.ndarray
     """
     
-    def requires_nonce(self) -> bool:
-        """BulbanEncryptor requires a nonce."""
-        return True
+
     
     def get_algorithm_name(self) -> str:
         """Get the name of the encryption algorithm."""
@@ -59,25 +57,23 @@ class BulbanEncryptor(EncryptorInterface):
     # -------------------------------------------------
     def encrypt_image(self,
                       image: np.ndarray,
-                      key: str,
-                      nonce: str = None) -> np.ndarray:
+                      key: str) -> np.ndarray:
         """Encrypt a grayscale image."""
         self.validate_image(image)
-        self.validate_encryption_params(key, nonce)
+        self.validate_encryption_params(key)
         padded, h0, w0 = self._pad_image(image)
-        X, DMr, DNr = self._derive_params(key, nonce, *padded.shape)
+        X, DMr, DNr = self._derive_params(key, *padded.shape)
         cipher = self._encrypt_round(padded, X, DMr, DNr)
         return cipher[:h0, :w0]
 
     def decrypt_image(self,
                       cipher: np.ndarray,
-                      key: str,
-                      nonce: str = None) -> np.ndarray:
+                      key: str) -> np.ndarray:
         """Decrypt a grayscale image."""
         self.validate_image(cipher)
-        self.validate_encryption_params(key, nonce)
+        self.validate_encryption_params(key)
         padded, h0, w0 = self._pad_image(cipher)
-        X, DMr, DNr = self._derive_params(key, nonce, *padded.shape)
+        X, DMr, DNr = self._derive_params(key, *padded.shape)
         plain = self._decrypt_round(padded, X, DMr, DNr)
         return plain[:h0, :w0]
 
@@ -94,9 +90,9 @@ class BulbanEncryptor(EncryptorInterface):
         padded[:h, :w] = img
         return padded, h, w
 
-    def _derive_params(self, key: str, nonce: str, M: int, N: int):
-        """Derive deterministic key material from (key, nonce)."""
-        seed = (key + "|" + nonce).encode()
+    def _derive_params(self, key: str, M: int, N: int):
+        """Derive deterministic key material from key."""
+        seed = key.encode()
         rng = np.random.default_rng(int.from_bytes(seed, 'big'))
         X = rng.random(6) * 100 + 2.0
         X[np.abs(X - 2.0) < 1e-12] += 0.1

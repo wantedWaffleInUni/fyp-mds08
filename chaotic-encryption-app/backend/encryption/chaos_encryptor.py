@@ -19,9 +19,7 @@ class ChaosEncryptor(EncryptorInterface):
         self.logistic_r = 3.9  # Logistic map parameter
         self.initial_x = 0.5   # Initial condition for logistic map
         
-    def requires_nonce(self) -> bool:
-        """Chaos encryptor does not require a nonce."""
-        return False
+
     
     def get_algorithm_name(self) -> str:
         """Get the name of the encryption algorithm."""
@@ -162,21 +160,20 @@ class ChaosEncryptor(EncryptorInterface):
         
         return result
     
-    def encrypt_image(self, image: np.ndarray, key: str, nonce: str = None) -> np.ndarray:
+    def encrypt_image(self, image: np.ndarray, key: str) -> np.ndarray:
         """
         Encrypt an image using chaotic encryption
         
         Args:
             image: Input image as numpy array (BGR format)
             key: Encryption key string
-            nonce: Not used by chaos encryptor (kept for interface compatibility)
             
         Returns:
             Encrypted image as numpy array
         """
         # Validate inputs using interface methods
         self.validate_image(image)
-        self.validate_encryption_params(key, nonce)
+        self.validate_encryption_params(key)
         
         # Get image dimensions
         height, width = image.shape[:2]
@@ -192,21 +189,20 @@ class ChaosEncryptor(EncryptorInterface):
         
         return encrypted_image
     
-    def decrypt_image(self, image: np.ndarray, key: str, nonce: str = None) -> np.ndarray:
+    def decrypt_image(self, image: np.ndarray, key: str) -> np.ndarray:
         """
         Decrypt an image using chaotic decryption
         
         Args:
             image: Encrypted image as numpy array (BGR format)
             key: Decryption key string (must be same as encryption key)
-            nonce: Not used by chaos encryptor (kept for interface compatibility)
             
         Returns:
             Decrypted image as numpy array
         """
         # Validate inputs using interface methods
         self.validate_image(image)
-        self.validate_encryption_params(key, nonce)
+        self.validate_encryption_params(key)
         
         # Get image dimensions
         height, width = image.shape[:2]
@@ -222,19 +218,18 @@ class ChaosEncryptor(EncryptorInterface):
         
         return decrypted_image
     
-    def get_encryption_info(self, key: str, nonce: str = None) -> dict:
+    def get_encryption_info(self, key: str) -> dict:
         """
         Get information about the encryption parameters
         
         Args:
             key: Encryption key
-            nonce: Not used by chaos encryptor
             
         Returns:
             Dictionary with encryption parameters
         """
         # Use the interface method and add chaos-specific info
-        info = super().get_encryption_info(key, nonce)
+        info = super().get_encryption_info(key)
         
         r, x0 = self._generate_key_from_string(key)
         info.update({

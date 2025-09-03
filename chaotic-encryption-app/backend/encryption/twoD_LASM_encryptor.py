@@ -103,21 +103,19 @@ class LASMEncryptor(EncryptorInterface):
         self.memory_window = int(memory_window)
         self.burn_in = int(burn_in)
         
-    def requires_nonce(self) -> bool:
-        """LASM encryptor requires a nonce."""
-        return True
+
     
     def get_algorithm_name(self) -> str:
         """Get the name of the encryption algorithm."""
         return '2dlasm'
 
     # ---------- key derivation ----------
-    def _derive_params(self, key: str, nonce: str) -> LASMKeyParams:
+    def _derive_params(self, key: str) -> LASMKeyParams:
         """
-        Derive stable LASM parameters from SHA-256(key|nonce).
+        Derive stable LASM parameters from SHA-256(key).
         The mapping keeps 'a' in a nice chaotic band and seeds in (0,1).
         """
-        h = hashlib.sha256((key + "|" + nonce).encode()).digest()
+        h = hashlib.sha256(key.encode()).digest()
         def u32(i):  # 4-byte to uint32
             return int.from_bytes(h[4*i:4*(i+1)], "big", signed=False)
 
@@ -207,17 +205,17 @@ class LASMEncryptor(EncryptorInterface):
         return img
 
     # ---------- public API ----------
-    def encrypt_image(self, image_bgr_or_gray: np.ndarray, key: str, nonce: str = None) -> np.ndarray:
+    def encrypt_image(self, image_bgr_or_gray: np.ndarray, key: str) -> np.ndarray:
         """
-        Encrypt a grayscale or BGR image with (key, nonce).
+        Encrypt a grayscale or BGR image with key.
         Output has the same shape/dtype.
         """
         self.validate_image(image_bgr_or_gray)
-        self.validate_encryption_params(key, nonce)
+        self.validate_encryption_params(key)
         img = _as_uint8(image_bgr_or_gray)
         H, W = img.shape[:2]
 
-        params = self._derive_params(key, nonce)
+        params = self._derive_params(key)
         (S1x, S1y), S2 = self._lasm_maps(H, W, params)
 
         # 1) permutation (same row/col for all channels)
@@ -233,16 +231,16 @@ class LASMEncryptor(EncryptorInterface):
                 Cimg[:, :, c] = self._diffuse_2d_uint8(P[:, :, c], S2)
         return Cimg
 
-    def decrypt_image(self, cipher_bgr_or_gray: np.ndarray, key: str, nonce: str = None) -> np.ndarray:
+    def decrypt_image(self, cipher_bgr_or_gray: np.ndarray, key: str) -> np.ndarray:
         """
-        Decrypt image encrypted with encrypt_image using the same (key, nonce).
+        Decrypt image encrypted with encrypt_image using the same key.
         """
         self.validate_image(cipher_bgr_or_gray)
-        self.validate_encryption_params(key, nonce)
+        self.validate_encryption_params(key)
         Cimg = _as_uint8(cipher_bgr_or_gray)
         H, W = Cimg.shape[:2]
 
-        params = self._derive_params(key, nonce)
+        params = self._derive_params(key)
         (S1x, S1y), S2 = self._lasm_maps(H, W, params)
 
         # invert diffusion

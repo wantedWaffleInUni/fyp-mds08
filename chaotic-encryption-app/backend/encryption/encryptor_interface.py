@@ -15,50 +15,38 @@ class EncryptorInterface(ABC):
     """
     
     @abstractmethod
-    def encrypt_image(self, image: np.ndarray, key: str, nonce: Optional[str] = None) -> np.ndarray:
+    def encrypt_image(self, image: np.ndarray, key: str) -> np.ndarray:
         """
         Encrypt an image using the specified algorithm.
         
         Args:
             image: Input image as numpy array (BGR, RGB, or grayscale format)
             key: Encryption key string (required)
-            nonce: Optional nonce for algorithms that require it
             
         Returns:
             Encrypted image as numpy array with same shape and dtype as input
             
         Raises:
-            ValueError: If image is None, key is empty, or nonce is required but not provided
+            ValueError: If image is None or key is empty
             NotImplementedError: If the encryptor doesn't support the requested operation
         """
         pass
     
     @abstractmethod
-    def decrypt_image(self, image: np.ndarray, key: str, nonce: Optional[str] = None) -> np.ndarray:
+    def decrypt_image(self, image: np.ndarray, key: str) -> np.ndarray:
         """
         Decrypt an image using the specified algorithm.
         
         Args:
             image: Encrypted image as numpy array (BGR, RGB, or grayscale format)
             key: Decryption key string (must match encryption key)
-            nonce: Optional nonce for algorithms that require it (must match encryption nonce)
             
         Returns:
             Decrypted image as numpy array with same shape and dtype as input
             
         Raises:
-            ValueError: If image is None, key is empty, or nonce is required but not provided
+            ValueError: If image is None or key is empty
             NotImplementedError: If the encryptor doesn't support the requested operation
-        """
-        pass
-    
-    @abstractmethod
-    def requires_nonce(self) -> bool:
-        """
-        Check if this encryptor requires a nonce parameter.
-        
-        Returns:
-            True if nonce is required, False if only key is needed
         """
         pass
     
@@ -72,44 +60,35 @@ class EncryptorInterface(ABC):
         """
         pass
     
-    def get_encryption_info(self, key: str, nonce: Optional[str] = None) -> Dict[str, Any]:
+    def get_encryption_info(self, key: str) -> Dict[str, Any]:
         """
         Get information about the encryption parameters and metadata.
         
         Args:
             key: Encryption key
-            nonce: Optional nonce if required by the algorithm
             
         Returns:
             Dictionary with encryption parameters, algorithm info, and metadata
         """
         info = {
             'algorithm': self.get_algorithm_name(),
-            'requires_nonce': self.requires_nonce(),
             'key_hash': self._hash_key(key)
         }
         
-        if nonce and self.requires_nonce():
-            info['nonce_hash'] = self._hash_key(nonce)
-            
         return info
     
-    def validate_encryption_params(self, key: str, nonce: Optional[str] = None) -> None:
+    def validate_encryption_params(self, key: str) -> None:
         """
         Validate encryption parameters before processing.
         
         Args:
             key: Encryption key to validate
-            nonce: Optional nonce to validate
             
         Raises:
             ValueError: If parameters are invalid
         """
         if not key or not key.strip():
             raise ValueError("Encryption key cannot be empty")
-            
-        if self.requires_nonce() and (not nonce or not nonce.strip()):
-            raise ValueError(f"Nonce is required for {self.get_algorithm_name()} algorithm")
     
     def validate_image(self, image: np.ndarray) -> None:
         """
@@ -152,4 +131,4 @@ class EncryptorInterface(ABC):
     
     def __repr__(self) -> str:
         """Detailed string representation of the encryptor."""
-        return f"{self.__class__.__name__}(algorithm={self.get_algorithm_name()}, requires_nonce={self.requires_nonce()})"
+        return f"{self.__class__.__name__}(algorithm={self.get_algorithm_name()})"

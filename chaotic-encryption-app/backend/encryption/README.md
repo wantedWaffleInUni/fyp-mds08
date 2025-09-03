@@ -167,13 +167,10 @@ encryptors: list[EncryptorInterface] = [
 
 # Use them polymorphically
 for encryptor in encryptors:
-    if encryptor.requires_nonce():
-        encrypted = encryptor.encrypt_image(image, key, nonce)
-        decrypted = encryptor.decrypt_image(encrypted, key, nonce)
-    else:
-        encrypted = encryptor.encrypt_image(image, key)
-        decrypted = encryptor.decrypt_image(encrypted, key)
+    encrypted = encryptor.encrypt_image(image, key)
+    decrypted = encryptor.decrypt_image(encrypted, key)
     
+    success = np.array_equal(image, decrypted)
     print(f"{encryptor.get_algorithm_name()}: {'✅' if success else '❌'}")
 ```
 
@@ -263,11 +260,11 @@ python quick_test.py
 
 ## Current Status
 
-All encryptor classes now implement the `EncryptorInterface`:
+All encryptor classes now implement the `EncryptorInterface` and use key-only encryption:
 
-- ✅ **ChaosEncryptor** - Chaotic Logistic Map (no nonce required)
-- ✅ **FODHNNEncryptor** - Fractional-Order Discrete Hopfield Neural Network (nonce required)
-- ✅ **LASMEncryptor** - 2D Logistic Arnold Sine Map (nonce required)
-- ✅ **LASMEncryptorFB** - 2D Logistic-Adjusted-Sine Map (nonce required)
-- ✅ **HybridEncryptorFB** - Hybrid Arnold + 2DSCL + Chen (nonce required)
-- ✅ **BulbanEncryptor** - Generalized Bulban Chaotic Map (nonce required)
+- ✅ **ChaosEncryptor** - Chaotic Logistic Map (key-only)
+- ✅ **FODHNNEncryptor** - Fractional-Order Discrete Hopfield Neural Network (key-only)
+- ✅ **LASMEncryptor** - 2D Logistic Arnold Sine Map (key-only)
+- ✅ **LASMEncryptorFB** - 2D Logistic-Adjusted-Sine Map (key-only)
+- ✅ **HybridEncryptorFB** - Hybrid Arnold + 2DSCL + Chen (key-only)
+- ✅ **BulbanEncryptor** - Generalized Bulban Chaotic Map (key-only)
