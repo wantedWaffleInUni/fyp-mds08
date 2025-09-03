@@ -23,6 +23,8 @@ const Encrypt = () => {
   const [result, setResult] = useState(null);
   const navigate = useNavigate();
   const [autoGenerateKey, setAutoGenerateKey] = useState(false);
+  const [showKey, setShowKey] = useState(false);
+
 
   // progress modal state
   // const [showProgress, setShowProgress] = useState(false);
@@ -205,7 +207,11 @@ const Encrypt = () => {
       value: '2dlasm', label: '2DLASM (2D Logistic Adjusted Sine Map)',
       desc: '2D chaotic map with high key sensitivity. Fast and secure.'
     },
-    { value: 'bulban', label: 'Bülban chaotic map', desc: 'Fast, highly secure, accepts any pixel size, but internally converts to grayscale before encryption, and outputs a grayscale cipher image.' }
+    { value: 'bulban', label: 'Bülban chaotic map', 
+      desc: 'Fast, highly secure, accepts any pixel size, but internally converts to grayscale before encryption, and outputs a grayscale cipher image.' 
+    },
+    
+    
   ];
 
   const [flipped, setFlipped] = useState({});
@@ -262,7 +268,7 @@ const Encrypt = () => {
           <div className="input-with-actions">
             <input
               ref={keyInputRef}
-              type="text"
+              type={showKey ? 'text' : 'password'}
               className="form-control"
               value={encryptionKey}
               onChange={(e) => !autoGenerateKey && setEncryptionKey(e.target.value)}
@@ -270,6 +276,7 @@ const Encrypt = () => {
               style={{ paddingRight: '116px' }}  // room for the two buttons
               readOnly={autoGenerateKey}
               aria-readonly={autoGenerateKey}
+              autoComplete="off"
             />
 
             <div className="input-actions">
@@ -313,20 +320,64 @@ const Encrypt = () => {
             </div>
           </div>
 
+          <div className='key-controls' style={{ display: 'flex', marginLeft: "550px ", marginTop: "4px", gap: "5px" }}>
+            <input
+              type="checkbox"
+              id="show-key"
+              className="form-check-input"
+              checked={showKey}
+              onChange={(e) => setShowKey(e.target.checked)}
+              
+            />
+            <label htmlFor="show-key" className="form-check-label" style={{ fontSize: "10px"}}>
+              Show key
+            </label>
+          </div>
+
+
           {/* generate checkbox */}
-          {/* <div className="form-check mt-2"> */}
-          <input
-            type="checkbox"
-            id="auto-generate-key"
-            className="form-check-input"
-            checked={autoGenerateKey}
-            onChange={(e) => setAutoGenerateKey(e.target.checked)}
+            <input
+              type="checkbox"
+              id="auto-generate-key"
+              className="form-check-input"
+              checked={autoGenerateKey}
+              onChange={(e) => setAutoGenerateKey(e.target.checked)}
+              
+            />
+            <label htmlFor="auto-generate-key" className="form-check-label">
+              Generate a random key
+            </label>
+
+
             
-          />
-          <label htmlFor="auto-generate-key" className="form-check-label">
-            Generate a random key
-          </label>
-          {/* </div> */}
+          
+
+          {/* <div className="key-controls">
+            <label htmlFor="auto-generate-key" className="form-check">
+              <input
+                type="checkbox"
+                id="auto-generate-key"
+                className="form-check-input"
+                checked={autoGenerateKey}
+                onChange={(e) => setAutoGenerateKey(e.target.checked)}
+              />
+              <span>Generate a random key</span>
+            </label>
+
+            <label htmlFor="show-key" className="form-check right">
+              <input
+                type="checkbox"
+                id="show-key"
+                className="form-check-input"
+                checked={showKey}
+                onChange={(e) => setShowKey(e.target.checked)}
+              />
+              <span>Show key</span>
+            </label>
+          </div> */}
+
+
+
 
           <small style={{ color: '#666', marginTop: '0.5rem', display: 'block' }}>
             Tip: Use a strong, memorable key. The key is used to generate chaotic sequences, essential for decryption.
