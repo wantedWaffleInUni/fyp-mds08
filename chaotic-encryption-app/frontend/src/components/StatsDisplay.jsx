@@ -19,8 +19,8 @@ const StatsDisplay = ({ metrics }) => {
       case 'npcr':
         return value > 99.5 ? '🟢 Excellent' : value > 99.0 ? '🟡 Good' : '🔴 Poor';
       case 'uaci':
-        return value > 33.0 && value < 34.0 ? '🟢 Excellent' : 
-               value > 32.0 && value < 36.0 ? '🟡 Good' : '🔴 Poor';
+        return value > 33.0 && value < 34.0 ? '🟢 Excellent' :
+          value > 32.0 && value < 36.0 ? '🟡 Good' : '🔴 Poor';
       default:
         return '';
     }
@@ -31,16 +31,16 @@ const StatsDisplay = ({ metrics }) => {
       <div className="card-header">
         <h3 className="card-title">Encryption Quality Metrics</h3>
       </div>
-      
+
       <div className="stats-grid">
-        {metrics.entropy_original && (
+        {metrics.entropy_original !== null && metrics.entropy_original !== undefined && (
           <div className="stat-card">
             <div className="stat-value">{formatValue(metrics.entropy_original)}</div>
             <div className="stat-label">Original Entropy (bits/pixel)</div>
           </div>
         )}
-        
-        {metrics.entropy_encrypted && (
+
+        {metrics.entropy_encrypted !== null && metrics.entropy_encrypted !== undefined && (
           <div className="stat-card">
             <div className="stat-value">{formatValue(metrics.entropy_encrypted)}</div>
             <div className="stat-label">
@@ -50,7 +50,7 @@ const StatsDisplay = ({ metrics }) => {
             </div>
           </div>
         )}
-        
+
         {metrics.npcr && (
           <div className="stat-card">
             <div className="stat-value">{formatValue(metrics.npcr, 2)}%</div>
@@ -61,7 +61,7 @@ const StatsDisplay = ({ metrics }) => {
             </div>
           </div>
         )}
-        
+
         {metrics.uaci && (
           <div className="stat-card">
             <div className="stat-value">{formatValue(metrics.uaci, 2)}%</div>
@@ -73,7 +73,7 @@ const StatsDisplay = ({ metrics }) => {
           </div>
         )}
       </div>
-      
+
       <div className="mt-3">
         <h4>Metric Descriptions:</h4>
         <ul style={{ listStyle: 'none', padding: 0 }}>
