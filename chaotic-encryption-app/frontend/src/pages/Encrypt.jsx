@@ -195,10 +195,10 @@ const Encrypt = () => {
   //   { value: '2dlasm', label: '2DLASM (2D Logistic Adjusted Sine Map)' },
   // ];
   const algoOptions = [
-    {
-      value: 'chaos', label: 'Chaotic Logistic (default)',
-      desc: 'Fast baseline using logistic-map confusion+diffusion. Good general choice.'
-    },
+    // {
+    //   value: 'chaos', label: 'Chaotic Logistic (default)',
+    //   desc: 'Fast baseline using logistic-map confusion+diffusion. Good general choice.'
+    // },
     {
       value: 'fodhnn', label: 'FODHNN (fractional-order Hopfield)',
       desc: 'Stronger confusion/diffusion via fractional-order dynamics. Slower but more secure.'
