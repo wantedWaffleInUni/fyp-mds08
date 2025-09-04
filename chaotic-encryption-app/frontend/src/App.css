@@ -563,13 +563,13 @@ body {
 }
 
 .form-check-input {
-  width: 16px;
-  height: 16px;
-  margin: 10px 0;
+  /* width: 16px;
+  height: 16px; */
+  /* margin: 0px 10px 10px 0px; */
   border: 1px solid #cbd5e1;
   border-radius: 4px;
   background: white;
-  transition: all .2s;
+  transition: all .2s; 
   cursor: pointer;
   padding-top: 12%;
 }
@@ -578,3 +578,17 @@ body {
   padding-inline-start: 1%;
   font-size: 14px;
 }
+
+/* .key-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+.key-controls .right {
+  margin-left: auto;           
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  
+} */
