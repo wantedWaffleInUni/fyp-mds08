@@ -19,10 +19,31 @@ const Results = () => {
     }
   }, [location.state, navigate]);
 
+  const isTiffName = (name = '') => /\.tiff?$/i.test(name);
+  const isTiffMime = (mime = '') => /tiff/i.test(mime || '');
+  // Prefer what Encrypt sent; fall back to any fields your backend may provide
+  const srcName =
+    location.state?.srcFile?.name ||
+    resultData?.original_filename ||
+    resultData?.original_name ||
+    '';
+  const srcType =
+    location.state?.srcFile?.type ||
+    resultData?.original_mime ||
+    '';
+  const isOriginalTIFF = isTiffName(srcName) || isTiffMime(srcType);
+
+    const dataUrlFor = (base64, filename = '', fallbackMime = 'image/png') => {
+      const ext = (filename || '').toLowerCase();
+      const mime =
+        ext.endsWith('.tif') || ext.endsWith('.tiff') ? 'image/tiff' : fallbackMime;
+      return `data:${mime};base64,${base64}`;
+    };
+
   const handleDownload = async (imageData, filename) => {
     try {
       // Convert base64 to blob
-      const response = await fetch(`data:image/png;base64,${imageData}`);
+      const response = await fetch(dataUrlFor(imageData, filename));
       const blob = await response.blob();
 
       // Download the file
@@ -66,31 +87,59 @@ const Results = () => {
           <h3 className="card-title">Image Comparison</h3>
         </div>
 
+        {/* ✨ Global TIFF disclaimer (shown only when applicable) */}
+        {operationType === 'encrypt' && isOriginalTIFF && (
+          <div className="alert alert-warning" style={{ margin: '0 1rem 1rem' }}>
+            <strong>Note:</strong> Browser preview for <code>.tif</code>/<code>.tiff</code> images
+            isn’t supported. The file is encrypted correctly—use the download button to view it locally.
+          </div>
+        )}
+
         <div className="image-preview">
           {operationType === 'encrypt' ? (
             <>
               <div className="image-container">
+                {/* If original is TIFF, don’t try to render an <img> */}
+                {isOriginalTIFF ? (
+                  <div className="no-preview-box"
+                       style={{display:'grid',placeItems:'center',height:260,background:'#fafafa',borderRadius:12,border:'1px dashed #ccc',padding:16}}>
+                    <div style={{textAlign:'center',color:'#6b7280'}}>
+                      Preview not supported for <code>.tif/.tiff</code> in most browsers.
+                      <br/>Use the button below to download and view locally.
+                    </div>
+                  </div>
+                ) : (
+
                 <img
-                  src={`data:image/png;base64,${resultData.original_image}`}
-                  alt="Original"
-                />
+                    src={dataUrlFor(
+                      resultData.original_image,
+                      resultData.original_filename || 'original_image.png',
+                      'image/png'
+                    )}
+                    alt="Original"
+                  />
+                )}
                 <div className="image-title">Original Image</div>
                 <button
                   className="btn btn-secondary mt-2"
-                  onClick={() => handleDownload(resultData.original_image, 'original_image.png')}
+                  onClick={() => handleDownload(resultData.original_image, resultData.original_filename || 'original_image.png')}
                 >
                   📥 Download Original
                 </button>
               </div>
               <div className="image-container">
                 <img
-                  src={`data:image/png;base64,${resultData.encrypted_image}`}
+                   src={dataUrlFor(
+                    resultData.encrypted_image,
+                    resultData.encrypted_filename || 'encrypted_image.png',
+                    'image/png'
+                  )}
                   alt="Encrypted"
                 />
                 <div className="image-title">Encrypted Image</div>
                 <button
                   className="btn btn-success mt-2"
-                  onClick={() => handleDownload(resultData.encrypted_image, resultData.encrypted_filename)}
+                  onClick={() => handleDownload(resultData.encrypted_image, resultData.encrypted_filename || 'encrypted_image.png')}
                 >
                   📥 Download Encrypted
                 </button>
@@ -99,13 +148,17 @@ const Results = () => {
           ) : (
             <div className="image-container">
               <img
-                src={`data:image/png;base64,${resultData.decrypted_image}`}
+                src={dataUrlFor(
+                  resultData.decrypted_image,
+                  resultData.decrypted_filename || 'decrypted_image.png',
+                  'image/png'
+                )}
                 alt="Decrypted"
               />
               <div className="image-title">Decrypted Image</div>
               <button
                 className="btn btn-success mt-2"
-                onClick={() => handleDownload(resultData.decrypted_image, resultData.decrypted_filename)}
+                onClick={() => handleDownload(resultData.decrypted_image, resultData.decrypted_filename || 'decrypted_image.png')}
               >
                 📥 Download Decrypted
               </button>
