@@ -9,6 +9,29 @@ import SelectAlgorithmModal from '../components/modals/SelectAlgorithmModal';
 import ProgressModal from '../components/modals/ProgressModal';
 import usePhasedProgress from '../components/modals/usePhasedProgress';
 
+// import {Eye, EyeOff} from 'lucide-react';
+// import { Eye as EyeIcon, EyeOff as EyeOffIcon } from 'react-feather';
+
+const EyeIcon = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+       aria-hidden="true">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const EyeOffIcon = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+       aria-hidden="true">
+    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.77 21.77 0 0 1 5.06-6.94" />
+    <path d="M1 1l22 22" />
+    <path d="M10.58 10.58a2 2 0 1 0 2.83 2.83" />
+    <path d="M9.88 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.77 21.77 0 0 1-3.16 4.19" />
+  </svg>
+);
+
 
 const Encrypt = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -320,10 +343,24 @@ const Encrypt = () => {
               >
                 {copied ? 'Copied!' : 'Copy'}
               </button>
-            </div>
-          </div>
 
-          <div className='key-controls' style={{ display: 'flex', marginLeft: "550px ", marginTop: "4px", gap: "5px" }}>
+              {/* 👁️ Show/Hide key */}
+              <button
+                type="button"
+                className="icon-btn"
+                onClick={() => setShowKey(v => !v)}
+                title={showKey ? 'Hide key' : 'Show key'}
+                aria-label={showKey ? 'Hide key' : 'Show key'}
+              >
+              {showKey ? <EyeOffIcon size={16} /> : <EyeIcon size={16} />}
+              </button>
+            
+            </div>
+            
+          </div>
+          
+
+          {/* <div className='key-controls' style={{ display: 'flex', marginLeft: "550px ", marginTop: "4px", gap: "5px" }}>
             <input
               type="checkbox"
               id="show-key"
@@ -335,7 +372,7 @@ const Encrypt = () => {
             <label htmlFor="show-key" className="form-check-label" style={{ fontSize: "10px"}}>
               Show key
             </label>
-          </div>
+          </div> */}
 
 
           {/* generate checkbox */}
