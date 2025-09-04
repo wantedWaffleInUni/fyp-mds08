@@ -164,7 +164,7 @@ const Encrypt = () => {
 
       stop();
       setShow(false);
-      navigate('/results', { state: { type: 'encrypt', data: res } });
+      navigate('/results', { state: { type: 'encrypt', data: res, srcFile: {name: selectedFile?.name, type: selectedFile?.type} } });
     } catch (e) {
       stop();
       setShow(false);
