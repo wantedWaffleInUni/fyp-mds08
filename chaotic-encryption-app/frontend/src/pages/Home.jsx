@@ -50,7 +50,7 @@ const Home = () => {
           
           <div>
             <h3>🖼️ Image Support</h3>
-            <p>Supports multiple image formats: PNG, JPG, JPEG, GIF, BMP</p>
+            <p>Supports multiple image formats: PNG, JPG, JPEG, GIF, BMP, TIF, TIFF</p>
           </div>
           
           <div>

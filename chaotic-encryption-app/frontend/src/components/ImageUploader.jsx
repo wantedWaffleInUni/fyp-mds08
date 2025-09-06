@@ -191,7 +191,7 @@ export default function ImageUploader({ onImageUpload, acceptedFileTypes = ['ima
           <div className="dropzone-icon">📁</div>
           <div className="dropzone-text">
             {isDragActive ? (isDragReject ? '❌ File type not supported' : '📤 Drop the image here…') :
-              <>📤 Drag &amp; drop an image here, or click to select<br /><small>PNG, JPG, GIF, BMP, TIFF (Max 16 MB)</small></>}
+              <>📤 Drag &amp; drop an image here, or click to select<br /><small>PNG, JPG, GIF, BMP, TIF, TIFF (Max 16 MB)</small></>}
           </div>
         </>
       )}

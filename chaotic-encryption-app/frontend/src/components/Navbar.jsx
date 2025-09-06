@@ -34,14 +34,14 @@ const Navbar = () => {
               Decrypt
             </NavLink>
           </li>
-          <li>
+          {/* <li>
             <NavLink 
               to="/results" 
               className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
             >
               Results
             </NavLink>
-          </li>
+          </li> */}
         </ul>
       </div>
     </nav>
