@@ -7,6 +7,7 @@ This file is a self-contained library module with no executable demo.
 import numpy as np
 import math
 import secrets
+import hashlib
 from typing import Tuple
 
 
@@ -45,8 +46,6 @@ class BulbanEncryptor(EncryptorInterface):
     encrypt_image(image, key) -> np.ndarray
     decrypt_image(image, key) -> np.ndarray
     """
-    
-
     
     def get_algorithm_name(self) -> str:
         """Get the name of the encryption algorithm."""
@@ -92,8 +91,11 @@ class BulbanEncryptor(EncryptorInterface):
 
     def _derive_params(self, key: str, M: int, N: int):
         """Derive deterministic key material from key."""
-        seed = key.encode()
-        rng = np.random.default_rng(int.from_bytes(seed, 'big'))
+        # 改为稳定的哈希种子，避免跨平台差异
+        seed_bytes = hashlib.sha256(key.encode()).digest()[:8]
+        seed_int = int.from_bytes(seed_bytes, 'big')
+        rng = np.random.default_rng(seed_int)
+
         X = rng.random(6) * 100 + 2.0
         X[np.abs(X - 2.0) < 1e-12] += 0.1
         X[np.abs(X - 2.5) < 1e-12] += 0.1
@@ -106,11 +108,6 @@ class BulbanEncryptor(EncryptorInterface):
     # -------------------------------------------------
     def _encrypt_round(self, img: np.ndarray, X: np.ndarray, DMr: int, DNr: int) -> np.ndarray:
         """Single encryption round: shuffle + diffuse."""
-        M0, N0 = img.shape
-        rng = np.random.default_rng(int.from_bytes(X.tobytes(), 'big'))
-        top = rng.integers(0, 256, (1, N0), dtype=np.uint8)
-        bottom = rng.integers(0, 256, (1, N0), dtype=np.uint8)
-        img = np.vstack([top, img, bottom])
         M, N = img.shape
         img = img.astype(np.int16)
 
@@ -185,4 +182,4 @@ class BulbanEncryptor(EncryptorInterface):
         for i in range(M):
             img[i] = np.roll(img[i], -PR[i])
 
-        return img[1:-1, :].astype(np.uint8)
+        return img.astype(np.uint8)
