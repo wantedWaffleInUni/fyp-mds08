@@ -1,8 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ImageUploader from '../components/ImageUploader';
 import { decryptImage } from '../services/api';
 import { saveAs } from 'file-saver';
+
+import SelectAlgorithmModal from '../components/modals/SelectAlgorithmModal';
+
+// 👁️ icons
+const EyeIcon = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const EyeOffIcon = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.77 21.77 0 0 1 5.06-6.94" />
+    <path d="M1 1l22 22" />
+    <path d="M10.58 10.58a2 2 0 1 0 2.83 2.83" />
+    <path d="M9.88 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.77 21.77 0 0 1-3.16 4.19" />
+  </svg>
+);
 
 const Decrypt = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -13,38 +34,80 @@ const Decrypt = () => {
   const [algorithm, setAlgorithm] = useState('chaos');
   const navigate = useNavigate();
 
+  // ---- key copy/paste/show/hide ----
+  const [showKey, setShowKey] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const keyInputRef = useRef(null);
+
+  const handleCopyKey = async () => {
+    try {
+      await navigator.clipboard.writeText(decryptionKey || '');
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    } catch {
+      setError('Copy failed (clipboard blocked by browser).');
+    }
+  };
+
+  const handlePasteKey = async () => {
+    try {
+      const txt = await navigator.clipboard.readText();
+      setDecryptionKey(txt || '');
+      if (error) setError('');
+    } catch {
+      setError('Paste blocked by browser. Use Ctrl+V instead.');
+    }
+  };
+
+  // ---- algorithm modal ----
+  const [showAlgoModal, setShowAlgoModal] = useState(false);
+  const [flipped, setFlipped] = useState({});
+  const setFlip = (val, on) => setFlipped(f => ({ ...f, [val]: on ?? !f[val] }));
+
+  const algoOptions = [
+   {
+      value: 'fodhnn', label: 'FODHNN (fractional-order Hopfield)',
+      desc: 'Stronger confusion/diffusion via fractional-order dynamics. Slower but more secure.'
+    },
+    {
+      value: '2dlasm', label: '2DLASM (2D Logistic Adjusted Sine Map)',
+      desc: '2D chaotic map with high key sensitivity. Fast and secure.'
+    },
+    { value: 'bulban', label: 'Bülban chaotic map', 
+      desc: 'Fast, highly secure, accepts any pixel size, but internally converts to grayscale before encryption, and outputs a grayscale cipher image.' 
+    },
+    { value: 'acm-2dscl', label: 'ACM-2DSCL (Arnold Cat Map + 2DSCL + Chen)', 
+      desc: 'Hybrid chaotic cipher with multi-stage confusion and diffusion. Strongest security out of all.'
+    },
+  ];
+
   const handleImageUpload = (file) => {
     setSelectedFile(file);
     setError('');
     setResult(null);
   };
 
-  const handleDecrypt = async () => {
+  const handleDecrypt = () => {
     if (!selectedFile) {
       setError('Please select an encrypted image to decrypt');
       return;
     }
-
     if (!decryptionKey.trim()) {
       setError('Please enter the decryption key');
       return;
     }
+    setShowAlgoModal(true); // 打开算法选择弹窗
+  };
 
-
-
+  const confirmDecrypt = async () => {
     setIsLoading(true);
+    setShowAlgoModal(false);
     setError('');
-
     try {
       const response = await decryptImage(selectedFile, decryptionKey, algorithm);
       setResult(response);
-
-      // Navigate to results page with the data
       navigate('/results', {
-        state: {
-          type: 'decrypt',
-          data: response
-        }
+        state: { type: 'decrypt', data: response }
       });
     } catch (err) {
       setError(err.message);
@@ -55,11 +118,8 @@ const Decrypt = () => {
 
   const handleDownload = async (imageData, filename) => {
     try {
-      // Convert base64 to blob
       const response = await fetch(`data:image/png;base64,${imageData}`);
       const blob = await response.blob();
-
-      // Download the file
       saveAs(blob, filename || 'decrypted_image.png');
     } catch (err) {
       setError('Download failed: ' + err.message);
@@ -74,11 +134,7 @@ const Decrypt = () => {
           <p>Upload an encrypted image and decrypt it using the original key</p>
         </div>
 
-        {error && (
-          <div className="alert alert-error">
-            {error}
-          </div>
-        )}
+        {error && <div className="alert alert-error">{error}</div>}
 
         <div className="form-group">
           <label className="form-label">Select Encrypted Image</label>
@@ -93,78 +149,31 @@ const Decrypt = () => {
 
         <div className="form-group">
           <label className="form-label">Decryption Key</label>
-          <input
-            type="text"
-            className="form-control"
-            value={decryptionKey}
-            onChange={(e) => setDecryptionKey(e.target.value)}
-            placeholder="Enter the decryption key (must match the encryption key)"
-          />
+          <div className="input-with-actions">
+            <input
+              ref={keyInputRef}
+              type={showKey ? 'text' : 'password'}
+              className="form-control"
+              value={decryptionKey}
+              onChange={(e) => setDecryptionKey(e.target.value)}
+              placeholder="Enter the decryption key"
+              style={{ paddingRight: '116px' }}
+              autoComplete="off"
+            />
+            <div className="input-actions">
+              <button type="button" className="icon-btn" onClick={handlePasteKey}>Paste</button>
+              <button type="button" className="icon-btn" onClick={handleCopyKey} disabled={!decryptionKey}>
+                {copied ? 'Copied!' : 'Copy'}
+              </button>
+              <button type="button" className="icon-btn" onClick={() => setShowKey(v => !v)}>
+                {showKey ? <EyeOffIcon size={16} /> : <EyeIcon size={16} />}
+              </button>
+            </div>
+          </div>
           <small style={{ color: '#666', marginTop: '0.5rem', display: 'block' }}>
             The decryption key must be exactly the same as the key used for encryption.
           </small>
         </div>
-
-        <div className="form-group">
-          <label className="form-label">Algorithm</label>
-          <div className="d-flex gap-2">
-            <label className="radio">
-              <input
-                type="radio"
-                name="algorithm"
-                value="chaos"
-                checked={algorithm === 'chaos'}
-                onChange={() => setAlgorithm('chaos')}
-              />
-              <span>Chaotic Logistic (default)</span>
-            </label>
-            <label className="radio">
-              <input
-                type="radio"
-                name="algorithm"
-                value="fodhnn"
-                checked={algorithm === 'fodhnn'}
-                onChange={() => setAlgorithm('fodhnn')}
-              />
-              <span>FODHNN</span>
-            </label>
-
-            <label className="radio">
-              <input
-                type="radio"
-                name="algorithm"
-                value="2dlasm"
-                checked={algorithm === '2dlasm'}
-                onChange={() => setAlgorithm('2dlasm')}
-              />
-              <span>2DLASM</span>
-            </label>
-
-            <label className="radio">
-              <input
-                type="radio"
-                name="algorithm"
-                value="acm_2dscl"
-                checked={algorithm === 'acm_2dscl'}
-                onChange={() => setAlgorithm('acm_2dscl')}
-              />
-              <span>ACM_2DSCL</span>
-            </label>
-
-            <label className="radio">
-              <input
-                type="radio"
-                name="algorithm"
-                value="bulban"
-                checked={algorithm === 'bulban'}
-                onChange={() => setAlgorithm('bulban')}
-              />
-              <span>Bulban</span>
-            </label>
-          </div>
-        </div>
-
-
 
         <div className="d-flex justify-center">
           <button
@@ -190,17 +199,12 @@ const Decrypt = () => {
           <div className="card-header">
             <h3 className="card-title">Decryption Results</h3>
           </div>
-
           <div className="image-preview">
             <div className="image-container">
-              <img
-                src={`data:image/png;base64,${result.decrypted_image}`}
-                alt="Decrypted"
-              />
+              <img src={`data:image/png;base64,${result.decrypted_image}`} alt="Decrypted" />
               <div className="image-title">Decrypted Image</div>
             </div>
           </div>
-
           <div className="d-flex justify-center gap-2 mt-3">
             <button
               className="btn btn-success"
@@ -212,20 +216,17 @@ const Decrypt = () => {
         </div>
       )}
 
-      <div className="card">
-        <div className="card-header">
-          <h3 className="card-title">Important Notes</h3>
-        </div>
-
-        <div className="alert alert-info">
-          <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
-            <li><strong>Key Requirement:</strong> You must use the exact same key that was used for encryption</li>
-            <li><strong>Image Format:</strong> The encrypted image should be in PNG format</li>
-            <li><strong>File Size:</strong> Maximum file size is 16MB</li>
-            <li><strong>Security:</strong> Never share your decryption key with others</li>
-          </ul>
-        </div>
-      </div>
+      <SelectAlgorithmModal
+        open={showAlgoModal}
+        onClose={() => setShowAlgoModal(false)}
+        onConfirm={confirmDecrypt}
+        options={algoOptions}
+        selected={algorithm}
+        onSelect={(val) => setAlgorithm(val)}
+        confirming={isLoading}
+        flipped={flipped}
+        setFlip={setFlip}
+      />
     </div>
   );
 };
