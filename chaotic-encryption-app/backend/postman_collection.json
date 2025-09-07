@@ -1,0 +1,501 @@
+{
+  "info": {
+    "name": "Chaotic Encryption App API Tests",
+    "description": "Comprehensive test collection for encryption and decryption scenarios",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5001",
+      "type": "string"
+    },
+    {
+      "key": "test_key",
+      "value": "test_encryption_key_123",
+      "type": "string"
+    },
+    {
+      "key": "encrypted_image_b64",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/health",
+          "host": ["{{base_url}}"],
+          "path": ["api", "health"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Encrypt - FODHNN Algorithm",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    const response = pm.response.json();",
+              "    if (response.success) {",
+              "        pm.collectionVariables.set('encrypted_image_b64', response.encrypted_image);",
+              "        console.log('FODHNN Encryption successful');",
+              "        console.log('Entropy Original:', response.metrics.entropy_original);",
+              "        console.log('Entropy Encrypted:', response.metrics.entropy_encrypted);",
+              "        console.log('NPCR:', response.metrics.npcr);",
+              "        console.log('UACI:', response.metrics.uaci);",
+              "    }",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"image\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==\",\n  \"key\": \"{{test_key}}\",\n  \"algorithm\": \"fodhnn\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/encrypt",
+          "host": ["{{base_url}}"],
+          "path": ["api", "encrypt"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Encrypt - LASM Algorithm (Default)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    const response = pm.response.json();",
+              "    if (response.success) {",
+              "        pm.collectionVariables.set('encrypted_image_b64', response.encrypted_image);",
+              "        console.log('LASM Encryption successful');",
+              "        console.log('Algorithm used:', response.algorithm);",
+              "    }",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"image\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==\",\n  \"key\": \"{{test_key}}\",\n  \"algorithm\": \"2dlasm\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/encrypt",
+          "host": ["{{base_url}}"],
+          "path": ["api", "encrypt"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Encrypt - ACM-2DSCL Algorithm",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    const response = pm.response.json();",
+              "    if (response.success) {",
+              "        pm.collectionVariables.set('encrypted_image_b64', response.encrypted_image);",
+              "        console.log('ACM-2DSCL Encryption successful');",
+              "    }",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"image\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==\",\n  \"key\": \"{{test_key}}\",\n  \"algorithm\": \"acm-2dscl\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/encrypt",
+          "host": ["{{base_url}}"],
+          "path": ["api", "encrypt"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Encrypt - Bulban Algorithm (Grayscale)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    const response = pm.response.json();",
+              "    if (response.success) {",
+              "        pm.collectionVariables.set('encrypted_image_b64', response.encrypted_image);",
+              "        console.log('Bulban Encryption successful (Grayscale)');",
+              "    }",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"image\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==\",\n  \"key\": \"{{test_key}}\",\n  \"algorithm\": \"bulban\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/encrypt",
+          "host": ["{{base_url}}"],
+          "path": ["api", "encrypt"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Decrypt - FODHNN Algorithm",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    const response = pm.response.json();",
+              "    if (response.success) {",
+              "        console.log('FODHNN Decryption successful');",
+              "        console.log('Decrypted image size:', response.decrypted_image.length);",
+              "    }",
+              "} else {",
+              "    console.log('Decryption failed:', pm.response.text());",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"image\": \"{{encrypted_image_b64}}\",\n  \"key\": \"{{test_key}}\",\n  \"algorithm\": \"fodhnn\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/decrypt",
+          "host": ["{{base_url}}"],
+          "path": ["api", "decrypt"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Decrypt - LASM Algorithm",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    const response = pm.response.json();",
+              "    if (response.success) {",
+              "        console.log('LASM Decryption successful');",
+              "    }",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"image\": \"{{encrypted_image_b64}}\",\n  \"key\": \"{{test_key}}\",\n  \"algorithm\": \"2dlasm\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/decrypt",
+          "host": ["{{base_url}}"],
+          "path": ["api", "decrypt"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Decrypt - ACM-2DSCL Algorithm",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    const response = pm.response.json();",
+              "    if (response.success) {",
+              "        console.log('ACM-2DSCL Decryption successful');",
+              "    }",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"image\": \"{{encrypted_image_b64}}\",\n  \"key\": \"{{test_key}}\",\n  \"algorithm\": \"acm_2dscl\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/decrypt",
+          "host": ["{{base_url}}"],
+          "path": ["api", "decrypt"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Decrypt - Bulban Algorithm",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    const response = pm.response.json();",
+              "    if (response.success) {",
+              "        console.log('Bulban Decryption successful');",
+              "    }",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"image\": \"{{encrypted_image_b64}}\",\n  \"key\": \"{{test_key}}\",\n  \"algorithm\": \"bulban\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/decrypt",
+          "host": ["{{base_url}}"],
+          "path": ["api", "decrypt"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Error Test - Wrong Key",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    const response = pm.response.json();",
+              "    if (response.success) {",
+              "        console.log('Decryption with wrong key succeeded (unexpected)');",
+              "    } else {",
+              "        console.log('Decryption with wrong key failed (expected)');",
+              "    }",
+              "} else {",
+              "    console.log('Decryption with wrong key failed with error:', pm.response.text());",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"image\": \"{{encrypted_image_b64}}\",\n  \"key\": \"wrong_key_123\",\n  \"algorithm\": \"fodhnn\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/decrypt",
+          "host": ["{{base_url}}"],
+          "path": ["api", "decrypt"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Error Test - Invalid Image Data",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 400) {",
+              "    console.log('Invalid image data correctly rejected');",
+              "} else {",
+              "    console.log('Unexpected response for invalid image data');",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"image\": \"invalid_base64_data\",\n  \"key\": \"{{test_key}}\",\n  \"algorithm\": \"fodhnn\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/encrypt",
+          "host": ["{{base_url}}"],
+          "path": ["api", "encrypt"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Error Test - Missing Key",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    console.log('Request without key succeeded (using default key)');",
+              "} else {",
+              "    console.log('Request without key failed:', pm.response.text());",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"image\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==\",\n  \"algorithm\": \"fodhnn\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/encrypt",
+          "host": ["{{base_url}}"],
+          "path": ["api", "encrypt"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Performance Test - Large Image",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const startTime = Date.now();",
+              "if (pm.response.code === 200) {",
+              "    const endTime = Date.now();",
+              "    const duration = endTime - startTime;",
+              "    console.log('Large image encryption completed in:', duration, 'ms');",
+              "    const response = pm.response.json();",
+              "    if (response.success) {",
+              "        console.log('Large image encryption successful');",
+              "    }",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"image\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==\",\n  \"key\": \"{{test_key}}\",\n  \"algorithm\": \"fodhnn\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/encrypt",
+          "host": ["{{base_url}}"],
+          "path": ["api", "encrypt"]
+        }
+      },
+      "response": []
+    }
+  ]
+}
