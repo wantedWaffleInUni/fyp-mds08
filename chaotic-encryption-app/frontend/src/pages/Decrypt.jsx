@@ -5,6 +5,9 @@ import { decryptImage } from '../services/api';
 import { saveAs } from 'file-saver';
 
 import SelectAlgorithmModal from '../components/modals/SelectAlgorithmModal';
+import ProgressModal from '../components/modals/ProgressModal';
+import usePhasedProgress from '../components/modals/usePhasedProgress';
+
 
 // 👁️ icons
 const EyeIcon = ({ size = 16 }) => (
@@ -39,11 +42,6 @@ const Decrypt = () => {
   const [copied, setCopied] = useState(false);
   const keyInputRef = useRef(null);
 
-  const PHASES = [
-    { label: 'Analysing image …', from: 2, to: 25 },
-    { label: 'Deconfusion & inverse diffusion stage …', from: 26, to: 55 },
-    { label: 'Decrypting …', from: 56, to: 85 }
-  ];
 
   const handleCopyKey = async () => {
     try {
@@ -87,6 +85,17 @@ const Decrypt = () => {
     },
   ];
 
+  // ---- progress modal ----
+  const PHASES = [
+    { label: 'Analysing image …', from: 2, to: 25 },
+    { label: 'Deconfusion & inverse diffusion stage …', from: 26, to: 55 },
+    { label: 'Decrypting …', from: 56, to: 85 }
+  ];
+  const { show, setShow, progress, phase, start, stop } = usePhasedProgress(PHASES);
+  const abortRef = useRef(null);
+
+
+
   const handleImageUpload = (file) => {
     setSelectedFile(file);
     setError('');
@@ -122,6 +131,11 @@ const Decrypt = () => {
     setIsLoading(true);
     setShowAlgoModal(false);
     setError('');
+
+    const ac = new AbortController();
+    abortRef.current = ac;
+    
+    start(ac.signal);
     try {
       const response = await decryptImage(selectedFile, decryptionKey, algorithm);
       setResult(response);
@@ -253,6 +267,17 @@ const Decrypt = () => {
         confirming={isLoading}
         flipped={flipped}
         setFlip={setFlip}
+      />
+
+      <ProgressModal
+        open={show}
+        progress={progress}
+        phase={phase}
+        onCancel={() => {
+          abortRef.current?.abort();
+          stop();
+          setShow(false);
+        }}
       />
     </div>
   );
