@@ -18,6 +18,94 @@ from encryption.bulban_encryptor import BulbanEncryptor
 
 from utils import calculate_entropy, calculate_npcr, calculate_uaci
 
+def save_encrypted_image(image: np.ndarray, filepath: str) -> bool:
+    """
+    Save encrypted image with optimized compression for high-entropy data.
+    
+    For encrypted images with high entropy, we use multiple strategies:
+    1. Try maximum PNG compression first
+    2. If that fails, try JPEG with high quality
+    3. As a last resort, save as uncompressed binary with .enc extension
+    
+    Args:
+        image: Encrypted image as numpy array
+        filepath: Path where to save the image
+        
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    try:
+        # Strategy 1: Maximum PNG compression
+        success = cv2.imwrite(filepath, image, [cv2.IMWRITE_PNG_COMPRESSION, 9])
+        
+        if success:
+            return True
+            
+        # Strategy 2: JPEG with high quality (better for some high-entropy data)
+        jpeg_path = filepath.replace('.png', '.jpg')
+        success = cv2.imwrite(jpeg_path, image, [cv2.IMWRITE_JPEG_QUALITY, 95])
+        if success:
+            # Rename the file back to original extension
+            os.rename(jpeg_path, filepath)
+            return True
+        
+        # Strategy 3: Save as binary format (most efficient for high-entropy data)
+        binary_path = filepath.replace('.png', '.enc')
+        with open(binary_path, 'wb') as f:
+            # Write image dimensions first
+            f.write(image.shape[0].to_bytes(4, 'big'))  # height
+            f.write(image.shape[1].to_bytes(4, 'big'))  # width
+            if len(image.shape) == 3:
+                f.write(image.shape[2].to_bytes(4, 'big'))  # channels
+            else:
+                f.write((1).to_bytes(4, 'big'))  # grayscale = 1 channel
+            # Write raw image data
+            f.write(image.tobytes())
+        
+        # Rename to original extension
+        os.rename(binary_path, filepath)
+        return True
+        
+    except Exception as e:
+        print(f"Error saving encrypted image: {e}")
+        return False
+
+def load_encrypted_image(filepath: str) -> np.ndarray:
+    """
+    Load encrypted image that may have been saved in different formats.
+    
+    Args:
+        filepath: Path to the encrypted image file
+        
+    Returns:
+        np.ndarray: Loaded image array, or None if failed
+    """
+    try:
+        # First try standard OpenCV loading
+        image = cv2.imread(filepath)
+        if image is not None:
+            return image
+            
+        # If that fails, try loading as binary format
+        with open(filepath, 'rb') as f:
+            height = int.from_bytes(f.read(4), 'big')
+            width = int.from_bytes(f.read(4), 'big')
+            channels = int.from_bytes(f.read(4), 'big')
+            
+            if channels == 1:
+                shape = (height, width)
+            else:
+                shape = (height, width, channels)
+                
+            # Read raw image data
+            data = f.read()
+            image = np.frombuffer(data, dtype=np.uint8).reshape(shape)
+            return image
+            
+    except Exception as e:
+        print(f"Error loading encrypted image: {e}")
+        return None
+
 app = Flask(__name__)
 CORS(app)
 
@@ -130,9 +218,11 @@ def encrypt_image():
             encryptor = ChaosEncryptor()
             encrypted_img = encryptor.encrypt_image(original_img, key)
         
-        # Save encrypted image
+        # Save encrypted image with optimized compression for high-entropy data
         encrypted_path = os.path.join(app.config['UPLOAD_FOLDER'], encrypted_filename)
-        cv2.imwrite(encrypted_path, encrypted_img)
+        success = save_encrypted_image(encrypted_img, encrypted_path)
+        if not success:
+            return jsonify({'error': 'Failed to save encrypted image'}), 500
         
         # Calculate metrics
         entropy_original = calculate_entropy(original_img)
@@ -187,8 +277,8 @@ def decrypt_image():
         if not encrypted_path:
             return jsonify({'error': 'Failed to save encrypted image'}), 500
         
-        # Read image for processing
-        encrypted_img = cv2.imread(encrypted_path)
+        # Read image for processing (supports both standard and binary formats)
+        encrypted_img = load_encrypted_image(encrypted_path)
         if encrypted_img is None:
             return jsonify({'error': 'Failed to read image'}), 500
         
@@ -215,9 +305,11 @@ def decrypt_image():
             encryptor = ChaosEncryptor()
             decrypted_img = encryptor.decrypt_image(encrypted_img, key)
         
-        # Save decrypted image
+        # Save decrypted image with optimized compression
         decrypted_path = os.path.join(app.config['UPLOAD_FOLDER'], decrypted_filename)
-        cv2.imwrite(decrypted_path, decrypted_img)
+        success = save_encrypted_image(decrypted_img, decrypted_path)
+        if not success:
+            return jsonify({'error': 'Failed to save decrypted image'}), 500
         
         # Convert image to base64 for response
         decrypted_b64 = image_to_base64(decrypted_path)
