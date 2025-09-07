@@ -48,7 +48,7 @@ const Home = () => {
             <p>Real-time calculation of entropy, NPCR, and UACI for encryption quality assessment</p>
           </div>
           
-          <div>
+          {/* <div>
             <h3>🖼️ Image Support</h3>
             <p>Supports multiple image formats: PNG, JPG, JPEG, GIF, BMP, TIF, TIFF</p>
           </div>
@@ -56,7 +56,7 @@ const Home = () => {
           <div>
             <h3>⚡ Fast Processing</h3>
             <p>Optimized algorithms for quick encryption and decryption</p>
-          </div>
+          </div> */}
         </div>
       </div>
       
@@ -65,7 +65,7 @@ const Home = () => {
           <h2 className="card-title">How It Works</h2>
         </div>
         
-        <div style={{ textAlign: 'left', maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'left', maxWidth: '800px', margin: '0 auto', paddingLeft: '2rem' }}>
           <ol style={{ lineHeight: '2', fontSize: '1.1rem' }}>
             <li><strong>Upload:</strong> Select an image file using drag-and-drop or file picker</li>
             <li><strong>Encrypt:</strong> Choose an encryption key and apply chaotic encryption</li>
@@ -75,7 +75,7 @@ const Home = () => {
         </div>
       </div>
       
-      <div className="card">
+      {/* <div className="card">
         <div className="card-header">
           <h2 className="card-title">Security Advantages</h2>
         </div>
@@ -101,7 +101,7 @@ const Home = () => {
             <p>Encrypted images achieve high entropy values, indicating strong randomness</p>
           </div>
         </div>
-      </div>
+      </div> */}
       
       <div className="card">
         <div className="card-header">
