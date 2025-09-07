@@ -21,14 +21,14 @@ const fileToBase64 = (file) => {
 };
 
 // API functions
-export const encryptImage = async (imageFile, key = 'default_key_123', algorithm = 'chaos') => {
+export const encryptImage = async (imageFile, key = 'default_key_123', algorithm = '2dlasm') => {
   try {
     const imageData = await fileToBase64(imageFile);
     
     const payload = {
       image: imageData,
       key: key,
-      algorithm: (algorithm || 'chaos').toLowerCase(),
+      algorithm: (algorithm || '2dlasm').toLowerCase(),
     };
     const response = await api.post('/encrypt', payload);
     
@@ -39,14 +39,14 @@ export const encryptImage = async (imageFile, key = 'default_key_123', algorithm
   }
 };
 
-export const decryptImage = async (imageFile, key = 'default_key_123', algorithm = 'chaos') => {
+export const decryptImage = async (imageFile, key = 'default_key_123', algorithm = '2dlasm') => {
   try {
     const imageData = await fileToBase64(imageFile);
     
     const payload = {
       image: imageData,
       key: key,
-      algorithm: (algorithm || 'chaos').toLowerCase(),
+      algorithm: (algorithm || '2dlasm').toLowerCase(),
     };
     const response = await api.post('/decrypt', payload);
     

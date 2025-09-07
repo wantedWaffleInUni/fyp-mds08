@@ -9,7 +9,6 @@ from PIL import Image
 import io
 import base64
 from werkzeug.utils import secure_filename
-from encryption.chaos_encryptor import ChaosEncryptor
 from encryption.fodhnn_encryptor import FODHNNEncryptor
 from encryption.another_2d import LASMEncryptorFB
 from encryption.acm_2dscl import HybridEncryptorFB
@@ -177,7 +176,7 @@ def encrypt_image():
         # Extract image data and key
         image_data = data['image']
         key = data.get('key', 'default_key_123')
-        algorithm = str(data.get('algorithm', 'chaos')).lower()
+        algorithm = str(data.get('algorithm', '2dlasm')).lower()
         
         # Generate unique filename
         original_filename = f"original_{uuid.uuid4()}.png"
@@ -196,27 +195,20 @@ def encrypt_image():
         # Initialize encryptor and encrypt
         if algorithm == 'fodhnn':
             encryptor = FODHNNEncryptor()
-            encrypted_img = encryptor.encrypt_image(original_img, key)
-
-        elif algorithm == '2dlasm':
-            encryptor = LASMEncryptorFB()
-            encrypted_img = encryptor.encrypt_image(original_img, key)
         
-        elif algorithm == 'acm_2dscl':
+        elif algorithm == 'acm-2dscl':
             encryptor = HybridEncryptorFB()
-            encrypted_img = encryptor.encrypt_image(original_img, key)
         
         elif algorithm == 'bulban':
             # Convert to grayscale if image is colored
             if original_img.ndim == 3:
                 original_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
             encryptor = BulbanEncryptor()
-            encrypted_img = encryptor.encrypt_image(original_img, key)
-
 
         else:
-            encryptor = ChaosEncryptor()
-            encrypted_img = encryptor.encrypt_image(original_img, key)
+            encryptor = LASMEncryptorFB()
+
+        encrypted_img = encryptor.encrypt_image(original_img, key)
         
         # Save encrypted image with optimized compression for high-entropy data
         encrypted_path = os.path.join(app.config['UPLOAD_FOLDER'], encrypted_filename)
@@ -266,7 +258,7 @@ def decrypt_image():
         # Extract image data and key
         image_data = data['image']
         key = data.get('key', 'default_key_123')
-        algorithm = str(data.get('algorithm', 'chaos')).lower()
+        algorithm = str(data.get('algorithm', '2dlasm')).lower()
         
         # Generate unique filename
         encrypted_filename = f"encrypted_{uuid.uuid4()}.png"
@@ -285,25 +277,20 @@ def decrypt_image():
         # Initialize encryptor and decrypt
         if algorithm == 'fodhnn':
             encryptor = FODHNNEncryptor()
-            decrypted_img = encryptor.decrypt_image(encrypted_img, key)
-
-        elif algorithm == '2dlasm':
-            encryptor = LASMEncryptorFB()
-            decrypted_img = encryptor.decrypt_image(encrypted_img, key)
 
         elif algorithm == 'acm_2dscl':
             encryptor = HybridEncryptorFB()
-            decrypted_img = encryptor.decrypt_image(encrypted_img, key)
 
         elif algorithm == 'bulban':
             if encrypted_img.ndim == 3:
                 encrypted_img = cv2.cvtColor(encrypted_img, cv2.COLOR_BGR2GRAY)
             encryptor = BulbanEncryptor()
-            decrypted_img = encryptor.decrypt_image(encrypted_img, key)
 
         else:
-            encryptor = ChaosEncryptor()
-            decrypted_img = encryptor.decrypt_image(encrypted_img, key)
+            encryptor = LASMEncryptorFB()
+
+        decrypted_img = encryptor.decrypt_image(encrypted_img, key)
+
         
         # Save decrypted image with optimized compression
         decrypted_path = os.path.join(app.config['UPLOAD_FOLDER'], decrypted_filename)
