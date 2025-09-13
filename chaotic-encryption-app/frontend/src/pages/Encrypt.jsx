@@ -266,7 +266,7 @@ const Encrypt = () => {
 
   return (
     <div>
-      <div className="card">
+      <div className="card-form">
         <div className="card-header">
           <h2 className="card-title">🔒 Encrypt Image</h2>
           <p>Upload an image to encrypt it using chaotic encryption</p>
