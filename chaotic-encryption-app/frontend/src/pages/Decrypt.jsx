@@ -128,7 +128,7 @@ const Decrypt = () => {
 
   return (
     <div>
-      <div className="card">
+      <div className="card-form">
         <div className="card-header">
           <h2 className="card-title">🔓 Decrypt Image</h2>
           <p>Upload an encrypted image and decrypt it using the original key</p>

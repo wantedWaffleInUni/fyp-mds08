@@ -63,19 +63,34 @@ body {
 }
 
 /* Main container */
+/*all pages*/
 .container {
   flex: 1;
-  margin: 0 4px;
-  padding: 2rem 4rem;
+  margin: 0 4px; /* set it to 4px, larger card size*/
+  padding: 2rem 8rem; /*top, bottom: 2; left, right 8*/
 } 
 
 /* Cards */
-.card {
+.card { 
+  background:white;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  min-height: 300px;
+}
+
+.card-form {              /*for cards in encrypt and decrypt pages*/
   background: white;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 2rem;
   margin-bottom: 2rem;
+  min-height: 720px; 
+  /* to distribute content evenly in cards */
+  display: flex;          
+  flex-direction: column;  
+  justify-content: space-between; 
 }
 
 .card-header {
