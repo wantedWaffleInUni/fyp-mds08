@@ -86,7 +86,11 @@ body {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 2rem;
   margin-bottom: 2rem;
-  min-height: 888px; 
+  min-height: 720px; 
+  /* to distribute content evenly in cards */
+  display: flex;          
+  flex-direction: column;  
+  justify-content: space-between; 
 }
 
 .card-header {
