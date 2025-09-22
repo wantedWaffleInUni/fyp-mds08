@@ -1,12 +1,14 @@
 import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+const API_KEY = process.env.REACT_APP_API_KEY || 'dev_key_1'; // Use environment variable for production
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 120000, // 2 minutes
   headers: {
     'Content-Type': 'application/json',
+    'X-API-Key': API_KEY, // Add API key to all requests
   },
 });
 
