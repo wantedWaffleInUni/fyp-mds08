@@ -40,7 +40,7 @@ const Encrypt = () => {
   const [encryptionKey, setEncryptionKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showAlgoModal, setShowAlgoModal] = useState(false);
-  const [selectedAlgorithm, setSelectedAlgorithm] = useState('chaos');
+  const [selectedAlgorithm, setSelectedAlgorithm] = useState('2dlasm');
 
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
