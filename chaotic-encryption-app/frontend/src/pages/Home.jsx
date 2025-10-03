@@ -1,7 +1,25 @@
-import React from 'react';
+// import React from 'react';
 import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import CaptchaModal from '../components/modals/CaptchaModal';
 
 const Home = () => {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [redirectPath, setRedirectPath] = useState('');
+  const navigate = useNavigate();
+
+  const handleClick = (path) => {
+    setRedirectPath(path);
+    setModalOpen(true);
+  };
+
+  const handleVerified = (token) => {
+    // ✅ optional: send token to backend for validation
+    console.log("Captcha verified:", token);
+    navigate(redirectPath); // redirect after verification
+  };
+
   return (
     <div className="text-center">
       <div className="card">
@@ -23,12 +41,19 @@ const Home = () => {
         </div>
         
         <div className="d-flex justify-center gap-2 mb-3">
-          <Link to="/encrypt" className="btn btn-primary">
+          {/* <Link to="/encrypt" className="btn btn-primary">
             🔒 Encrypt Image
           </Link>
           <Link to="/decrypt" className="btn btn-secondary">
             🔓 Decrypt Image
-          </Link>
+          </Link> */}
+
+          <button onClick={() => handleClick('/encrypt')} className="btn btn-primary">
+            🔒 Encrypt Image
+          </button>
+          <button onClick={() => handleClick('/decrypt')} className="btn btn-secondary">
+            🔓 Decrypt Image
+          </button>
         </div>
       </div>
       
@@ -112,10 +137,26 @@ const Home = () => {
           Ready to experience the power of chaotic encryption? Start by uploading an image!
         </p>
         
-        <Link to="/encrypt" className="btn btn-primary" style={{ fontSize: '1.2rem', padding: '1rem 2rem' }}>
+        {/* <Link to="/encrypt" className="btn btn-primary" style={{ fontSize: '1.2rem', padding: '1rem 2rem' }}>
           🚀 Start Encrypting
-        </Link>
+        </Link> */}
+
+        <button
+          onClick={() => handleClick('/encrypt')}
+          className="btn btn-primary"
+          style={{ fontSize: '1.2rem', padding: '1rem 2rem' }}
+        >
+          🚀 Start Encrypting
+        </button>
       </div>
+
+      {/* Captcha Modal */}
+      <CaptchaModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onVerify={handleVerified}
+      />
+
     </div>
   );
 };
