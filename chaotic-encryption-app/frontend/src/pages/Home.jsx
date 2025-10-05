@@ -59,50 +59,68 @@ const Home = () => {
         </div>
       </div>
       
-      <div className="card">
-        <div className="card-header">
-          <h2 className="card-title">Key Features</h2>
-        </div>
-        
-        <div className = "feature-grid">
-          <div className = "feature"> 
-            <div className="feature-title"> 🔐 Chaotic Encryption</div>
-            <div className="feature-desc">Logistic maps and chaotic sequences for pixel-level encryption</div>
-            <ol style={{ lineHeight: '2', fontSize: '1.1rem' }}></ol>
-          </div>
-
-          <div className="feature">
-            <div className="feature-title"> 📊 Quality Metrics</div>
-            <div className="feature-desc">Real-time calculation of entropy, NPCR, and UACI for encryption quality assessment</div>
-          </div>
-
-          
-          {/* <div>
-            <h3>🖼️ Image Support</h3>
-            <p>Supports multiple image formats: PNG, JPG, JPEG, GIF, BMP, TIF, TIFF</p>
-          </div>
-          
-          <div>
-            <h3>⚡ Fast Processing</h3>
-            <p>Optimized algorithms for quick encryption and decryption</p>
-          </div> */}
-        </div>
-      </div>
       
       <div className="card">
         <div className="card-header">
-          <h2 className="card-title">How It Works</h2>
+          <h2 className="card-title">Key Features & How It Works</h2>
         </div>
-        
-        <div style={{ textAlign: 'left', maxWidth: '800px', margin: '0 auto', paddingLeft: '2rem' }}>
-          <ol style={{ lineHeight: '2', fontSize: '1.1rem' }}>
-            <li><strong>Upload:</strong> Select an image file using drag-and-drop or file picker</li>
-            <li><strong>Encrypt:</strong> Choose an encryption key and apply chaotic encryption</li>
-            <li><strong>Analyze:</strong> View encryption quality metrics and visual results</li>
-            <li><strong>Download:</strong> Save the encrypted/decrypted image to your device</li>
-          </ol>
+
+          <div className="features-steps-grid">
+            {/* LEFT: one tall FEATURES card */}
+            <section className="features features--cards">
+              <article className="pill-card pill-card--stack">
+                <div className="pill-card__label">FEATURES</div>
+
+                <div className="feature-item">
+                  <div className="feature-item__icon">🔐</div>
+                  <h3>Chaotic Encryption</h3>
+                  <p>Logistic maps & chaotic sequences for pixel-level encryption</p>
+                </div>
+
+                <hr className="pill-sep" />
+
+                <div className="feature-item">
+                  <div className="feature-item__icon">📊</div>
+                  <h3>Quality Metrics</h3>
+                  <p>Real-time entropy, NPCR, and UACI calculations</p>
+                </div>
+              </article>
+            </section>
+
+          {/* RIGHT column: step cards */}
+          <section className="steps steps--cards">
+            <article className="pill-card">
+              <div className="pill-card__year">STEP 1</div>
+              <div className="pill-card__icon">📤</div>
+              <h3>Upload</h3>
+              <p>Select an image file using drag-and-drop or file picker</p>
+            </article>
+
+            <article className="pill-card">
+              <div className="pill-card__year">STEP 2</div>
+              <div className="pill-card__icon">🔑</div>
+              <h3>Encrypt</h3>
+              <p>Enter or generate a strong key and apply chaotic encryption</p>
+            </article>
+
+            <article className="pill-card">
+              <div className="pill-card__year">STEP 3</div>
+              <div className="pill-card__icon">🧪</div>
+              <h3>Analyze</h3>
+              <p>Review encryption quality metrics & visual results</p>
+            </article>
+
+            <article className="pill-card">
+              <div className="pill-card__year">STEP 4</div>
+              <div className="pill-card__icon">🔗</div>
+              <h3>Download</h3>
+              <p>Save the encrypted or decrypted image or Share the results</p>
+            </article>
+          </section>
         </div>
       </div>
+
+
       
       {/* <div className="card">
         <div className="card-header">
@@ -145,10 +163,7 @@ const Home = () => {
           Start by{" "}
           <Typewriter
             words={[
-              "uploading an image",
-              "choosing a strong key",
-              "analyzing entropy, NPCR, and UACI",
-              "downloading your results"
+              "clicking the button below"
             ]}
             typingSpeed={70}
             deletingSpeed={45}

@@ -751,9 +751,101 @@ button, .btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .icon-btn
   width: 2px;
   height: 1em;
   margin-left: 3px;
-  background: #6d66ea;          /* match your purple */
+  background: #6d66ea;          /* match purple */
   display: inline-block;
   animation: caret-blink 1s steps(1) infinite;
 }
 @keyframes caret-blink { 50% { opacity: 0; } }
 
+/* Features & Steps section on Home page */
+/* two columns, stacks on mobile (keep from earlier) */
+.features-steps-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+@media (max-width: 960px) { .features-steps-grid { grid-template-columns: 1fr; } }
+
+/* arrange right column as a vertical card grid */
+.features--cards,
+.steps--cards {
+  display: grid;
+  gap: 1rem;
+}
+
+/* pill-card = the tall card style  */
+.pill-card {
+  background: #f6f4fa;                      /* soft brand tint */
+  border: 1px solid rgba(118, 75, 162, .25);
+  border-radius: 12px;
+  padding: 1.25rem 1.1rem 1.1rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,.05);
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+}
+
+
+/* small label on top */
+.pill-card__year {
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: #5b7fff;
+  margin-bottom: .4rem;
+}
+
+/* icon row like the illustration in each card */
+.pill-card__icon {
+  font-size: 1.6rem;
+  line-height: 1;
+  margin-bottom: .35rem;
+}
+
+.pill-card h3 {
+  margin: 0 0 .35rem;
+  font-weight: 800;
+}
+
+.pill-card p {
+  margin: 0;
+  color: #444;
+  line-height: 1.6;
+  font-size: .98rem;
+}
+
+/* left column = one stacked card */
+.pill-card--stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 1rem;
+  padding-bottom: 1.1rem;
+}
+
+/* small “FEATURES” label (same vibe as STEP labels) */
+.pill-card__label {
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: #5b7fff; /* brand blue */
+  margin-bottom: 2px;
+  text-transform: uppercase;
+}
+
+/* inner feature rows */
+.feature-item {
+  text-align: center;
+}
+.feature-item__icon {
+  font-size: 1.6rem;
+  line-height: 1;
+  margin-bottom: .35rem;
+}
+
+/* thin divider between the two features */
+.pill-sep {
+  border: none;
+  height: 1px;
+  background: rgba(118, 75, 162, .18); /* soft purple */
+  margin: 4px auto 0;
+  width: 86%;
+}
