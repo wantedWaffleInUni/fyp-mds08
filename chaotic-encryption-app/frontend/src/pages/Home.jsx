@@ -1,28 +1,16 @@
 // import React from 'react';
-import { Link } from 'react-router-dom';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CaptchaModal from '../components/modals/CaptchaModal';
+import Typewriter from "../components/Typewriter";
+
 
 const Home = () => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [redirectPath, setRedirectPath] = useState('');
   const navigate = useNavigate();
 
-  const handleClick = (path) => {
-    setRedirectPath(path);
-    setModalOpen(true);
-  };
-
-  const handleVerified = (token) => {
-    // ✅ optional: send token to backend for validation
-    console.log("Captcha verified:", token);
-    navigate(redirectPath); // redirect after verification
-  };
 
   return (
     <div className="text-center">
-      <div className="card">
+      <div className="card hero">
         <div className="card-header">
           <h1 className="card-title" style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>
             🔐 Chaotic Image Encryption
@@ -30,13 +18,29 @@ const Home = () => {
           <p style={{ fontSize: '1rem', color: '#666' }}>
             Advanced image encryption using chaotic maps for enhanced security
           </p>
+          <p style={{ fontSize: '1rem', color: '#666' }}>
+            Protect sensitive visuals and ensure privacy with our reliable, user-friendly image encryption solution. 
+          </p>
         </div>
-        
-        <div className="mb-3">
-          <p style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
-            Secure your images with advanced encryption. <br></br>
-            Protect sensitive visuals and ensure privacy with our reliable, user-friendly image encryption solution.
-            
+
+       
+
+        {/* “Get Started” lines */}
+        <div style={{ margin: '10px 0 18px' }}>
+          <p style={{ fontSize: '1.15rem', fontWeight: 600, margin: 0 }}>
+            Ready to experience the power of chaotic encryption?
+          </p>
+          <p style={{ fontSize: '1.05rem', color: '#555', margin: '8px 0 18px' }}>
+            Start by{' '}
+            <Typewriter
+              words={[
+                'selecting from one of the options below',
+              ]}
+              typingSpeed={70}
+              deletingSpeed={45}
+              pauseTime={1100}
+              loop
+            />
           </p>
         </div>
         
@@ -48,57 +52,77 @@ const Home = () => {
             🔓 Decrypt Image
           </Link> */}
 
-          <button onClick={() => handleClick('/encrypt')} className="btn btn-primary">
+          <button onClick={() => navigate('/encrypt')} className="btn btn-primary btn--md">
             🔒 Encrypt Image
           </button>
-          <button onClick={() => handleClick('/decrypt')} className="btn btn-secondary">
+          <button onClick={() => navigate('/decrypt')} className="btn btn-secondary btn--md">
             🔓 Decrypt Image
           </button>
         </div>
       </div>
       
-      <div className="card">
-        <div className="card-header">
-          <h2 className="card-title">Key Features</h2>
-        </div>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
-          <div>
-            <h3>🔐 Chaotic Encryption</h3>
-            <p>Uses logistic maps and chaotic sequences for pixel-level encryption</p>
-          </div>
-          
-          <div>
-            <h3>📊 Quality Metrics</h3>
-            <p>Real-time calculation of entropy, NPCR, and UACI for encryption quality assessment</p>
-          </div>
-          
-          {/* <div>
-            <h3>🖼️ Image Support</h3>
-            <p>Supports multiple image formats: PNG, JPG, JPEG, GIF, BMP, TIF, TIFF</p>
-          </div>
-          
-          <div>
-            <h3>⚡ Fast Processing</h3>
-            <p>Optimized algorithms for quick encryption and decryption</p>
-          </div> */}
-        </div>
-      </div>
       
       <div className="card">
         <div className="card-header">
-          <h2 className="card-title">How It Works</h2>
+          <h2 className="card-title">Key Features & How It Works</h2>
         </div>
-        
-        <div style={{ textAlign: 'left', maxWidth: '800px', margin: '0 auto', paddingLeft: '2rem' }}>
-          <ol style={{ lineHeight: '2', fontSize: '1.1rem' }}>
-            <li><strong>Upload:</strong> Select an image file using drag-and-drop or file picker</li>
-            <li><strong>Encrypt:</strong> Choose an encryption key and apply chaotic encryption</li>
-            <li><strong>Analyze:</strong> View encryption quality metrics and visual results</li>
-            <li><strong>Download:</strong> Save the encrypted/decrypted image to your device</li>
-          </ol>
+
+          <div className="features-steps-grid">
+            {/* LEFT: one tall FEATURES card */}
+            <section className="features features--cards">
+              <article className="pill-card pill-card--stack">
+                <div className="pill-card__label">FEATURES</div>
+
+                <div className="feature-item">
+                  <div className="feature-item__icon">🔐</div>
+                  <h3>Chaotic Encryption</h3>
+                  <p>Logistic maps & chaotic sequences for pixel-level encryption</p>
+                </div>
+
+                <hr className="pill-sep" />
+
+                <div className="feature-item">
+                  <div className="feature-item__icon">📊</div>
+                  <h3>Quality Metrics</h3>
+                  <p>Real-time entropy, NPCR, and UACI calculations</p>
+                </div>
+              </article>
+            </section>
+
+          {/* RIGHT column: step cards */}
+          <section className="steps steps--cards">
+            <article className="pill-card">
+              <div className="pill-card__year">STEP 1</div>
+              <div className="pill-card__icon">📤</div>
+              <h3>Upload</h3>
+              <p>Select an image file using drag-and-drop or file picker</p>
+            </article>
+
+            <article className="pill-card">
+              <div className="pill-card__year">STEP 2</div>
+              <div className="pill-card__icon">🔑</div>
+              <h3>Encrypt</h3>
+              <p>Enter or generate a strong key and apply chaotic encryption</p>
+            </article>
+
+            <article className="pill-card">
+              <div className="pill-card__year">STEP 3</div>
+              <div className="pill-card__icon">🧪</div>
+              <h3>Analyze</h3>
+              <p>Review encryption quality metrics & visual results</p>
+            </article>
+
+            <article className="pill-card">
+              <div className="pill-card__year">STEP 4</div>
+              <div className="pill-card__icon">🔗</div>
+              <h3>Download</h3>
+              <p>Save the encrypted or decrypted image or Share the results</p>
+            </article>
+          </section>
         </div>
       </div>
+
+
       
       {/* <div className="card">
         <div className="card-header">
@@ -130,32 +154,47 @@ const Home = () => {
       
       <div className="card">
         <div className="card-header">
-          <h2 className="card-title">Get Started</h2>
+          <h2 className="card-title">FAQ</h2>
         </div>
-        
-        <p style={{ fontSize: '1.1rem', marginBottom: '2rem' }}>
-          Ready to experience the power of chaotic encryption? Start by uploading an image!
-        </p>
-        
-        {/* <Link to="/encrypt" className="btn btn-primary" style={{ fontSize: '1.2rem', padding: '1rem 2rem' }}>
-          🚀 Start Encrypting
-        </Link> */}
 
-        <button
-          onClick={() => handleClick('/encrypt')}
-          className="btn btn-primary"
-          style={{ fontSize: '1.2rem', padding: '1rem 2rem' }}
-        >
-          🚀 Start Encrypting
-        </button>
+        <div className="faq">
+          <details>
+            <summary>What image formats are supported?</summary>
+            <p>PNG, JPG/JPEG, BMP, and TIFF (up to 16 MB)</p>
+          </details>
+
+          <details>
+            <summary>Is my encryption key stored anywhere?</summary>
+            <p>No. Keys are used in-session only and never persisted by the app</p>
+          </details>
+
+          <details>
+            <summary>Can I decrypt later on another device?</summary>
+            <p>Yes. Keep the exact same key you used for encryption, and the encrypted image</p>
+          </details>
+
+          <details>
+            <summary>Does this run locally or on a server?</summary>
+            <p>Processing runs in the app runtime; the image and key are not uploaded to third-party services</p>
+          </details>
+
+          <details>
+            <summary>How do I choose a strong key?</summary>
+            <p>Use 16+ characters with a mix of letters, numbers, and symbols. Avoid dictionary words</p>
+          </details>
+
+          <details>
+            <summary>What are NPCR and UACI?</summary>
+            <p>
+              Common quality metrics for image ciphers - higher NPCR/UACI generally indicate stronger
+              diffusion and randomness
+            </p>
+          </details>
+        </div>
       </div>
 
-      {/* Captcha Modal */}
-      <CaptchaModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onVerify={handleVerified}
-      />
+
+
 
     </div>
   );

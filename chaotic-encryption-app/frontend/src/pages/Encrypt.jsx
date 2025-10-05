@@ -9,6 +9,8 @@ import SelectAlgorithmModal from '../components/modals/SelectAlgorithmModal';
 import ProgressModal from '../components/modals/ProgressModal';
 import usePhasedProgress from '../components/modals/usePhasedProgress';
 
+import CaptchaModal from '../components/modals/CaptchaModal'; 
+
 // import {Eye, EyeOff} from 'lucide-react';
 // import { Eye as EyeIcon, EyeOff as EyeOffIcon } from 'react-feather';
 
@@ -47,6 +49,9 @@ const Encrypt = () => {
   const navigate = useNavigate();
   const [autoGenerateKey, setAutoGenerateKey] = useState(false);
   const [showKey, setShowKey] = useState(false);
+
+  const [showCaptcha, setShowCaptcha] = useState(false);
+  const [captchaOK, setCaptchaOK] = useState(false); // per-session flag
 
 
   // progress modal state
@@ -104,6 +109,26 @@ const Encrypt = () => {
       return;
     }
 
+      // If user already solved captcha this session, go straight to algorithms
+    if (captchaOK) {
+      setShowAlgoModal(true);
+    } else {
+      setShowCaptcha(true);
+    }
+  };
+
+  // Captcha handlers
+  const handleCaptchaVerified = (token) => {
+    setCaptchaOK(true);        // remember the session is verified
+    setShowCaptcha(false);
+    setShowAlgoModal(true);    // now show algorithm picker
+  };
+
+  const handleCaptchaClose = () => {
+    setShowCaptcha(false);
+  };
+
+
     //     if (!selectedFile && !encryptionKey.trim()) {
     //       setError('Please select an image and enter an encryption key');
     //       return;
@@ -118,8 +143,8 @@ const Encrypt = () => {
     //       return;
     //     }
     // Open algorithm selection modal
-    setShowAlgoModal(true);
-  };
+   
+  
 
   // copy and paste key handlers
   const keyInputRef = useRef(null);
@@ -174,27 +199,6 @@ const Encrypt = () => {
     }
   };
 
-
-
-
-  //   const confirmEncrypt = async () => {
-  //   // close modal and go to /results immediately
-  //   const needsNonce = ['fodhnn', '2dlasm'].includes(selectedAlgorithm);
-  // 
-  //   setShowAlgoModal(false);
-  // 
-  //   navigate('/results', {
-  //     state: {
-  //       type: 'encrypt',
-  //       params: {
-  //         file: selectedFile,
-  //         key: encryptionKey,
-  //         algorithm: selectedAlgorithm,
-  //         nonce: needsNonce ? (nonce || undefined) : undefined,
-  //       },
-  //     },
-  //   });
-  // };
 
 
   const handleDownload = async (imageData, filename) => {
@@ -427,7 +431,7 @@ const Encrypt = () => {
         <div className="d-flex justify-center">
           <button
 
-            className={`btn ${canEncrypt ? 'btn-primary' : 'btn-disabled'}`}
+            className={`btn btn--md ${canEncrypt ? 'btn-primary' : 'btn-disabled'}`}
             onClick={handleEncrypt}
             disabled={!canEncrypt || isLoading}
             style={{ minWidth: '200px' }}
@@ -526,6 +530,13 @@ const Encrypt = () => {
           setShow(false);
         }}
       />
+
+      <CaptchaModal
+        open={showCaptcha}
+        onClose={handleCaptchaClose}
+        onVerify={handleCaptchaVerified}
+      />
+
 
     </div>
   );

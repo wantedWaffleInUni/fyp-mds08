@@ -8,6 +8,9 @@ import SelectAlgorithmModal from '../components/modals/SelectAlgorithmModal';
 import ProgressModal from '../components/modals/ProgressModal';
 import usePhasedProgress from '../components/modals/usePhasedProgress';
 
+import CaptchaModal from '../components/modals/CaptchaModal';
+
+
 
 // 👁️ icons
 const EyeIcon = ({ size = 16 }) => (
@@ -41,6 +44,10 @@ const Decrypt = () => {
   const [showKey, setShowKey] = useState(false);
   const [copied, setCopied] = useState(false);
   const keyInputRef = useRef(null);
+
+  const [showCaptcha, setShowCaptcha] = useState(false);
+  const [captchaOK, setCaptchaOK] = useState(false);
+
 
 
   const handleCopyKey = async () => {
@@ -124,7 +131,22 @@ const Decrypt = () => {
     //   setError('Please enter the decryption key');
     //   return;
     // }
-    setShowAlgoModal(true); // 打开算法选择弹窗
+    if (captchaOK) {
+      setShowAlgoModal(true);    
+    } else {
+      setShowCaptcha(true);
+    }
+  };
+
+  // Captcha handlers
+  const handleCaptchaVerified = (token) => {
+    setCaptchaOK(true);        // remember the session is verified
+    setShowCaptcha(false);
+    setShowAlgoModal(true);    // now show algorithm picker
+  };
+
+  const handleCaptchaClose = () => {
+    setShowCaptcha(false);
   };
 
   const confirmDecrypt = async () => {
@@ -210,7 +232,7 @@ const Decrypt = () => {
 
         <div className="d-flex justify-center">
           <button
-            className={`btn ${canDecrypt ? 'btn-primary' : 'btn-disabled'}`}
+            className={`btn btn--md ${canDecrypt ? 'btn-primary' : 'btn-disabled'}`}
             onClick={handleDecrypt}
             disabled={isLoading || !canDecrypt}
             style={{ minWidth: '200px' }}
@@ -279,6 +301,14 @@ const Decrypt = () => {
           setShow(false);
         }}
       />
+
+      <CaptchaModal
+        open={showCaptcha}
+        onClose={handleCaptchaClose}
+        onVerify={handleCaptchaVerified}
+      />
+
+
     </div>
   );
 };

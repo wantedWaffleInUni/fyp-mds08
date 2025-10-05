@@ -4,35 +4,7 @@ import ReCAPTCHA from 'react-google-recaptcha';
 import Modal from './Modal';
 
 const SITE_KEY = "6LeEzNwrAAAAAIjy_YwGLqff60fzSGvFh9tQLpO-"; // replace with real site key
-// 
-// export default function CaptchaModal({ open, onClose, onVerify }) {
-//   const [verified, setVerified] = useState(false);
-// 
-//   const handleVerify = (token) => {
-//     if (token) {
-//       setVerified(true);
-//       onVerify(token); // Pass token back to parent (optional: server validation)
-//     }
-//   };
-// 
-//   return (
-//     <Modal open={open} onClose={onClose} ariaLabel="Captcha Verification">
-//       <div style={{ padding: '2rem', textAlign: 'center' }}>
-//         <h2>Please verify to continue</h2>
-//         <ReCAPTCHA sitekey={SITE_KEY} onChange={handleVerify} />
-//         <div style={{ marginTop: '1.5rem' }}>
-//           <button
-//             className="btn btn-primary"
-//             disabled={!verified}
-//             onClick={onClose}
-//           >
-//             Continue
-//           </button>
-//         </div>
-//       </div>
-//     </Modal>
-//   );
-// }
+
 
 export default function CaptchaModal({ open, onClose, onVerify }) {
   const [verified, setVerified] = useState(false);
@@ -54,13 +26,15 @@ export default function CaptchaModal({ open, onClose, onVerify }) {
 
   return (
     <Modal open={open} onClose={onClose} ariaLabel="Captcha Verification">
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
+      <div className="captcha-modal">
         <h2>Please verify to continue</h2>
+  
+        <div className="captcha-box">
+          <ReCAPTCHA sitekey={SITE_KEY} onChange={handleVerify} />
+          {/* or <ReCAPTCHA sitekey={SITE_KEY} onChange={handleVerify} size="normal" /> */}
+        </div>
 
-        <ReCAPTCHA sitekey={SITE_KEY} onChange={handleVerify} />
-        {/* <div>captcha placeholder</div> */}
-
-        <div style={{ marginTop: '1.5rem' }}>
+        <div className="captcha-actions">
           <button
             className={`btn ${verified && token ? 'btn-primary' : 'btn-disabled'}`}
             disabled={!verified || !token}
