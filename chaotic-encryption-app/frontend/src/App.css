@@ -849,3 +849,38 @@ button, .btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .icon-btn
   margin: 4px auto 0;
   width: 86%;
 }
+
+/* FAQ styles */
+.faq details {
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: #fafbff;
+  transition: border-color .2s;
+}
+
+.faq details[open] {
+  background: #f4f6ff;
+  border-color: #cdd7ff;
+}
+
+.faq summary {
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;      /* remove default arrow in Safari */
+}
+
+.faq summary::-webkit-details-marker { display: none; } /* remove default arrow in WebKit */
+
+.faq summary::after {
+  content: "▾";
+  float: right;
+  opacity: .6;
+  transition: transform .2s;
+}
+
+.faq details[open] summary::after { transform: rotate(180deg); }
+
+.faq p { margin: 10px 0 0; color: #444; }
+

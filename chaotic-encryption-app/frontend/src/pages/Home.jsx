@@ -24,7 +24,7 @@ const Home = () => {
 
   return (
     <div className="text-center">
-      <div className="card">
+      <div className="card hero">
         <div className="card-header">
           <h1 className="card-title" style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>
             🔐 Chaotic Image Encryption
@@ -32,13 +32,29 @@ const Home = () => {
           <p style={{ fontSize: '1rem', color: '#666' }}>
             Advanced image encryption using chaotic maps for enhanced security
           </p>
+          <p style={{ fontSize: '1rem', color: '#666' }}>
+            Protect sensitive visuals and ensure privacy with our reliable, user-friendly image encryption solution. 
+          </p>
         </div>
-        
-        <div className="mb-3">
-          <p style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
-            Secure your images with advanced encryption. <br></br>
-            Protect sensitive visuals and ensure privacy with our reliable, user-friendly image encryption solution.
-            
+
+       
+
+        {/* “Get Started” lines */}
+        <div style={{ margin: '10px 0 18px' }}>
+          <p style={{ fontSize: '1.15rem', fontWeight: 600, margin: 0 }}>
+            Ready to experience the power of chaotic encryption?
+          </p>
+          <p style={{ fontSize: '1.05rem', color: '#555', margin: '8px 0 18px' }}>
+            Start by{' '}
+            <Typewriter
+              words={[
+                'selecting from one of the options below',
+              ]}
+              typingSpeed={70}
+              deletingSpeed={45}
+              pauseTime={1100}
+              loop
+            />
           </p>
         </div>
         
@@ -152,39 +168,46 @@ const Home = () => {
       
       <div className="card">
         <div className="card-header">
-          <h2 className="card-title">Get Started</h2>
+          <h2 className="card-title">FAQ</h2>
         </div>
-        
-        <p style={{ fontSize: '1.2rem', fontWeight: 600, margin: 0 }}>
-          Ready to experience the power of chaotic encryption?
-        </p>
 
-        <p style={{ fontSize: '1.1rem', color: '#555', marginTop: '8px', marginBottom: '25px' }}>
-          Start by{" "}
-          <Typewriter
-            words={[
-              "clicking the button below"
-            ]}
-            typingSpeed={70}
-            deletingSpeed={45}
-            pauseTime={1100}
-            loop
-          />
-          
-        </p>
-        
-        {/* <Link to="/encrypt" className="btn btn-primary" style={{ fontSize: '1.2rem', padding: '1rem 2rem' }}>
-          🚀 Start Encrypting
-        </Link> */}
+        <div className="faq">
+          <details>
+            <summary>What image formats are supported?</summary>
+            <p>PNG, JPG/JPEG, BMP, and TIFF (up to 16 MB)</p>
+          </details>
 
-        <button
-          onClick={() => handleClick('/encrypt')}
-          className="btn btn-primary btn--lg"
-          style={{ fontSize: '1.2rem', padding: '1rem 2rem' }}
-        >
-          🚀 Start Encrypting
-        </button>
+          <details>
+            <summary>Is my encryption key stored anywhere?</summary>
+            <p>No. Keys are used in-session only and never persisted by the app</p>
+          </details>
+
+          <details>
+            <summary>Can I decrypt later on another device?</summary>
+            <p>Yes. Keep the exact same key you used for encryption, and the encrypted image</p>
+          </details>
+
+          <details>
+            <summary>Does this run locally or on a server?</summary>
+            <p>Processing runs in the app runtime; the image and key are not uploaded to third-party services</p>
+          </details>
+
+          <details>
+            <summary>How do I choose a strong key?</summary>
+            <p>Use 16+ characters with a mix of letters, numbers, and symbols. Avoid dictionary words</p>
+          </details>
+
+          <details>
+            <summary>What are NPCR and UACI?</summary>
+            <p>
+              Common quality metrics for image ciphers - higher NPCR/UACI generally indicate stronger
+              diffusion and randomness
+            </p>
+          </details>
+        </div>
       </div>
+
+
 
       {/* Captcha Modal */}
       <CaptchaModal
