@@ -690,3 +690,24 @@ button, .btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .icon-btn
   gap: 8px;
   
 } */
+
+
+/* Typewriter styles */
+.typewriter {
+  display: inline-flex;
+  align-items: baseline;
+}
+.typewriter-text {
+  /* optional: make it pop a bit */
+  font-weight: 600;
+}
+.typewriter-caret {
+  width: 2px;
+  height: 1em;
+  margin-left: 3px;
+  background: #6d66ea;          /* match your purple */
+  display: inline-block;
+  animation: caret-blink 1s steps(1) infinite;
+}
+@keyframes caret-blink { 50% { opacity: 0; } }
+

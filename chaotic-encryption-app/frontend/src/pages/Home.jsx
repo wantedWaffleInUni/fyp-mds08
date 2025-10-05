@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CaptchaModal from '../components/modals/CaptchaModal';
+import Typewriter from "../components/Typewriter";
+
 
 const Home = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -133,8 +135,25 @@ const Home = () => {
           <h2 className="card-title">Get Started</h2>
         </div>
         
-        <p style={{ fontSize: '1.1rem', marginBottom: '2rem' }}>
-          Ready to experience the power of chaotic encryption? Start by uploading an image!
+        <p style={{ fontSize: '1.2rem', fontWeight: 600, margin: 0 }}>
+          Ready to experience the power of chaotic encryption?
+        </p>
+
+        <p style={{ fontSize: '1.1rem', color: '#555', marginTop: '8px', marginBottom: '25px' }}>
+          Start by{" "}
+          <Typewriter
+            words={[
+              "uploading an image",
+              "choosing a strong key",
+              "analyzing entropy, NPCR, and UACI",
+              "downloading your results"
+            ]}
+            typingSpeed={70}
+            deletingSpeed={45}
+            pauseTime={1100}
+            loop
+          />
+          
         </p>
         
         {/* <Link to="/encrypt" className="btn btn-primary" style={{ fontSize: '1.2rem', padding: '1rem 2rem' }}>
