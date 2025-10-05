@@ -884,3 +884,31 @@ button, .btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .icon-btn
 
 .faq p { margin: 10px 0 0; color: #444; }
 
+
+/*  Captcha Modal  */
+.captcha-modal {
+  display: flex;
+  padding: 2rem;
+  flex-direction: column;
+  align-items: center;    
+  gap: 14px;              /* even spacing between title, captcha, button */
+}
+
+/* Center the ReCAPTCHA wrapper */
+.captcha-box {
+  width: 100%;
+  display: flex;
+  justify-content: center; 
+  align-items: center;       
+  margin: 8px 0 18px;
+}
+
+.captcha-box > div {
+  margin-inline: auto !important;
+}
+
+/* Continue button in Captcha */
+.captcha-actions {
+  display: flex;
+  justify-content: center;
+}

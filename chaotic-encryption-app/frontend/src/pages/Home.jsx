@@ -1,26 +1,12 @@
 // import React from 'react';
-import { Link } from 'react-router-dom';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CaptchaModal from '../components/modals/CaptchaModal';
 import Typewriter from "../components/Typewriter";
 
 
 const Home = () => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [redirectPath, setRedirectPath] = useState('');
   const navigate = useNavigate();
 
-  const handleClick = (path) => {
-    setRedirectPath(path);
-    setModalOpen(true);
-  };
-
-  const handleVerified = (token) => {
-    // ✅ optional: send token to backend for validation
-    console.log("Captcha verified:", token);
-    navigate(redirectPath); // redirect after verification
-  };
 
   return (
     <div className="text-center">
@@ -66,10 +52,10 @@ const Home = () => {
             🔓 Decrypt Image
           </Link> */}
 
-          <button onClick={() => handleClick('/encrypt')} className="btn btn-primary btn--md">
+          <button onClick={() => navigate('/encrypt')} className="btn btn-primary btn--md">
             🔒 Encrypt Image
           </button>
-          <button onClick={() => handleClick('/decrypt')} className="btn btn-secondary btn--md">
+          <button onClick={() => navigate('/decrypt')} className="btn btn-secondary btn--md">
             🔓 Decrypt Image
           </button>
         </div>
@@ -209,12 +195,6 @@ const Home = () => {
 
 
 
-      {/* Captcha Modal */}
-      <CaptchaModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onVerify={handleVerified}
-      />
 
     </div>
   );
