@@ -48,10 +48,10 @@ const Home = () => {
             🔓 Decrypt Image
           </Link> */}
 
-          <button onClick={() => handleClick('/encrypt')} className="btn btn-primary">
+          <button onClick={() => handleClick('/encrypt')} className="btn btn-primary btn--md">
             🔒 Encrypt Image
           </button>
-          <button onClick={() => handleClick('/decrypt')} className="btn btn-secondary">
+          <button onClick={() => handleClick('/decrypt')} className="btn btn-secondary btn--md">
             🔓 Decrypt Image
           </button>
         </div>
@@ -143,7 +143,7 @@ const Home = () => {
 
         <button
           onClick={() => handleClick('/encrypt')}
-          className="btn btn-primary"
+          className="btn btn-primary btn--lg"
           style={{ fontSize: '1.2rem', padding: '1rem 2rem' }}
         >
           🚀 Start Encrypting

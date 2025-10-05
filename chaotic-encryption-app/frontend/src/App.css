@@ -18,6 +18,16 @@ body {
   flex-direction: column;
 }
 
+/* Typography: section titles */
+h1, h2, h3 { 
+  font-family: 'Exo 2', sans-serif; 
+  font-weight: 700; 
+  letter-spacing: .3px; 
+  line-height: 1.1; 
+}
+.logo { font-family: 'Orbitron', sans-serif; }
+
+
 /* Navigation */
 .navbar {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -33,12 +43,21 @@ body {
   align-items: center;
 }
 
-.navbar-brand {
-  color: white;
-  font-size: 1.5rem;
+/* Typography: logo */
+.navbar-brand,
+.navbar-brand .logo-text {
+  font-family: 'Orbitron', 'Exo 2', sans-serif !important; /* force Orbitron */
   font-weight: bold;
+  letter-spacing: .8px;
+  line-height: 1.05;
+  display: inline-flex;
+  align-items: center;
+
+  color: white;
   text-decoration: none;
+  font-size: 1.5rem; 
 }
+.logo-emoji { font-family: inherit; }
 
 .navbar-nav {
   display: flex;
@@ -106,19 +125,42 @@ body {
 }
 
 /* Buttons */
-.btn {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
+/* Base buttons (small/normal) */
+.btn,
+button.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: 0.75rem 1.25rem;   /* base */
   border: none;
-  border-radius: 5px;
-  font-size: 1rem;
-  font-weight: 500;
+  border-radius: 8px;
+  font-size: 1rem;            /* base */
+  font-weight: 600;
+  letter-spacing: .2px;
+  line-height: 1;
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease;
   text-align: center;
 }
 
+/* Medium — use on the two hero buttons + encrypt/decrypt page actions */
+.btn--md {
+  font-size: 1.0625rem;       /* 17px */
+  padding: 0.9rem 1.5rem;
+  border-radius: 10px;
+}
+
+/* Large — keep for big CTA only */
+.btn--lg {
+  font-size: 1.2rem;          /* ~19px */
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(102,126,234,.28);
+}
+
+/* Gradient & Hover on buttons */
 .btn-primary {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -165,6 +207,14 @@ body {
 .btn-danger:hover {
   background: #c82333;
 }
+
+/* Typography - buttons use exo2 */
+button, .btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .icon-btn, .btn-choice 
+{
+  font-family: 'Exo 2', sans-serif !important;
+
+}
+
 
 /* Forms */
 .form-group {

@@ -427,7 +427,7 @@ const Encrypt = () => {
         <div className="d-flex justify-center">
           <button
 
-            className={`btn ${canEncrypt ? 'btn-primary' : 'btn-disabled'}`}
+            className={`btn btn--md ${canEncrypt ? 'btn-primary' : 'btn-disabled'}`}
             onClick={handleEncrypt}
             disabled={!canEncrypt || isLoading}
             style={{ minWidth: '200px' }}

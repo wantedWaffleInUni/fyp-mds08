@@ -210,7 +210,7 @@ const Decrypt = () => {
 
         <div className="d-flex justify-center">
           <button
-            className={`btn ${canDecrypt ? 'btn-primary' : 'btn-disabled'}`}
+            className={`btn btn--md ${canDecrypt ? 'btn-primary' : 'btn-disabled'}`}
             onClick={handleDecrypt}
             disabled={isLoading || !canDecrypt}
             style={{ minWidth: '200px' }}
