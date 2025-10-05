@@ -64,16 +64,18 @@ const Home = () => {
           <h2 className="card-title">Key Features</h2>
         </div>
         
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
-          <div>
-            <h3>🔐 Chaotic Encryption</h3>
-            <p>Uses logistic maps and chaotic sequences for pixel-level encryption</p>
+        <div className = "feature-grid">
+          <div className = "feature"> 
+            <div className="feature-title"> 🔐 Chaotic Encryption</div>
+            <div className="feature-desc">Logistic maps and chaotic sequences for pixel-level encryption</div>
+            <ol style={{ lineHeight: '2', fontSize: '1.1rem' }}></ol>
           </div>
-          
-          <div>
-            <h3>📊 Quality Metrics</h3>
-            <p>Real-time calculation of entropy, NPCR, and UACI for encryption quality assessment</p>
+
+          <div className="feature">
+            <div className="feature-title"> 📊 Quality Metrics</div>
+            <div className="feature-desc">Real-time calculation of entropy, NPCR, and UACI for encryption quality assessment</div>
           </div>
+
           
           {/* <div>
             <h3>🖼️ Image Support</h3>
