@@ -1,9 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState }  from 'react';
 import { NavLink } from 'react-router-dom';
 
 const Navbar = () => {
+
+  const [compact, setCompact] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setCompact(window.scrollY > 12); // tweak threshold
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll(); // set initial
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
-    <nav className="navbar">
+    <nav className={`navbar ${compact ? 'navbar--compact' : ''}`}>
+
       <div className="navbar-container">
         
         <NavLink to="/" className="navbar-brand" aria-label="PEEKAPC Home">

@@ -30,9 +30,21 @@ h1, h2, h3 {
 
 /* Navigation */
 .navbar {
+  position: sticky;          /* stays at top while scrolling */
+  top: 0;
+  z-index: 1000;
+
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 1rem 0;
+  padding-block: 16px;       /* instead of padding: 1rem 0; */
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+  transition: padding .2s ease, box-shadow .2s ease;
+}
+
+/* compact state toggled by Navbar.jsx */
+.navbar--compact {
+  padding-block: 8px;        /* shrink height */
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
 
 .navbar-container {
@@ -56,13 +68,18 @@ h1, h2, h3 {
   color: white;
   text-decoration: none;
   font-size: 1.5rem; 
+  
+  transition: font-size .2s ease, letter-spacing .2s ease; /* NEW for resizable nav bar */
 }
+.navbar--compact .navbar-brand { font-size: 1.25rem; letter-spacing: .6px; }
 .logo-emoji { font-family: inherit; }
 
+/* Nav links: tighten slightly when compact */
 .navbar-nav {
   display: flex;
   list-style: none;
   gap: 2rem;
+  transition: gap .2s ease;        /* NEW for resizable nav bar */
 }
 
 .nav-link {
@@ -70,7 +87,7 @@ h1, h2, h3 {
   text-decoration: none;
   padding: 0.5rem 1rem;
   border-radius: 5px;
-  transition: background-color 0.3s ease;
+  transition: background-color .2s ease, padding .2s ease;  /* NEW for resizable nav bar */
 }
 
 .nav-link:hover {
@@ -80,6 +97,13 @@ h1, h2, h3 {
 .nav-link.active {
   background-color: rgba(255, 255, 255, 0.2);
 }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .navbar, .navbar-brand, .navbar-nav, .nav-link { transition: none; }
+}
+
+
 
 /* Main container */
 /*all pages*/
@@ -145,14 +169,14 @@ button.btn {
   text-align: center;
 }
 
-/* Medium — use on the two hero buttons + encrypt/decrypt page actions */
+/* Medium — use on the two hero buttons + encrypt/decrypt page action buttons */
 .btn--md {
   font-size: 1.0625rem;       /* 17px */
   padding: 0.9rem 1.5rem;
   border-radius: 10px;
 }
 
-/* Large — keep for big CTA only */
+/* Large — for "start encrypting" button at main pg */
 .btn--lg {
   font-size: 1.2rem;          /* ~19px */
   padding: 1rem 2rem;
