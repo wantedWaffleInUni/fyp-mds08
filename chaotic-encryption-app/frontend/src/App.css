@@ -132,7 +132,7 @@ h1, h2, h3 {
 }
 
 /* Per original min-heights */
-.card { min-height: 300px; }
+.card { min-height: 100px; }
 
 /* Encrypt/Decrypt tall form cards */
 .card-form {
