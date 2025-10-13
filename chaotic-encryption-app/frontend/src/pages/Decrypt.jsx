@@ -5,6 +5,12 @@ import { decryptImage } from '../services/api';
 import { saveAs } from 'file-saver';
 
 import SelectAlgorithmModal from '../components/modals/SelectAlgorithmModal';
+import ProgressModal from '../components/modals/ProgressModal';
+import usePhasedProgress from '../components/modals/usePhasedProgress';
+
+import CaptchaModal from '../components/modals/CaptchaModal';
+
+
 
 // 👁️ icons
 const EyeIcon = ({ size = 16 }) => (
@@ -38,6 +44,11 @@ const Decrypt = () => {
   const [showKey, setShowKey] = useState(false);
   const [copied, setCopied] = useState(false);
   const keyInputRef = useRef(null);
+
+  const [showCaptcha, setShowCaptcha] = useState(false);
+  const [captchaOK, setCaptchaOK] = useState(false);
+
+
 
   const handleCopyKey = async () => {
     try {
@@ -81,28 +92,72 @@ const Decrypt = () => {
     },
   ];
 
+  // ---- progress modal ----
+  const PHASES = [
+    { label: 'Analysing image …', from: 2, to: 25 },
+    { label: 'Deconfusion & inverse diffusion stage …', from: 26, to: 55 },
+    { label: 'Decrypting …', from: 56, to: 85 }
+  ];
+  const { show, setShow, progress, phase, start, stop } = usePhasedProgress(PHASES);
+  const abortRef = useRef(null);
+
+
+
   const handleImageUpload = (file) => {
     setSelectedFile(file);
     setError('');
     setResult(null);
   };
 
+  // ------- validation flags/messages -------
+  const keyFilled = decryptionKey.trim().length > 0;
+  const canDecrypt = !!selectedFile && keyFilled;
+
+  const validationMsg =
+    !selectedFile && !keyFilled
+      ? 'Please select encrypted image and enter the decryption key'
+      : !selectedFile
+        ? 'Please select encrypted image to decrypt'
+        : !keyFilled
+          ? 'Please enter the decryption key'
+          : '';
+
   const handleDecrypt = () => {
-    if (!selectedFile) {
-      setError('Please select an encrypted image to decrypt');
+    if (!canDecrypt) {
+      setError(validationMsg);
       return;
     }
-    if (!decryptionKey.trim()) {
-      setError('Please enter the decryption key');
-      return;
+    // if (!decryptionKey.trim()) {
+    //   setError('Please enter the decryption key');
+    //   return;
+    // }
+    if (captchaOK) {
+      setShowAlgoModal(true);    
+    } else {
+      setShowCaptcha(true);
     }
-    setShowAlgoModal(true); // 打开算法选择弹窗
+  };
+
+  // Captcha handlers
+  const handleCaptchaVerified = (token) => {
+    setCaptchaOK(true);        // remember the session is verified
+    setShowCaptcha(false);
+    setShowAlgoModal(true);    // now show algorithm picker
+  };
+
+  const handleCaptchaClose = () => {
+    setShowCaptcha(false);
   };
 
   const confirmDecrypt = async () => {
     setIsLoading(true);
     setShowAlgoModal(false);
     setError('');
+
+    const ac = new AbortController();
+    abortRef.current = ac;
+    
+    start(ac.signal);
     try {
       const response = await decryptImage(selectedFile, decryptionKey, algorithm);
       setResult(response);
@@ -137,18 +192,18 @@ const Decrypt = () => {
         {error && <div className="alert alert-error">{error}</div>}
 
         <div className="form-group">
-          <label className="form-label">Select Encrypted Image</label>
+          <label className="form-label"><strong>Select Encrypted Image</strong></label>
           <ImageUploader onImageUpload={handleImageUpload} />
           {selectedFile && (
             <div className="mt-2">
-              <p><strong>Selected:</strong> {selectedFile.name}</p>
-              <p><strong>Size:</strong> {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+              <p>Selected:{selectedFile.name}</p>
+              <p>Size:{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
             </div>
           )}
         </div>
 
         <div className="form-group">
-          <label className="form-label">Decryption Key</label>
+          <label className="form-label"><strong>Decryption Key</strong></label>
           <div className="input-with-actions">
             <input
               ref={keyInputRef}
@@ -171,16 +226,17 @@ const Decrypt = () => {
             </div>
           </div>
           <small style={{ color: '#666', marginTop: '0.5rem', display: 'block' }}>
-            The decryption key must be exactly the same as the key used for encryption.
+            Tip: The decryption key must be exactly the same as the key used for encryption.
           </small>
         </div>
 
         <div className="d-flex justify-center">
           <button
-            className="btn btn-primary"
+            className={`btn btn--md ${canDecrypt ? 'btn-primary' : 'btn-disabled'}`}
             onClick={handleDecrypt}
-            disabled={isLoading || !selectedFile}
+            disabled={isLoading || !canDecrypt}
             style={{ minWidth: '200px' }}
+            aria-disabled={isLoading || !canDecrypt}
           >
             {isLoading ? (
               <>
@@ -192,6 +248,13 @@ const Decrypt = () => {
             )}
           </button>
         </div>
+        {/* live validation hint when disabled */}
+        {!canDecrypt && !isLoading && (
+          <div className="mt-2" style={{ color: '#6b7280', fontSize: 13, alignContent: 'center', textAlign: 'center' }}>
+            {validationMsg}
+          </div>
+        )}
+      
       </div>
 
       {result && (
@@ -227,6 +290,25 @@ const Decrypt = () => {
         flipped={flipped}
         setFlip={setFlip}
       />
+
+      <ProgressModal
+        open={show}
+        progress={progress}
+        phase={phase}
+        onCancel={() => {
+          abortRef.current?.abort();
+          stop();
+          setShow(false);
+        }}
+      />
+
+      <CaptchaModal
+        open={showCaptcha}
+        onClose={handleCaptchaClose}
+        onVerify={handleCaptchaVerified}
+      />
+
+
     </div>
   );
 };

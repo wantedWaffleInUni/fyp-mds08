@@ -9,7 +9,7 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;
   color: #333;
-  background-color: #f8f9fa;
+  background-color: #fff;
 }
 
 .App {
@@ -18,11 +18,33 @@ body {
   flex-direction: column;
 }
 
+/* Typography: section titles */
+h1, h2, h3 { 
+  font-family: 'Exo 2', sans-serif; 
+  font-weight: 700; 
+  letter-spacing: .3px; 
+  line-height: 1.1; 
+}
+.logo { font-family: 'Orbitron', sans-serif; }
+
+
 /* Navigation */
 .navbar {
+  position: sticky;          /* stays at top while scrolling */
+  top: 0;
+  z-index: 1000;
+
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 1rem 0;
+  padding-block: 16px;       /* instead of padding: 1rem 0; */
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+  transition: padding .2s ease, box-shadow .2s ease;
+}
+
+/* compact state toggled by Navbar.jsx */
+.navbar--compact {
+  padding-block: 8px;        /* shrink height */
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
 
 .navbar-container {
@@ -33,17 +55,31 @@ body {
   align-items: center;
 }
 
-.navbar-brand {
-  color: white;
-  font-size: 1.5rem;
+/* Typography: logo */
+.navbar-brand,
+.navbar-brand .logo-text {
+  font-family: 'Orbitron', 'Exo 2', sans-serif !important; /* force Orbitron */
   font-weight: bold;
-  text-decoration: none;
-}
+  letter-spacing: .8px;
+  line-height: 1.05;
+  display: inline-flex;
+  align-items: center;
 
+  color: white;
+  text-decoration: none;
+  font-size: 1.5rem; 
+  
+  transition: font-size .2s ease, letter-spacing .2s ease; /* NEW for resizable nav bar */
+}
+.navbar--compact .navbar-brand { font-size: 1.25rem; letter-spacing: .6px; }
+.logo-emoji { font-family: inherit; }
+
+/* Nav links: tighten slightly when compact */
 .navbar-nav {
   display: flex;
   list-style: none;
   gap: 2rem;
+  transition: gap .2s ease;        /* NEW for resizable nav bar */
 }
 
 .nav-link {
@@ -51,7 +87,7 @@ body {
   text-decoration: none;
   padding: 0.5rem 1rem;
   border-radius: 5px;
-  transition: background-color 0.3s ease;
+  transition: background-color .2s ease, padding .2s ease;  /* NEW for resizable nav bar */
 }
 
 .nav-link:hover {
@@ -62,6 +98,13 @@ body {
   background-color: rgba(255, 255, 255, 0.2);
 }
 
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .navbar, .navbar-brand, .navbar-nav, .nav-link { transition: none; }
+}
+
+
+
 /* Main container */
 /*all pages*/
 .container {
@@ -71,54 +114,109 @@ body {
 } 
 
 /* Cards */
-.card { 
-  background:white;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
-  margin-bottom: 2rem;
-  min-height: 300px;
+
+/* Outer line gradient */
+:root {
+  --brand-grad: linear-gradient(90deg, #667eea, #5b7fff, #764ba2);
 }
 
-.card-form {              /*for cards in encrypt and decrypt pages*/
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+/* Base card */
+.card,
+.card-form {
+  position: relative;              /* needed for gradient border overlay */
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,.10);
   padding: 2rem;
   margin-bottom: 2rem;
-  min-height: 720px; 
-  /* to distribute content evenly in cards */
-  display: flex;          
-  flex-direction: column;  
-  justify-content: space-between; 
 }
 
+/* Per original min-heights */
+.card { min-height: 100px; }
+
+/* Encrypt/Decrypt tall form cards */
+.card-form {
+  min-height: 720px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Gradient 1px border */
+.card::before,
+.card-form::before {
+  content: "";
+  position: absolute;
+  inset: 0;                      /* cover the whole card */
+  padding: 1px;                  /* border thickness */
+  border-radius: inherit;
+  background: var(--brand-grad);
+  pointer-events: none;
+
+  /* The “hole” trick so only a 1px ring remains */
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;   /* Chrome/Safari */
+          mask-composite: exclude; /* Firefox */
+}
+
+/* Headers */
 .card-header {
   border-bottom: 1px solid #e9ecef;
   padding-bottom: 1rem;
   margin-bottom: 1.5rem;
 }
 
+
+/* Titles */
 .card-title {
   font-size: 1.5rem;
   font-weight: 600;
   color: #333;
 }
 
+
 /* Buttons */
-.btn {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
+/* Base buttons (small/normal) */
+.btn,
+button.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: 0.75rem 1.25rem;   /* base */
   border: none;
-  border-radius: 5px;
-  font-size: 1rem;
-  font-weight: 500;
+  border-radius: 8px;
+  font-size: 1rem;            /* base */
+  font-weight: 600;
+  letter-spacing: .2px;
+  line-height: 1;
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease;
   text-align: center;
 }
 
+/* Medium — use on the two hero buttons + encrypt/decrypt page action buttons */
+.btn--md {
+  font-size: 1.0625rem;       /* 17px */
+  padding: 0.9rem 1.5rem;
+  border-radius: 10px;
+}
+
+/* Large — for "start encrypting" button at main pg */
+.btn--lg {
+  font-size: 1.2rem;          /* ~19px */
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(102,126,234,.28);
+}
+
+/* Gradient & Hover on buttons */
 .btn-primary {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -130,13 +228,23 @@ body {
 }
 
 .btn-secondary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* .btn-secondary {
   background: #6c757d;
   color: white;
 }
 
 .btn-secondary:hover {
   background: #5a6268;
-}
+} */
 
 .btn-success {
   background: #28a745;
@@ -155,6 +263,14 @@ body {
 .btn-danger:hover {
   background: #c82333;
 }
+
+/* Typography - buttons use exo2 */
+button, .btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .icon-btn, .btn-choice 
+{
+  font-family: 'Exo 2', sans-serif !important;
+
+}
+
 
 /* Forms */
 .form-group {
@@ -250,6 +366,20 @@ body {
   gap: 1.5rem;
   margin-top: 2rem;
 }
+
+/* Feature grid used on Home.jsx - keeps items spaced and responsive */
+.feature-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+.feature {
+  border:1px solid #e5e7eb; border-radius:10px; padding:1rem;
+  background:#fff;
+}
+
+.feature-title { font-weight:700; margin:.4rem 0 .25rem; }
+.feature-desc { color:#6b7280; font-size:.95rem; }
 
 .stat-card {
   background: white;
@@ -606,3 +736,242 @@ body {
   gap: 8px;
   
 } */
+
+
+/* Typewriter styles */
+.typewriter {
+  display: inline-flex;
+  align-items: baseline;
+}
+.typewriter-text {
+  /* optional: make it pop a bit */
+  font-weight: 600;
+}
+.typewriter-caret {
+  width: 2px;
+  height: 1em;
+  margin-left: 3px;
+  background: #6d66ea;          /* match purple */
+  display: inline-block;
+  animation: caret-blink 1s steps(1) infinite;
+}
+@keyframes caret-blink { 50% { opacity: 0; } }
+
+/* Features & Steps section on Home page */
+/* two columns, stacks on mobile (keep from earlier) */
+.features-steps-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+@media (max-width: 960px) { .features-steps-grid { grid-template-columns: 1fr; } }
+
+/* arrange right column as a vertical card grid */
+.features--cards,
+.steps--cards {
+  display: grid;
+  gap: 1rem;
+}
+
+/* pill-card = the tall card style  */
+.pill-card {
+  background: #f6f4fa;                      /* soft brand tint */
+  border: 1px solid rgba(118, 75, 162, .25);
+  border-radius: 12px;
+  padding: 1.25rem 1.1rem 1.1rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,.05);
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+}
+
+
+/* small label on top */
+.pill-card__year {
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: #5b7fff;
+  margin-bottom: .4rem;
+}
+
+/* icon row like the illustration in each card */
+.pill-card__icon {
+  font-size: 1.6rem;
+  line-height: 1;
+  margin-bottom: .35rem;
+}
+
+.pill-card h3 {
+  margin: 0 0 .35rem;
+  font-weight: 800;
+}
+
+.pill-card p {
+  margin: 0;
+  color: #444;
+  line-height: 1.6;
+  font-size: .98rem;
+}
+
+/* left column = one stacked card */
+.pill-card--stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 1rem;
+  padding-bottom: 1.1rem;
+}
+
+/* small “FEATURES” label (same vibe as STEP labels) */
+.pill-card__label {
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: #5b7fff; /* brand blue */
+  margin-bottom: 2px;
+  text-transform: uppercase;
+}
+
+/* inner feature rows */
+.feature-item {
+  text-align: center;
+}
+.feature-item__icon {
+  font-size: 1.6rem;
+  line-height: 1;
+  margin-bottom: .35rem;
+}
+
+/* thin divider between the two features */
+.pill-sep {
+  border: none;
+  height: 1px;
+  background: rgba(118, 75, 162, .18); /* soft purple */
+  margin: 4px auto 0;
+  width: 86%;
+}
+
+/* FAQ styles */
+.faq details {
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: #fafbff;
+  transition: border-color .2s;
+}
+
+.faq details[open] {
+  background: #f4f6ff;
+  border-color: #cdd7ff;
+}
+
+.faq summary {
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;      /* remove default arrow in Safari */
+}
+
+.faq summary::-webkit-details-marker { display: none; } /* remove default arrow in WebKit */
+
+.faq summary::after {
+  content: "▾";
+  float: right;
+  opacity: .6;
+  transition: transform .2s;
+}
+
+.faq details[open] summary::after { transform: rotate(180deg); }
+
+.faq p { margin: 10px 0 0; color: #444; }
+
+
+/*  Captcha Modal  */
+.captcha-modal {
+  display: flex;
+  padding: 2rem;
+  flex-direction: column;
+  align-items: center;    
+  gap: 14px;              /* even spacing between title, captcha, button */
+}
+
+/* Center the ReCAPTCHA wrapper */
+.captcha-box {
+  width: 100%;
+  display: flex;
+  justify-content: center; 
+  align-items: center;       
+  margin: 8px 0 18px;
+}
+
+.captcha-box > div {
+  margin-inline: auto !important;
+}
+
+/* Continue button in Captcha */
+.captcha-actions {
+  display: flex;
+  justify-content: center;
+}
+/* Intro.js Custom Styles */
+.introjs-tooltip {
+  min-width: 400px !important;
+  max-width: 500px !important;
+  padding: 20px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.introjs-tooltiptext {
+  font-size: 16px !important;
+  line-height: 1.6 !important;
+  color: #333 !important;
+  padding: 15px !important;
+}
+
+.introjs-helperLayer {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.introjs-tooltipbuttons {
+  display: flex !important;
+  justify-content: space-between !important;
+  padding: 10px !important;
+  border-top: 1px solid #eee !important;
+}
+
+.introjs-button {
+  padding: 8px 16px !important;
+  font-size: 14px !important;
+  border-radius: 4px !important;
+  background: #6366f1 !important;
+  color: white !important;
+  border: none !important;
+  margin: 0 5px !important; 
+  transition: all 0.3s ease !important;
+  white-space: nowrap !important;  
+}
+
+.introjs-button:hover {
+  background: #4f46e5 !important;
+  transform: translateY(-1px) !important;
+}
+
+.introjs-prevbutton {
+  margin-right: auto !important;
+}
+
+.introjs-nextbutton {
+  margin-left: auto !important;
+}
+
+.introjs-button {
+  font-weight: 500 !important;      
+  text-shadow: none !important;     
+  filter: none !important;          
+  letter-spacing: 0.5px !important; 
+}
+
+.introjs-button::before,
+.introjs-button::after {
+  content: none !important;         
+}
