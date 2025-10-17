@@ -898,6 +898,7 @@ button, .btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .icon-btn
   display: flex;
   justify-content: center;
 }
+
 /* Intro.js Custom Styles */
 .introjs-tooltip {
   min-width: 400px !important;
@@ -928,7 +929,7 @@ button, .btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .icon-btn
 .introjs-button {
   padding: 8px 16px !important;
   font-size: 14px !important;
-  border-radius: 4px !important;
+  border-radius: 8px !important;
   background: #6366f1 !important;
   color: white !important;
   border: none !important;
@@ -991,4 +992,76 @@ button, .btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .icon-btn
 .features-steps-grid .pill-card,
 .features-steps-grid .pill-card::before {
   border-radius: var(--box-radius) !important;
+}
+
+/* Force 3-up row layout */
+.results-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(260px, 1fr)) !important;
+  gap: 16px !important;
+  justify-items: center;       /* center each card in its grid cell */
+  align-items: start;
+  margin-inline: auto;
+  max-width: 1100px;           /* keeps it tidy in the center */
+}
+
+.result-card {
+  width: 100%;
+  max-width: 360px;            /* keeps images from getting too huge */
+  border: 1px solid rgba(118,75,162,.25);
+  background: #fff;
+  border-radius: var(--box-radius);
+  padding: 10px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.05);
+}
+
+.result-card img {
+  width: 100%;
+  height: 260px;
+  object-fit: contain;
+  border-radius: calc(var(--box-radius));
+  background: #fafbff;
+}
+
+/* Stack to 1 column only on small screens */
+@media (max-width: 900px) {
+  .results-grid { grid-template-columns: 1fr !important; }
+}
+
+.results-stage { display: grid; gap: .5rem; }
+
+.results-frame {
+  position: relative;
+  padding: 0 56px;          /* space for arrows */
+  max-width: 1200px;
+  margin-inline: auto;
+}
+
+
+
+.results-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px; height: 44px;
+  border-radius: 9999px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  font-size: 22px;
+  display: grid; place-items: center;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,.05);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.results-arrow.left  { left: 8px; }
+.results-arrow.right { right: 8px; }
+.results-arrow:hover {
+  transform: translateY(-50%) scale(1.03);
+  box-shadow: 0 4px 12px rgba(102,126,234,.20);
+  border-color: #a5b4fc;
+}
+
+@media (max-width: 900px) {
+  .results-grid { grid-template-columns: 1fr; }
+  .results-frame { padding: 0 42px; }
 }

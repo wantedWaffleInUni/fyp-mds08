@@ -36,6 +36,11 @@ const Home = () => {
             tooltipClass: 'custom-tooltip-large'
           },
           {
+            element: '#results-showcase',
+            intro: "Quick preview of how images look before and after encryption/decryption 🧪",
+            tooltipClass: 'custom-tooltip-large'
+          },
+          {
             element: '.features-steps-grid',
             intro: "Here you can explore the system's main features and workflow 🧭",
             tooltipClass: 'custom-tooltip-large'
@@ -108,6 +113,16 @@ const Home = () => {
              Decrypt Image
           </button>
         </div>
+      </div>
+
+      {/* Results Showcase */}
+      <div className="card results-showcase" id="results-showcase">
+        <div className="card-header">
+          <h2 className="card-title">See It In Action</h2>
+          <p className="results-subtitle">Original → Encrypted → Decrypted</p>
+        </div>
+
+        <ResultsCarousel />
       </div>
 
 
@@ -227,7 +242,63 @@ const Home = () => {
   );
 
 
+  
 };
+
+const ResultsCarousel = () => {
+  // Each page shows: Original → Encrypted → Decrypted
+  const pages = [
+    {
+      caption: "Sample 1",
+      items: [
+        { label: "Original",  src: "/showcase/kodim13.png" },
+        { label: "Encrypted", src: "/showcase/FODHNN_kodim13_enc.png" },
+        { label: "Decrypted", src: "/showcase/FODHNN_kodim13_dec.png" }
+      ]
+    },
+
+    {
+      caption: "Sample 2",
+      items: [
+        { label: "Original",  src: "/showcase/kodim02.png" },
+        { label: "Encrypted", src: "/showcase/grey_kodim02_enc.png" },
+        { label: "Decrypted", src: "/showcase/grey_kodim02_dec.png" }
+      ]
+    },
+  ];
+
+  const total = pages.length;
+  const [page, setPage] = React.useState(0);
+  const prev = () => setPage((p) => (p - 1 + total) % total);
+  const next = () => setPage((p) => (p + 1) % total);
+
+  const { caption, items } = pages[page];
+
+  return (
+    <div className="results-stage">
+      <div className="results-caption">{caption}</div>
+
+      <div className="results-frame">
+        <button className="results-arrow left" onClick={prev} aria-label="Previous samples">‹</button>
+
+        <div className="results-grid">
+          {items.map((img, i) => (
+            <figure key={i} className="result-card">
+              <img src={img.src} alt={`${img.label} preview`} loading="lazy" />
+              <figcaption>{img.label}</figcaption>
+            </figure>
+          ))}
+        </div>
+
+        <button className="results-arrow right" onClick={next} aria-label="Next samples">›</button>
+      </div>
+
+      
+    </div>
+  );
+
+};
+
 
 
 export default Home;
