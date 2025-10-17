@@ -207,7 +207,7 @@ const Home = () => {
 
           <details>
             <summary>Does this run locally or on a server?</summary>
-            <p>Processing happens in the app itself — no third-party uploads.</p>
+            <p>Processing happens in the app itself. No third-party uploads.</p>
           </details>
 
 
@@ -219,7 +219,7 @@ const Home = () => {
 
           <details>
             <summary>What are NPCR and UACI?</summary>
-            <p>They are metrics to evaluate image cipher strength — higher values mean better diffusion and randomness.</p>
+            <p>They are metrics to evaluate image cipher strength. The higher the values, the better the diffusion and randomness.</p>
           </details>
         </div>
       </div>
