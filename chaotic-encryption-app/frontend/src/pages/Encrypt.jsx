@@ -447,7 +447,7 @@ const Encrypt = () => {
                 Encrypting...
               </>
             ) : (
-              '🔒 Encrypt Image'
+              'Encrypt Image'
             )}
           </button>
 

@@ -244,7 +244,7 @@ const Decrypt = () => {
                 Decrypting...
               </>
             ) : (
-              '🔓 Decrypt Image'
+              'Decrypt Image'
             )}
           </button>
         </div>
