@@ -77,18 +77,18 @@ const Decrypt = () => {
 
   const algoOptions = [
    {
-      value: 'fodhnn', label: 'FODHNN (fractional-order Hopfield)',
-      desc: 'Stronger confusion/diffusion via fractional-order dynamics. Slower but more secure.'
+      value: 'fodhnn', label: 'Method 1 - FODHNN',
+      desc: ' Utilises fractional-order Hopfield with stronger confusion/diffusion via fractional-order dynamics. Slower but more secure.'
     },
     {
-      value: '2dlasm', label: '2DLASM (2D Logistic Adjusted Sine Map)',
-      desc: '2D chaotic map with high key sensitivity. Fast and secure.'
+      value: '2dlasm', label: 'Method 2 - 2DLASM ',
+      desc: 'Utilises 2D Logistic Adjusted Sine Map with high key sensitivity. Fast and secure.'
     },
-    { value: 'bulban', label: 'Bülban chaotic map', 
-      desc: 'Fast, highly secure, accepts any pixel size, but internally converts to grayscale before encryption, and outputs a grayscale cipher image.' 
+    { value: 'bulban', label: 'Method 3 - Bülban', 
+      desc: 'Chaotic map that is fast, highly secure, accepts any pixel size, but internally converts to grayscale before encryption, and outputs a grayscale cipher image.' 
     },
-    { value: 'acm-2dscl', label: 'ACM-2DSCL (Arnold Cat Map + 2DSCL + Chen)', 
-      desc: 'Hybrid chaotic cipher with multi-stage confusion and diffusion. Strongest security out of all.'
+    { value: 'acm-2dscl', label: 'Method 4 - ACM-2DSCL', 
+      desc: 'Hybrid chaotic cipher of Arnold Cat Map, 2DSCL and Chen with multi-stage confusion and diffusion.'
     },
   ];
 
