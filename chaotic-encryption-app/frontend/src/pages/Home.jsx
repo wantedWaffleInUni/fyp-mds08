@@ -101,11 +101,11 @@ const Home = () => {
 
 
         <div className="d-flex justify-center gap-2 mb-3">
-          <button onClick={() => navigate('/encrypt')} className="btn btn-primary btn--md">
-            🔒 Encrypt Image
+          <button onClick={() => navigate('/encrypt')} className="btn btn-primary btn--lg">
+             Encrypt Image
           </button>
-          <button onClick={() => navigate('/decrypt')} className="btn btn-secondary btn--md">
-            🔓 Decrypt Image
+          <button onClick={() => navigate('/decrypt')} className="btn btn-secondary btn--lg">
+             Decrypt Image
           </button>
         </div>
       </div>

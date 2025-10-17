@@ -143,26 +143,8 @@ h1, h2, h3 {
 }
 
 /* Gradient 1px border */
-.card::before,
-.card-form::before {
-  content: "";
-  position: absolute;
-  inset: 0;                      /* cover the whole card */
-  padding: 1px;                  /* border thickness */
-  border-radius: inherit;
-  background: var(--brand-grad);
-  pointer-events: none;
 
-  /* The “hole” trick so only a 1px ring remains */
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;   /* Chrome/Safari */
-          mask-composite: exclude; /* Firefox */
-}
+
 
 /* Headers */
 .card-header {
@@ -210,15 +192,15 @@ button.btn {
 
 /* Large — for "start encrypting" button at main pg */
 .btn--lg {
-  font-size: 1.2rem;          /* ~19px */
-  padding: 1rem 2rem;
+  font-size: 20rem;          /* ~19px */
+  padding: 4rem 5rem;
   border-radius: 12px;
   box-shadow: 0 6px 18px rgba(102,126,234,.28);
 }
 
 /* Gradient & Hover on buttons */
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #5b7fff;
   color: white;
 }
 
@@ -228,7 +210,7 @@ button.btn {
 }
 
 .btn-secondary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #5b7fff;
   color: white;
 }
 
@@ -974,4 +956,35 @@ button, .btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .icon-btn
 .introjs-button::before,
 .introjs-button::after {
   content: none !important;         
+}
+
+
+:root {
+  --box-radius: 0px;         
+}
+
+/* Outer sections */
+.card,
+.card-form {
+  border-radius: var(--box-radius) !important;
+}
+.card::before,
+.card-form::before {
+  border-radius: var(--box-radius) !important;   /* match the ring */
+}
+
+/* Feature/step tiles (the small cards on the grid) */
+.pill-card,
+.pill-card--stack {
+  border-radius: var(--box-radius) !important;
+}
+.pill-card::before,
+.pill-card--stack::before {
+  border-radius: var(--box-radius) !important;
+}
+
+/* any inner containers flatten them */
+.features-steps-grid .pill-card,
+.features-steps-grid .pill-card::before {
+  border-radius: var(--box-radius) !important;
 }
