@@ -142,7 +142,6 @@ h1, h2, h3 {
   justify-content: space-between;
 }
 
-/* Gradient 1px border */
 
 
 
@@ -833,6 +832,11 @@ button, .btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .icon-btn
 }
 
 /* FAQ styles */
+
+.faq {
+  text-align: left;                 
+}
+
 .faq details {
   border: 1px solid #e9ecef;
   border-radius: 8px;
