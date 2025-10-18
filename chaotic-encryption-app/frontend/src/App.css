@@ -1064,4 +1064,16 @@ button, .btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .icon-btn
 @media (max-width: 900px) {
   .results-grid { grid-template-columns: 1fr; }
   .results-frame { padding: 0 42px; }
+
+
+}
+/*  Only for Navbar highlight step */
+.introjs-helperLayer[data-step="3"] {
+  background-color: transparent !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.7) !important;
+}
+
+.introjs-helperLayer {
+  background-color: transparent !important;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.8) !important;
 }
