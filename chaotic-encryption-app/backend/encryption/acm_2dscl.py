@@ -92,7 +92,7 @@ class HybridEncryptorFB(EncryptorInterface):
     
     def get_algorithm_name(self) -> str:
         """Get the name of the encryption algorithm."""
-        return 'hybrid'
+        return 'acm_2dscl'
 
     # --- parameter derivation ---
 

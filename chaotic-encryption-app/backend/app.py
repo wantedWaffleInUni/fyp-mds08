@@ -202,7 +202,7 @@ def encrypt_image():
         if algorithm == 'fodhnn':
             encryptor = FODHNNEncryptor()
         
-        elif algorithm == 'acm-2dscl':
+        elif algorithm == 'acm_2dscl':
             encryptor = HybridEncryptorFB()
         
         elif algorithm == 'bulban':

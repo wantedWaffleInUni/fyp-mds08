@@ -237,7 +237,7 @@ const Encrypt = () => {
     { value: 'bulban', label: 'Method 3 - Bülban', 
       desc: 'Chaotic map that is fast, highly secure, accepts any pixel size, but internally converts to grayscale before encryption, and outputs a grayscale cipher image.' 
     },
-    { value: 'acm-2dscl', label: 'Method 4 - ACM-2DSCL', 
+    { value: 'acm_2dscl', label: 'Method 4 - ACM-2DSCL', 
       desc: 'Hybrid chaotic cipher of Arnold Cat Map, 2DSCL and Chen with multi-stage confusion and diffusion.'
     },
     
