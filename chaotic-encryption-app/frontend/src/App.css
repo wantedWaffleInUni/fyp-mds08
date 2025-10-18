@@ -1074,6 +1074,22 @@ button, .btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .icon-btn
 }
 
 .introjs-helperLayer {
-  background-color: transparent !important;
+  /* background-color: transparent !important; */
   box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.8) !important;
+}
+/* Only if you used highlightClass: 'intro-ring' above */
+.introjs-helperLayer.intro-ring {
+  background: transparent !important;
+  border-radius: 10px !important;
+  box-shadow:
+    0 0 0 4px rgba(99, 102, 241, 0.9),            /* purple ring */
+    0 0 0 9999px rgba(0, 0, 0, 0.6) !important;   /* extra dim outside */
+}
+
+
+/* Darken + blur the entire background while the tour is active */
+.introjs-overlay {
+  background: rgba(0, 0, 0, 0.6) !important;      /* darkness */
+  backdrop-filter: blur(2px);                      /* nice focus effect */
+  -webkit-backdrop-filter: blur(2px);
 }

@@ -66,7 +66,9 @@ const Home = () => {
         tooltipPosition: 'auto',
         scrollTo: 'tooltip',
         overlayOpacity: 0.8,
-        tooltipClass: 'custom-tooltip-large'
+        tooltipClass: 'custom-tooltip-large',
+        disableInteraction: true,   // block clicks behind the overlay
+        highlightClass: 'intro-ring'// optional: custom halo class below
       });
 
 
