@@ -36,6 +36,12 @@ const Home = () => {
             tooltipClass: 'custom-tooltip-large'
           },
           {
+            element: '.navbar-nav',   
+            intro: "You can also perform encryption and decryption here 🔐",
+            position: 'bottom-left',
+            tooltipClass: 'custom-tooltip-large'
+        },
+          {
             element: '#results-showcase',
             intro: "Quick preview of how images look before and after encryption/decryption 🧪",
             tooltipClass: 'custom-tooltip-large'
