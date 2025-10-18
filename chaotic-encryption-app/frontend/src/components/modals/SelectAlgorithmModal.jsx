@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import Modal from './Modal.jsx';
 
 export default function SelectAlgorithmModal(props) {
@@ -17,12 +17,39 @@ export default function SelectAlgorithmModal(props) {
     setFlip = () => { },
   } = props;
 
+  const [error, setError] = useState('');
+
   // normalize
   const list = options ?? algoOptions ?? [];
   const chosen = selected ?? selectedAlgorithm;
   const handleSelect = onSelect ?? onSelectAlgorithm ?? (() => { });
   const confirming = Boolean(isLoading ?? confirmingProp); // <-- supports both
 
+  // const algoChosen = list.find(a => a.value === chosen);
+  const canConfirm = Boolean(chosen);
+
+   console.log("[SelectAlgorithmModal] state check:", {
+    selected,
+    selectedAlgorithm,
+    chosen,
+    canConfirm,
+    confirming,
+    listLength: list.length,
+  });
+
+  const validationMsg =
+    !canConfirm ? 'Please select an algorithm to proceed.'
+      : '';
+
+  const handleConfirm = async () => {
+    console.log("[SelectAlgorithmModal] handleConfirm:", { chosen, selectedAlgorithm });
+    if (!canConfirm){
+      setError(validationMsg);
+      return;
+    }
+    setError('');
+    onConfirm?.();
+  };
 
   if (process.env.NODE_ENV !== 'production') {
     // eslint-disable-next-line no-console
@@ -52,7 +79,9 @@ export default function SelectAlgorithmModal(props) {
 
               const selectThis = () => {
                 if (confirming) return;
+                console.log("[SelectAlgorithmModal] User clicked:", opt.value);
                 handleSelect(opt.value);
+                setError('');
               };
 
               const setFlipSafe = (on) => {
@@ -105,10 +134,32 @@ export default function SelectAlgorithmModal(props) {
 
       <div className="modal-footer d-flex gap-2 justify-end">
         <button className="btn btn-secondary" onClick={onClose} disabled={confirming}>Cancel</button>
-        <button className="btn btn-primary" onClick={onConfirm} disabled={confirming}>
+        <button 
+          className={`btn ${canConfirm ? 'btn-primary' : 'btn-disabled'}`}
+          onClick={handleConfirm} 
+          disabled={confirming || !canConfirm}
+          aria-disabled={confirming || !canConfirm}
+          >
           {confirming ? 'Encrypting…' : 'Confirm'}
         </button>
       </div>
+
+      {/* live validation hint when disabled */}
+        {!canConfirm  && (
+          <div
+            className="mt-1"
+            style={{ color: '#6b7280', fontSize: 13, textAlign: 'right' }}
+          >
+            {validationMsg}
+          </div>
+        )}
+
+        {error && (
+          <div className="alert alert-error mt-2">
+            {error}
+          </div>
+        )}
+
     </Modal>
   );
 
