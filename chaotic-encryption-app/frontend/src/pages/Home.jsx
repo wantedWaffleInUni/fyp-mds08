@@ -36,6 +36,17 @@ const Home = () => {
             tooltipClass: 'custom-tooltip-large'
           },
           {
+            element: '.navbar-nav',   
+            intro: "You can also perform encryption and decryption here 🔐",
+            position: 'bottom-left',
+            tooltipClass: 'custom-tooltip-large'
+        },
+          {
+            element: '#results-showcase',
+            intro: "Quick preview of how images look before and after encryption/decryption 🧪",
+            tooltipClass: 'custom-tooltip-large'
+          },
+          {
             element: '.features-steps-grid',
             intro: "Here you can explore the system's main features and workflow 🧭",
             tooltipClass: 'custom-tooltip-large'
@@ -55,7 +66,9 @@ const Home = () => {
         tooltipPosition: 'auto',
         scrollTo: 'tooltip',
         overlayOpacity: 0.8,
-        tooltipClass: 'custom-tooltip-large'
+        tooltipClass: 'custom-tooltip-large',
+        disableInteraction: true,   // block clicks behind the overlay
+        highlightClass: 'intro-ring'// optional: custom halo class below
       });
 
 
@@ -101,13 +114,23 @@ const Home = () => {
 
 
         <div className="d-flex justify-center gap-2 mb-3">
-          <button onClick={() => navigate('/encrypt')} className="btn btn-primary btn--md">
-            🔒 Encrypt Image
+          <button onClick={() => navigate('/encrypt')} className="btn btn-primary btn--lg">
+             Encrypt Image
           </button>
-          <button onClick={() => navigate('/decrypt')} className="btn btn-secondary btn--md">
-            🔓 Decrypt Image
+          <button onClick={() => navigate('/decrypt')} className="btn btn-secondary btn--lg">
+             Decrypt Image
           </button>
         </div>
+      </div>
+
+      {/* Results Showcase */}
+      <div className="card results-showcase" id="results-showcase">
+        <div className="card-header">
+          <h2 className="card-title">See It In Action</h2>
+          <p className="results-subtitle">Original → Encrypted → Decrypted</p>
+        </div>
+
+        <ResultsCarousel />
       </div>
 
 
@@ -207,7 +230,7 @@ const Home = () => {
 
           <details>
             <summary>Does this run locally or on a server?</summary>
-            <p>Processing happens in the app itself — no third-party uploads.</p>
+            <p>Processing happens in the app itself. No third-party uploads.</p>
           </details>
 
 
@@ -219,7 +242,7 @@ const Home = () => {
 
           <details>
             <summary>What are NPCR and UACI?</summary>
-            <p>They are metrics to evaluate image cipher strength — higher values mean better diffusion and randomness.</p>
+            <p>They are metrics to evaluate image cipher strength. The higher the values, the better the diffusion and randomness.</p>
           </details>
         </div>
       </div>
@@ -227,7 +250,63 @@ const Home = () => {
   );
 
 
+  
 };
+
+const ResultsCarousel = () => {
+  // Each page shows: Original → Encrypted → Decrypted
+  const pages = [
+    {
+      caption: "Sample 1",
+      items: [
+        { label: "Original",  src: "/showcase/kodim13.png" },
+        { label: "Encrypted", src: "/showcase/FODHNN_kodim13_enc.png" },
+        { label: "Decrypted", src: "/showcase/FODHNN_kodim13_dec.png" }
+      ]
+    },
+
+    {
+      caption: "Sample 2",
+      items: [
+        { label: "Original",  src: "/showcase/kodim02.png" },
+        { label: "Encrypted", src: "/showcase/grey_kodim02_enc.png" },
+        { label: "Decrypted", src: "/showcase/grey_kodim02_dec.png" }
+      ]
+    },
+  ];
+
+  const total = pages.length;
+  const [page, setPage] = React.useState(0);
+  const prev = () => setPage((p) => (p - 1 + total) % total);
+  const next = () => setPage((p) => (p + 1) % total);
+
+  const { caption, items } = pages[page];
+
+  return (
+    <div className="results-stage">
+      <div className="results-caption">{caption}</div>
+
+      <div className="results-frame">
+        <button className="results-arrow left" onClick={prev} aria-label="Previous samples">‹</button>
+
+        <div className="results-grid">
+          {items.map((img, i) => (
+            <figure key={i} className="result-card">
+              <img src={img.src} alt={`${img.label} preview`} loading="lazy" />
+              <figcaption>{img.label}</figcaption>
+            </figure>
+          ))}
+        </div>
+
+        <button className="results-arrow right" onClick={next} aria-label="Next samples">›</button>
+      </div>
+
+      
+    </div>
+  );
+
+};
+
 
 
 export default Home;

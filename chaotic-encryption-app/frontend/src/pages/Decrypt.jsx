@@ -76,25 +76,23 @@ const Decrypt = () => {
   const setFlip = (val, on) => setFlipped(f => ({ ...f, [val]: on ?? !f[val] }));
 
   const algoOptions = [
-    {
-      value: 'fodhnn', label: 'FODHNN (fractional-order Hopfield)',
-      desc: 'Stronger confusion/diffusion via fractional-order dynamics. Slower but more secure.'
+   {
+      value: 'fodhnn', label: 'Method 1 - FODHNN',
+      desc: ' Utilises fractional-order Hopfield with stronger confusion/diffusion via fractional-order dynamics. Slower but more secure.'
     },
     {
-      value: '2dlasm', label: '2DLASM (2D Logistic Adjusted Sine Map)',
-      desc: '2D chaotic map with high key sensitivity. Fast and secure.'
+      value: '2dlasm', label: 'Method 2 - 2DLASM ',
+      desc: 'Utilises 2D Logistic Adjusted Sine Map with high key sensitivity. Fast and secure.'
     },
-    {
-      value: 'bulban', label: 'Bülban chaotic map',
-      desc: 'Fast, highly secure, accepts any pixel size, but internally converts to grayscale before encryption, and outputs a grayscale cipher image.'
+    { value: 'bulban', label: 'Method 3 - Bülban', 
+      desc: 'Chaotic map that is fast, highly secure, accepts any pixel size, but internally converts to grayscale before encryption, and outputs a grayscale cipher image.' 
+    },
+    { value: 'acm_2dscl', label: 'ACM-2DSCL (Arnold Cat Map + 2DSCL + Chen)', 
+      desc: 'Hybrid chaotic cipher with multi-stage confusion and diffusion. Strongest security out of all.'
     },
     {
       value: 'aes', label: 'AES-256 (CTR mode)',
       desc: 'Standard AES stream-mode encryption. Deterministic nonce for demo; use random nonce in production.'
-    },
-    {
-      value: 'acm-2dscl', label: 'ACM-2DSCL (Arnold Cat Map + 2DSCL + Chen)',
-      desc: 'Hybrid chaotic cipher with multi-stage confusion and diffusion. Strongest security out of all.'
     },
   ];
 
@@ -250,7 +248,7 @@ const Decrypt = () => {
                 Decrypting...
               </>
             ) : (
-              '🔓 Decrypt Image'
+              'Decrypt Image'
             )}
           </button>
         </div>

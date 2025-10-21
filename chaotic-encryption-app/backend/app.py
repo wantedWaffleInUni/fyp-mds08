@@ -314,6 +314,12 @@ def require_rate_limit(f):
         return f(*args, **kwargs)
     return decorated_function
 
+SHOWCASE_DIR = os.path.join(app.root_path, "showcase")
+
+@app.route("/showcase/<path:filename>")
+def showcase_file(filename):
+    return send_from_directory(SHOWCASE_DIR, filename)
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -380,7 +386,7 @@ def encrypt_image():
         if algorithm == 'fodhnn':
             encryptor = FODHNNEncryptor()
         
-        elif algorithm == 'acm-2dscl':
+        elif algorithm == 'acm_2dscl':
             encryptor = HybridEncryptorFB()
         
         elif algorithm == 'aes':
