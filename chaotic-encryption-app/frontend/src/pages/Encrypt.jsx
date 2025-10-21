@@ -9,15 +9,15 @@ import SelectAlgorithmModal from '../components/modals/SelectAlgorithmModal';
 import ProgressModal from '../components/modals/ProgressModal';
 import usePhasedProgress from '../components/modals/usePhasedProgress';
 
-import CaptchaModal from '../components/modals/CaptchaModal'; 
+import CaptchaModal from '../components/modals/CaptchaModal';
 
 // import {Eye, EyeOff} from 'lucide-react';
 // import { Eye as EyeIcon, EyeOff as EyeOffIcon } from 'react-feather';
 
 const EyeIcon = ({ size = 16 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
-       stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-       aria-hidden="true">
+    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+    aria-hidden="true">
     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
     <circle cx="12" cy="12" r="3" />
   </svg>
@@ -25,8 +25,8 @@ const EyeIcon = ({ size = 16 }) => (
 
 const EyeOffIcon = ({ size = 16 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
-       stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-       aria-hidden="true">
+    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+    aria-hidden="true">
     <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.77 21.77 0 0 1 5.06-6.94" />
     <path d="M1 1l22 22" />
     <path d="M10.58 10.58a2 2 0 1 0 2.83 2.83" />
@@ -109,7 +109,7 @@ const Encrypt = () => {
       return;
     }
 
-      // If user already solved captcha this session, go straight to algorithms
+    // If user already solved captcha this session, go straight to algorithms
     if (captchaOK) {
       setShowAlgoModal(true);
     } else {
@@ -129,22 +129,22 @@ const Encrypt = () => {
   };
 
 
-    //     if (!selectedFile && !encryptionKey.trim()) {
-    //       setError('Please select an image and enter an encryption key');
-    //       return;
-    //     }
-    //     if (!selectedFile) {
-    //       setError('Please select an image to encrypt');
-    //       return;
-    //     }
-    // 
-    //     if (!encryptionKey.trim()) {
-    //       setError('Please enter an encryption key');
-    //       return;
-    //     }
-    // Open algorithm selection modal
-   
-  
+  //     if (!selectedFile && !encryptionKey.trim()) {
+  //       setError('Please select an image and enter an encryption key');
+  //       return;
+  //     }
+  //     if (!selectedFile) {
+  //       setError('Please select an image to encrypt');
+  //       return;
+  //     }
+  // 
+  //     if (!encryptionKey.trim()) {
+  //       setError('Please enter an encryption key');
+  //       return;
+  //     }
+  // Open algorithm selection modal
+
+
 
   // copy and paste key handlers
   const keyInputRef = useRef(null);
@@ -189,7 +189,7 @@ const Encrypt = () => {
 
       stop();
       setShow(false);
-      navigate('/results', { state: { type: 'encrypt', data: res, srcFile: {name: selectedFile?.name, type: selectedFile?.type} } });
+      navigate('/results', { state: { type: 'encrypt', data: res, srcFile: { name: selectedFile?.name, type: selectedFile?.type } } });
     } catch (e) {
       stop();
       setShow(false);
@@ -240,8 +240,12 @@ const Encrypt = () => {
     { value: 'acm_2dscl', label: 'Method 4 - ACM-2DSCL', 
       desc: 'Hybrid chaotic cipher of Arnold Cat Map, 2DSCL and Chen with multi-stage confusion and diffusion.'
     },
-    
-    
+    {
+      value: 'aes', label: 'Method 4 - AES-256',
+      desc: 'Standard AES stream-mode encryption. Deterministic nonce for demo; use random nonce in production.'
+    },
+
+
   ];
 
   const [flipped, setFlipped] = useState({});
@@ -324,7 +328,7 @@ const Encrypt = () => {
               )}
 
               {/* In auto mode, allow regenerate */}
-              {autoGenerateKey &&(
+              {autoGenerateKey && (
                 <button
                   type="button"
                   className="icon-btn"
@@ -356,13 +360,13 @@ const Encrypt = () => {
                 title={showKey ? 'Hide key' : 'Show key'}
                 aria-label={showKey ? 'Hide key' : 'Show key'}
               >
-              {showKey ? <EyeOffIcon size={16} /> : <EyeIcon size={16} />}
+                {showKey ? <EyeOffIcon size={16} /> : <EyeIcon size={16} />}
               </button>
-            
+
             </div>
-            
+
           </div>
-          
+
 
           {/* <div className='key-controls' style={{ display: 'flex', marginLeft: "550px ", marginTop: "4px", gap: "5px" }}>
             <input
@@ -380,21 +384,21 @@ const Encrypt = () => {
 
 
           {/* generate checkbox */}
-            <input
-              type="checkbox"
-              id="auto-generate-key"
-              className="form-check-input"
-              checked={autoGenerateKey}
-              onChange={(e) => setAutoGenerateKey(e.target.checked)}
-              
-            />
-            <label htmlFor="auto-generate-key" className="form-check-label">
-              Generate a random key
-            </label>
+          <input
+            type="checkbox"
+            id="auto-generate-key"
+            className="form-check-input"
+            checked={autoGenerateKey}
+            onChange={(e) => setAutoGenerateKey(e.target.checked)}
+
+          />
+          <label htmlFor="auto-generate-key" className="form-check-label">
+            Generate a random key
+          </label>
 
 
-            
-          
+
+
 
           {/* <div className="key-controls">
             <label htmlFor="auto-generate-key" className="form-check">
