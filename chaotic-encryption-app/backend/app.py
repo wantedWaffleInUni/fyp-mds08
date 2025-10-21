@@ -18,6 +18,7 @@ from encryption.fodhnn_encryptor import FODHNNEncryptor
 from encryption.another_2d import LASMEncryptorFB
 from encryption.acm_2dscl import HybridEncryptorFB
 from encryption.bulban_encryptor import BulbanEncryptor
+from encryption.aes_encryptor import AESEncryptor
 
 
 from utils import calculate_entropy, calculate_npcr, calculate_uaci
@@ -382,6 +383,9 @@ def encrypt_image():
         elif algorithm == 'acm-2dscl':
             encryptor = HybridEncryptorFB()
         
+        elif algorithm == 'aes':
+            encryptor = AESEncryptor()
+
         elif algorithm == 'bulban':
             # Convert to grayscale if image is colored
             if original_img.ndim == 3:
@@ -465,6 +469,9 @@ def decrypt_image():
 
         elif algorithm == 'acm_2dscl':
             encryptor = HybridEncryptorFB()
+
+        elif algorithm == 'aes':
+            encryptor = AESEncryptor()
 
         elif algorithm == 'bulban':
             if encrypted_img.ndim == 3:
