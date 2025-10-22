@@ -87,11 +87,11 @@ const Decrypt = () => {
     { value: 'bulban', label: 'Method 3 - Bülban', 
       desc: 'Chaotic map that is fast, highly secure, accepts any pixel size, but internally converts to grayscale before encryption, and outputs a grayscale cipher image.' 
     },
-    { value: 'acm_2dscl', label: 'ACM-2DSCL (Arnold Cat Map + 2DSCL + Chen)', 
+    { value: 'acm_2dscl', label: 'Method 4 - ACM-2DSCL', 
       desc: 'Hybrid chaotic cipher with multi-stage confusion and diffusion. Strongest security out of all.'
     },
     {
-      value: 'aes', label: 'AES-256 (CTR mode)',
+      value: 'aes', label: 'Traditional - AES-256',
       desc: 'Standard AES stream-mode encryption. Deterministic nonce for demo; use random nonce in production.'
     },
   ];

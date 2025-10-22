@@ -241,7 +241,7 @@ const Encrypt = () => {
       desc: 'Hybrid chaotic cipher of Arnold Cat Map, 2DSCL and Chen with multi-stage confusion and diffusion.'
     },
     {
-      value: 'aes', label: 'Method 4 - AES-256',
+      value: 'aes', label: 'Traditional - AES-256',
       desc: 'Standard AES stream-mode encryption. Deterministic nonce for demo; use random nonce in production.'
     },
 
